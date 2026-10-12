@@ -15,3 +15,9 @@
 .pc-empty{min-height:34px}
 .pc-foot{margin:10px 0 0;flex-wrap:wrap}
 .pc-foot button{font-size:12px}
+
+/* Direct year/month selection: avoid clicking through years one month at a time. */
+.pc-selectors{display:flex;align-items:center;gap:5px;flex:1;justify-content:center;min-width:0}
+.pc-selectors select{font:inherit;max-width:58%;min-width:0;padding:7px 5px;border:1px solid #cbd5e1;border-radius:7px;background:#f8fafc;color:#17233b;cursor:pointer}
+.pc-selectors .pc-year-select{max-width:42%;}
+.pc-head{gap:5px}
