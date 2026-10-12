@@ -134,7 +134,25 @@ foreach ($availableFiles as $filePath) {
     </style>
 </head>
 <body class="profile-page">
-<main class="migration-wrap">
+<div class="admin-layout">
+    <aside class="admin-sidebar" id="admin-sidebar" aria-label="منوی اصلی">
+        <a class="sidebar-brand" href="dashboard.php"><span class="sidebar-brand-mark" aria-hidden="true">م‌د</span><span><strong>پنل مدیریت</strong><small>سامانه مدیریت دانش‌آموزان</small></span></a>
+        <p class="sidebar-section-label">منوی اصلی</p>
+        <nav class="sidebar-nav">
+            <a class="sidebar-link" href="dashboard.php"><span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span></a>
+            <a class="sidebar-link" href="students.php"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span></a>
+            <a class="sidebar-link" href="school.php"><span class="sidebar-icon" aria-hidden="true">▦</span><span>سال تحصیلی</span></a>
+            <a class="sidebar-link" href="users.php"><span class="sidebar-icon" aria-hidden="true">⚙</span><span>مدیریت کاربران</span></a>
+            <a class="sidebar-link is-current" href="database_updates.php" aria-current="page"><span class="sidebar-icon" aria-hidden="true">↻</span><span>به‌روزرسانی پایگاه داده</span></a>
+        </nav>
+        <div class="sidebar-bottom">
+            <span class="sidebar-user-avatar" aria-hidden="true"><?= update_page_escape(substr((string) ($_SESSION['username'] ?? ''), 0, 1)) ?></span>
+            <div class="sidebar-user-copy"><strong><?= update_page_escape((string) ($_SESSION['username'] ?? '')) ?></strong><small><?= update_page_escape(current_role() === 'super_admin' ? 'سوپر ادمین' : 'ادمین') ?></small></div>
+            <form action="logout.php" method="post"><input type="hidden" name="csrf_token" value="<?= update_page_escape(csrf_token()) ?>"><button class="sidebar-logout" type="submit" aria-label="خروج از حساب" title="خروج از حساب">↪</button></form>
+        </div>
+    </aside>
+    <main class="admin-main">
+      <div class="migration-wrap">
     <a class="migration-back" href="dashboard.php">بازگشت به داشبورد</a>
     <section class="migration-panel">
         <p class="eyebrow">مدیریت سیستم</p>
@@ -174,6 +192,8 @@ foreach ($availableFiles as $filePath) {
         <?php endif; ?>
     </section>
     <p class="migration-status">دسترسی این صفحه فقط برای سوپر ادمین و ادمین فعال است.</p>
-</main>
+</div>
+    </main>
+</div>
 </body>
 </html>
