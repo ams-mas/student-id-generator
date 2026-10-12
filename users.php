@@ -145,6 +145,7 @@ $username = (string) $_SESSION['username'];
         <nav class="sidebar-nav">
             <a class="sidebar-link" href="dashboard.php"><span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span></a>
             <a class="sidebar-link" href="students.php"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span></a>
+                <a class="sidebar-link" href="school.php"><span class="sidebar-icon" aria-hidden="true">▦</span><span>سال تحصیلی و صنف‌ها</span></a>
             <div class="sidebar-group">
                 <div class="sidebar-group-title"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت کاربران</span></div>
                 <div class="sidebar-submenu">
