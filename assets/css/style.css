@@ -405,3 +405,76 @@ html[lang="fa"] .muted{
   .admin-sidebar::before,
   .admin-sidebar::after{content:none!important;display:none!important}
 }
+
+
+/* Permanent right-side navigation: no collapsing, hover, or menu handle. */
+@media (min-width: 851px) {
+  .admin-layout {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    direction: rtl;
+  }
+  .admin-sidebar,
+  .admin-sidebar:not(.is-open),
+  .admin-sidebar.is-open,
+  .admin-sidebar:hover,
+  .admin-sidebar:focus-within {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    width: 286px !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow-y: auto;
+    transform: none !important;
+    transition: none !important;
+  }
+  .admin-sidebar .sidebar-toggle {
+    display: none !important;
+  }
+  .admin-sidebar::before,
+  .admin-sidebar::after {
+    display: none !important;
+    content: none !important;
+  }
+  .admin-main {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 286px 0 0 !important;
+    padding: 36px clamp(18px, 3vw, 42px) 24px !important;
+  }
+}
+@media (max-width: 850px) {
+  .admin-sidebar,
+  .admin-sidebar:not(.is-open),
+  .admin-sidebar.is-open,
+  .admin-sidebar:hover,
+  .admin-sidebar:focus-within {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .admin-sidebar .sidebar-toggle {
+    display: none !important;
+  }
+  .admin-sidebar::before,
+  .admin-sidebar::after {
+    display: none !important;
+    content: none !important;
+  }
+  .admin-main {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}
