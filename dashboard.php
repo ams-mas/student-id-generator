@@ -34,7 +34,7 @@ $userId = (int) $_SESSION['user_id'];
         </header>
 
         <section class="profile-card panel" aria-labelledby="profile-title">
-            <div class="profile-avatar" aria-hidden="true"><?= escape(mb_substr($username, 0, 1, 'UTF-8')) ?></div>
+            <div class="profile-avatar" aria-hidden="true"><?= escape(substr($username, 0, 1)) ?></div>
             <div class="profile-summary">
                 <p class="eyebrow">حساب کاربری</p>
                 <h2 id="profile-title"><?= escape($username) ?></h2>
