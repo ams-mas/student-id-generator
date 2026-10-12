@@ -29,9 +29,10 @@ $canManageUsers = in_array($role, ['super_admin', 'admin'], true);
             </a>
 
             <p class="sidebar-section-label">منوی اصلی</p>
-            <nav class="sidebar-nav">\n                <a class="sidebar-link" href="students.php"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span></a>
+            <nav class="sidebar-nav">
+                <a class="sidebar-link" href="students.php"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span></a>
                 <a class="sidebar-link is-current" href="dashboard.php" aria-current="page">
-                    <span class="sidebar-icon" aria-hidden="true">⌂</span><span>پروفایل مدیر</span>
+                    <span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span>
                 </a>
                 <?php if ($canManageUsers): ?>
                 <div class="sidebar-group">
@@ -56,7 +57,7 @@ $canManageUsers = in_array($role, ['super_admin', 'admin'], true);
                 <div>
                     <p class="eyebrow">پنل مدیریت</p>
                     <h1>پروفایل مدیر</h1>
-                    <p class="muted">به پنل سامانه ساخت کارت شناسایی خوش آمدید.</p>
+                    <p class="muted">از این بخش پرونده‌های دانش‌آموزان و حساب‌های سامانه را مدیریت کنید.</p>
                 </div>
                 <div class="account-actions">
                     <span class="signed-in-as">وارد شده‌اید با نام <strong><?= escape($username) ?></strong></span>
@@ -70,7 +71,7 @@ $canManageUsers = in_array($role, ['super_admin', 'admin'], true);
             <section class="profile-card panel" aria-labelledby="profile-title">
                 <div class="profile-avatar" aria-hidden="true"><?= escape(substr($username, 0, 1)) ?></div>
                 <div class="profile-summary">
-                    <p class="eyebrow">حساب کاربری</p>
+                    <p class="eyebrow">حساب مدیر</p>
                     <h2 id="profile-title"><?= escape($username) ?></h2>
                     <p class="muted"><?= escape($roleLabels[$role] ?? $role) ?></p>
                 </div>
@@ -98,7 +99,7 @@ $canManageUsers = in_array($role, ['super_admin', 'admin'], true);
                 </div>
             </section>
 
-            <footer class="page-footer">سامانه ساخت کارت شناسایی · پنل مدیریت</footer>
+            <footer class="page-footer">سامانه مدیریت دانش‌آموزان · پنل مدیریت</footer>
         </main>
     </div>
     <script>
