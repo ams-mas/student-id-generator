@@ -109,6 +109,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare('INSERT INTO students (student_number, register_book_number, first_name, last_name, father_name, grandfather_name, gender, date_of_birth, class_name, phone, guardian_name, guardian_phone, address) VALUES (:number,:book_number,:first,:last,:father_name,:grandfather_name,:gender,:dob,:class,:phone,:guardian,:guardian_phone,:address)');
                 $stmt->execute($params);
                 $newStudentId = (int)$pdo->lastInsertId();
+
+                // Save the book number separately for new records as well. Persian/Arabic
+                // letters and digits are valid UTF-8 text and must be stored unchanged.
+                $bookInsertUpdateStmt = $pdo->prepare('UPDATE students SET register_book_number = :book_number WHERE id = :id');
+                $bookInsertUpdateStmt->bindValue(':book_number', $bookNumber === '' ? null : $bookNumber, $bookNumber === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
+                $bookInsertUpdateStmt->bindValue(':id', $newStudentId, PDO::PARAM_INT);
+                $bookInsertUpdateStmt->execute();
+
                 $verifyBookStmt = $pdo->prepare('SELECT register_book_number FROM students WHERE id = :id LIMIT 1');
                 $verifyBookStmt->execute(['id' => $newStudentId]);
                 $savedBookNumber = $verifyBookStmt->fetchColumn();
