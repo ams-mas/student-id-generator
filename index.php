@@ -44,6 +44,9 @@ if (is_logged_in()) {
             <?php if (isset($_GET['inactive'])): ?>
                 <div class="login-alert" role="alert">این حساب غیرفعال است. برای دسترسی با مدیر سامانه تماس بگیرید.</div>
             <?php endif; ?>
+            <?php if (isset($_GET['throttled'])): ?>
+                <div class="login-alert" role="alert">تلاش‌های ورود بیش از حد مجاز است. چند دقیقه صبر کنید و دوباره تلاش کنید.</div>
+            <?php endif; ?>
             <?php if (isset($_GET['database'])): ?>
                 <div class="login-alert" role="alert">سرویس ورود در دسترس نیست. اجرای MySQL، وارد کردن فایل database/schema.sql و ایجاد حساب کاربری را بررسی کنید.</div>
             <?php endif; ?>
