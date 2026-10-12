@@ -15,8 +15,8 @@ $canManageUsers = in_array($role, ['super_admin', 'admin'], true);
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="پروفایل مدیر سامانه ساخت کارت شناسایی">
-    <title>پروفایل مدیر | سامانه ساخت کارت شناسایی</title>
+    <meta name="description" content="داشبورد سامانه مدیریت دانش‌آموزان">
+    <title>داشبورد | سامانه مدیریت دانش‌آموزان</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="profile-page">
@@ -24,12 +24,12 @@ $canManageUsers = in_array($role, ['super_admin', 'admin'], true);
         <aside class="admin-sidebar" id="admin-sidebar" aria-label="منوی اصلی">
             <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-controls="admin-sidebar" aria-expanded="false" aria-label="باز کردن منو"><span class="sidebar-toggle-icon" aria-hidden="true">☰</span><span class="sidebar-toggle-label">منو</span></button>
             <a class="sidebar-brand" href="dashboard.php">
-                <span class="sidebar-brand-mark" aria-hidden="true">ID</span>
-                <span><strong>پنل مدیریت</strong><small>سامانه کارت شناسایی</small></span>
+                <span class="sidebar-brand-mark" aria-hidden="true">م‌د</span>
+                <span><strong>پنل مدیریت</strong><small>سامانه مدیریت دانش‌آموزان</small></span>
             </a>
 
             <p class="sidebar-section-label">منوی اصلی</p>
-            <nav class="sidebar-nav">
+            <nav class="sidebar-nav">\n                <a class="sidebar-link" href="students.php"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span></a>
                 <a class="sidebar-link is-current" href="dashboard.php" aria-current="page">
                     <span class="sidebar-icon" aria-hidden="true">⌂</span><span>پروفایل مدیر</span>
                 </a>
@@ -94,7 +94,7 @@ $canManageUsers = in_array($role, ['super_admin', 'admin'], true);
                 <div class="profile-feature-list">
                     <div><span aria-hidden="true">01</span><div><strong>مدیریت پروفایل</strong><p>نام، ایمیل و تصویر مدیر</p></div></div>
                     <div><span aria-hidden="true">02</span><div><strong>تغییر رمز عبور</strong><p>به‌روزرسانی امن رمز حساب</p></div></div>
-                    <div><span aria-hidden="true">03</span><div><strong>مدیریت کارت‌ها</strong><p>این بخش را بعداً می‌سازیم</p></div></div>
+                    <div><span aria-hidden="true">03</span><div><strong>مدیریت دانش‌آموزان</strong><p>ثبت، جست‌وجو و به‌روزرسانی پرونده‌ها</p></div></div>
                 </div>
             </section>
 
