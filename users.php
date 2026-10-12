@@ -126,8 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-$statement = $pdo->query('SELECT id, username, role, is_active, created_at FROM users ORDER BY id DESC');
-$users = $statement->fetchAll();
 $username = (string) $_SESSION['username'];
 ?>
 <!doctype html>
@@ -192,46 +190,6 @@ $username = (string) $_SESSION['username'];
             </form>
         </section>
 
-        <section class="panel user-list-panel" aria-labelledby="user-list-title">
-            <h2 id="user-list-title">حساب‌های ثبت‌شده <span class="user-count"><?= count($users) ?></span></h2>
-            <div class="user-table-wrap">
-                <table class="user-table">
-                    <thead><tr><th>شناسه</th><th>نام کاربری</th><th>نوع حساب</th><th>وضعیت</th><th>تاریخ ایجاد</th><th>عملیات</th></tr></thead>
-                    <tbody>
-                    <?php foreach ($users as $account): ?>
-                        <?php
-                        $targetId = (int) $account['id'];
-                        $targetRole = (string) $account['role'];
-                        $canManage = $targetId !== $actorId && ($isSuperAdmin || $targetRole !== 'super_admin');
-                        ?>
-                        <tr>
-                            <td><?= escape((string) $targetId) ?></td>
-                            <td><?= escape((string) $account['username']) ?><?= $targetId === $actorId ? ' <span class="you-label">(شما)</span>' : '' ?></td>
-                            <td><?= escape($roleLabels[$targetRole] ?? $targetRole) ?></td>
-                            <td><span class="account-state <?= (int) $account['is_active'] === 1 ? 'state-active' : 'state-inactive' ?>"><?= (int) $account['is_active'] === 1 ? 'فعال' : 'غیرفعال' ?></span></td>
-                            <td><?= escape((string) $account['created_at']) ?></td>
-                            <td>
-                                <?php if ($canManage): ?>
-                                    <div class="user-actions">
-                                        <form method="post" action="users.php">
-                                            <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="user_id" value="<?= $targetId ?>">
-                                            <button class="button button-secondary button-small" type="submit"><?= (int) $account['is_active'] === 1 ? 'غیرفعال‌کردن' : 'فعال‌کردن' ?></button>
-                                        </form>
-                                        <form method="post" action="users.php" onsubmit="return confirm('آیا از حذف دائمی این حساب مطمئن هستید؟');">
-                                            <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="user_id" value="<?= $targetId ?>">
-                                            <button class="button button-danger button-small" type="submit">حذف</button>
-                                        </form>
-                                    </div>
-                                <?php else: ?><span class="muted">—</span><?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                    <?php if (!$users): ?><tr><td colspan="6">هنوز حسابی ساخته نشده است.</td></tr><?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-            <p class="help-text">برای امنیت، نمی‌توانید حساب خودتان را حذف یا غیرفعال کنید و آخرین سوپر ادمین نیز قابل حذف یا غیرفعال‌کردن نیست.</p>
-        </section>
         <footer class="page-footer">سامانه ساخت کارت شناسایی · مدیریت کاربران</footer>
     </main>
 </div>
