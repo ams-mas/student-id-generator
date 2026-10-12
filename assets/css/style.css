@@ -306,3 +306,55 @@ label{font-weight:700}
   .admin-sidebar:not(.is-open) .sidebar-toggle{right:calc(100% - 56px)!important}
   .admin-sidebar.is-open .sidebar-toggle{right:18px!important}
 }
+
+
+/* Persian typography and navigation sizing tune */
+html[lang="fa"] body{
+  font-size:16px;
+  line-height:1.8;
+  letter-spacing:0;
+}
+html[lang="fa"] h1,
+html[lang="fa"] h2,
+html[lang="fa"] h3,
+html[lang="fa"] p,
+html[lang="fa"] label{
+  letter-spacing:0;
+}
+html[lang="fa"] .sidebar-link,
+html[lang="fa"] .sidebar-group-title{
+  min-height:48px;
+  padding:11px 13px;
+  font-size:15px;
+  line-height:1.65;
+}
+html[lang="fa"] .sidebar-section-label{
+  font-size:12px;
+  line-height:1.7;
+  letter-spacing:0;
+}
+html[lang="fa"] .sidebar-brand strong{font-size:16px}
+html[lang="fa"] .sidebar-brand small{font-size:12px}
+html[lang="fa"] .sidebar-toggle{
+  min-height:44px;
+  font-size:14px;
+  letter-spacing:0;
+}
+html[lang="fa"] input,
+html[lang="fa"] select,
+html[lang="fa"] textarea,
+html[lang="fa"] .button,
+html[lang="fa"] .user-create-form input,
+html[lang="fa"] .user-create-form select{
+  font-size:15px;
+  line-height:1.65;
+}
+html[lang="fa"] .help-text,
+html[lang="fa"] .muted{
+  line-height:1.8;
+  letter-spacing:0;
+}
+@media(max-width:850px){
+  html[lang="fa"] .sidebar-link,
+  html[lang="fa"] .sidebar-group-title{min-height:46px}
+}
