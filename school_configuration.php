@@ -181,6 +181,7 @@ try {
             <a class="sidebar-link <?= $currentPage === 'add_user.php' ? 'is-current' : '' ?>" href="add_user.php">افزودن کاربر</a>
         </div>
 </div>
+    <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'reports.php' ? 'is-current' : '' ?>" href="#" aria-disabled="true" title="بخش گزارشات بعداً اضافه می‌شود"><span class="sidebar-icon" aria-hidden="true">▤</span><span>گزارشات</span></a>
 <a class="sidebar-link <?= $currentPage === 'database_updates.php' ? 'is-current' : '' ?>" href="database_updates.php"><span class="sidebar-icon" aria-hidden="true">↻</span><span>به‌روزرسانی پایگاه داده</span></a>
 <?php endif; ?>
 </nav>
