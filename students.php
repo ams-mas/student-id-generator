@@ -121,7 +121,7 @@ $filterAge = trim((string)($_GET['age'] ?? ''));
 $where = [];
 $params = [];
 if ($search !== '') {
-    $where[] = '(student_number LIKE :q1 OR CONCAT('R', LPAD(id, 8, '0')) LIKE :q7 OR first_name LIKE :q2 OR last_name LIKE :q3 OR class_name LIKE :q4 OR guardian_name LIKE :q5 OR register_book_number LIKE :q6)';
+    $where[] = "(student_number LIKE :q1 OR CONCAT('R', LPAD(id, 8, '0')) LIKE :q7 OR first_name LIKE :q2 OR last_name LIKE :q3 OR class_name LIKE :q4 OR guardian_name LIKE :q5 OR register_book_number LIKE :q6)";
     $term = '%'.$search.'%';
     $params += ['q1'=>$term, 'q2'=>$term, 'q3'=>$term, 'q4'=>$term, 'q5'=>$term, 'q6'=>$term, 'q7'=>$term];
 }
