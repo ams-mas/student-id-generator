@@ -769,3 +769,68 @@ html[lang="fa"] .muted{
     left: auto !important;
   }
 }
+
+
+/* Unified application color system: navy, blue, teal, and neutral surfaces. */
+:root {
+  color-scheme: light;
+  --ink: #1e293b;
+  --muted: #64748b;
+  --line: #d7e0eb;
+  --surface: #ffffff;
+  --background: #f1f5f9;
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --blue-soft: #dbeafe;
+  --nav-bg: #172554;
+  --teal: #0f766e;
+}
+body { background: var(--background) !important; color: var(--ink); }
+.panel, .profile-card, .profile-details, .profile-next, .login-panel {
+  background: #fff;
+  border-color: var(--line);
+}
+.admin-sidebar {
+  background: linear-gradient(180deg, #172554 0%, #1e3a5f 100%) !important;
+  border-left-color: #263b60 !important;
+  color: #f8fafc !important;
+}
+.admin-sidebar .sidebar-brand strong,
+.admin-sidebar .sidebar-brand small,
+.admin-sidebar .sidebar-section-label,
+.admin-sidebar .sidebar-group-title { color: #e2e8f0 !important; }
+.admin-sidebar .sidebar-link { color: #dbeafe !important; }
+.admin-sidebar .sidebar-link:hover,
+.admin-sidebar .sidebar-group-title:hover {
+  background: rgb(255 255 255 / 9%) !important;
+  color: #fff !important;
+}
+.admin-sidebar .sidebar-link.is-current {
+  background: #2563eb !important;
+  color: #fff !important;
+  box-shadow: inset -3px 0 0 #93c5fd;
+}
+.admin-sidebar .sidebar-submenu { border-right-color: #405579 !important; }
+.button-primary, .login-submit { background: #2563eb !important; color: #fff !important; }
+.button-primary:hover, .login-submit:hover { background: #1d4ed8 !important; }
+.button-secondary { background: #fff !important; color: #1e293b !important; border: 1px solid #cbd5e1 !important; }
+.button-danger { background: #fee2e2 !important; color: #991b1b !important; }
+.button-danger:hover { background: #fecaca !important; }
+input:focus, select:focus, textarea:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 15%) !important;
+}
+.user-table, table { color: #1e293b; }
+.user-table th, table thead th {
+  background: #e8eef8 !important;
+  color: #172554 !important;
+  border-color: #d7e0eb !important;
+}
+.user-table td, table tbody td { border-color: #e2e8f0; }
+.user-table tbody tr:nth-child(even), table tbody tr:nth-child(even) { background: #f8fafc; }
+.user-table tbody tr:hover, table tbody tr:hover { background: #eff6ff; }
+.status-pill, .user-count { background: #dbeafe; color: #1d4ed8; }
+.user-alert-success { background: #dcfce7 !important; color: #166534 !important; }
+.user-alert-error { background: #fee2e2 !important; color: #991b1b !important; }
+.state-active, .profile-status { background: #dcfce7; color: #166534; }
+.state-inactive { background: #e2e8f0; color: #475569; }
