@@ -116,6 +116,11 @@ foreach ($availableFiles as $filePath) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>به‌روزرسانی پایگاه داده</title>
     <link rel="stylesheet" href="assets/css/style.css">
+<style>
+/* School identity in the top of the sidebar */
+.admin-sidebar .sidebar-brand{align-items:center;}
+.admin-sidebar .sidebar-school-logo{width:48px;height:48px;min-width:48px;object-fit:contain;border-radius:10px;background:#fff;padding:4px;box-sizing:border-box;}
+</style>
     <style>
         .migration-wrap{max-width:1000px;margin:32px auto;padding:0 18px}
         .migration-panel{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin:18px 0;box-shadow:0 6px 24px rgba(15,23,42,.05)}
@@ -136,7 +141,27 @@ foreach ($availableFiles as $filePath) {
 <body class="profile-page">
 <div class="admin-layout">
     <aside class="admin-sidebar" id="admin-sidebar" aria-label="منوی اصلی">
-        <a class="sidebar-brand" href="dashboard.php"><span class="sidebar-brand-mark" aria-hidden="true">م‌د</span><span><strong>پنل مدیریت</strong><small>سامانه مدیریت دانش‌آموزان</small></span></a>
+        <?php
+$sidebarSchoolLogo = '';
+try {
+    require_once __DIR__ . '/config/database.php';
+    $sidebarSettingsStmt = database_connection()->query('SELECT school_name, logo_path FROM school_configuration WHERE id = 1 LIMIT 1');
+    $sidebarSchoolSettings = $sidebarSettingsStmt->fetch() ?: [];
+    $sidebarSchoolLogo = (string) ($sidebarSchoolSettings['logo_path'] ?? '');
+    $sidebarSchoolName = trim((string) ($sidebarSchoolSettings['school_name'] ?? ''));
+} catch (Throwable $sidebarSettingsError) {
+    $sidebarSchoolLogo = '';
+    $sidebarSchoolName = '';
+}
+?>
+<a class="sidebar-brand" href="dashboard.php">
+    <?php if ($sidebarSchoolLogo !== ''): ?>
+        <img class="sidebar-school-logo" src="<?= htmlspecialchars($sidebarSchoolLogo, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>" alt="لوگوی مدرسه">
+    <?php else: ?>
+        <span class="sidebar-brand-mark" aria-hidden="true">م‌د</span>
+    <?php endif; ?>
+    <span><strong><?= htmlspecialchars($sidebarSchoolName !== '' ? $sidebarSchoolName : 'پنل مدیریت', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></strong><small>سامانه مدیریت دانش‌آموزان</small></span>
+</a>
         <p class="sidebar-section-label">منوی اصلی</p>
         <nav class="sidebar-nav">
     <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'dashboard.php' ? 'is-current' : '' ?>" href="dashboard.php"><span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span></a>
