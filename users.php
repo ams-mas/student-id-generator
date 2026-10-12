@@ -214,6 +214,29 @@ $username = (string) $_SESSION['username'];
 .admin-sidebar .sidebar-system-clock{display:flex;flex-direction:column;align-items:center;gap:4px;margin:12px 12px 18px;padding:10px 8px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:rgba(255,255,255,.07);text-align:center;direction:rtl;}
 .admin-sidebar .sidebar-clock-date{font-size:12px;line-height:1.7;color:#dbeafe;}
 .admin-sidebar .sidebar-clock-time{font-size:20px;font-weight:700;letter-spacing:1px;line-height:1.4;color:#fff;font-variant-numeric:tabular-nums;}
+
+/* Polished user list: readable columns, calm row separation, and compact actions. */
+.user-list-panel{margin-top:24px;padding:0;overflow:hidden}
+.user-list-panel>h2{display:flex;align-items:center;gap:10px;margin:0;padding:22px 24px;border-bottom:1px solid var(--line);font-size:1.2rem}
+.user-list-panel>h2::before{content:"";width:4px;height:25px;border-radius:4px;background:var(--blue)}
+.user-table-wrap{width:100%;overflow-x:auto}
+.user-table{width:100%;min-width:760px;border-collapse:separate;border-spacing:0;text-align:right;white-space:nowrap}
+.user-table th,.user-table td{padding:15px 18px;border-bottom:1px solid #edf0f5;vertical-align:middle}
+.user-table th{background:#f4f7fc;color:#53627a;font-size:.8rem;font-weight:800}
+.user-table td{font-size:.86rem;color:#26354d}
+.user-table tbody tr{transition:background .15s ease}
+.user-table tbody tr:hover{background:#f8faff}
+.user-table tbody tr:last-child td{border-bottom:0}
+.user-table th:first-child,.user-table td:first-child{width:80px;color:#68758b;font-variant-numeric:tabular-nums}
+.user-table td:nth-child(2){font-weight:800;color:#172b4d}
+.user-table td:nth-child(3){font-weight:700}
+.user-actions{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.user-actions form{margin:0}
+.user-actions .button{min-height:34px;padding:6px 11px;border-radius:8px;font-size:.76rem;white-space:nowrap}
+.user-actions .button-danger{border:1px solid #f3cccc}
+.user-list-panel>.help-text{margin:0;padding:13px 24px;background:#fafbfe;border-top:1px solid var(--line);font-size:.78rem}
+@media(max-width:760px){.user-list-panel>h2{padding:18px}.user-table th,.user-table td{padding:12px 14px}.user-list-panel>.help-text{padding:12px 18px}}
+
 </style>
 </head>
 <body class="profile-page">
@@ -329,10 +352,10 @@ try {
         </section>
         <?php endif; ?>
 
-        <section class="panel" aria-labelledby="users-list-title">
+        <section class="panel user-list-panel" aria-labelledby="users-list-title">
             <h2 id="users-list-title">تمام کاربران (<?= count($allUsers) ?>)</h2>
-            <div class="students-table-wrap">
-                <table class="students-table">
+            <div class="user-table-wrap">
+                <table class="user-table">
                     <thead><tr><th>شناسه</th><th>نام کاربری</th><th>نوع حساب</th><th>وضعیت</th><th>تاریخ ایجاد</th><th>عملیات</th></tr></thead>
                     <tbody>
                     <?php if (!$allUsers): ?><tr><td colspan="6">هیچ حسابی ثبت نشده است.</td></tr><?php endif; ?>
@@ -341,9 +364,9 @@ try {
                             <td><?= (int)$listedUser['id'] ?></td>
                             <td><?= escape($listedUser['username']) ?></td>
                             <td><?= escape($roleLabels[$listedUser['role']] ?? $listedUser['role']) ?></td>
-                            <td><?= (int)$listedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال' ?></td>
+                            <td><span class="account-state <?= (int)$listedUser['is_active'] === 1 ? 'state-active' : 'state-inactive' ?>"><?= (int)$listedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال' ?></span></td>
                             <td><?= escape($listedUser['created_at'] ?? '—') ?></td>
-                            <td><div class="student-actions">
+                            <td><div class="user-actions">
                                 <?php if ($isSuperAdmin || $listedUser['role'] !== 'super_admin'): ?>
                                 <a class="button button-primary" href="users.php?edit=<?= (int)$listedUser['id'] ?>">ویرایش</a>
                                 <?php endif; ?>
