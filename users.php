@@ -143,16 +143,44 @@ $username = (string) $_SESSION['username'];
         <a class="sidebar-brand" href="dashboard.php"><span class="sidebar-brand-mark" aria-hidden="true">ID</span><span><strong>پنل مدیریت</strong><small>سامانه کارت شناسایی</small></span></a>
         <p class="sidebar-section-label">منوی اصلی</p>
         <nav class="sidebar-nav">
-            <a class="sidebar-link" href="dashboard.php"><span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span></a>
-            <a class="sidebar-link" href="students.php"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span></a>
-                <a class="sidebar-link" href="school.php"><span class="sidebar-icon" aria-hidden="true">▦</span><span>سال تحصیلی و صنف‌ها</span></a>
-            <div class="sidebar-group">
-                <div class="sidebar-group-title"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت کاربران</span></div>
-                <div class="sidebar-submenu">
-                    <a class="sidebar-link is-current" href="users.php" aria-current="page"><span>افزودن و مدیریت کاربران</span></a>
-                </div>
-            </div>
-        </nav>
+    <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'dashboard.php' ? 'is-current' : '' ?>" href="dashboard.php"><span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span></a>
+
+    <div class="sidebar-group">
+        <a class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'students.php' ? 'is-current' : '' ?>" href="students.php"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span></a>
+        <div class="sidebar-submenu">
+            <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'students.php' ? 'is-current' : '' ?>" href="students.php">فهرست و ثبت دانش‌آموزان</a>
+            <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">انتقال و ارتقای صنف <small>به‌زودی</small></span>
+            <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">تاریخچه تحصیلی <small>به‌زودی</small></span>
+        </div>
+    </div>
+
+    <div class="sidebar-group">
+        <span class="sidebar-group-title"><span class="sidebar-icon" aria-hidden="true">♟</span><span>مدیریت آموزگاران</span></span>
+        <div class="sidebar-submenu">
+            <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">فهرست آموزگاران <small>به‌زودی</small></span>
+            <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">ثبت آموزگار <small>به‌زودی</small></span>
+            <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">تعیین صنف مسئول <small>به‌زودی</small></span>
+        </div>
+    </div>
+
+    <div class="sidebar-group">
+        <a class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'school.php' ? 'is-current' : '' ?>" href="school.php"><span class="sidebar-icon" aria-hidden="true">▦</span><span>تنظیمات مدرسه</span></a>
+        <div class="sidebar-submenu">
+            <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'school.php' ? 'is-current' : '' ?>" href="school.php">سال تحصیلی</a>
+            <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">صنف‌ها و بخش‌ها <small>به‌زودی</small></span>
+        </div>
+    </div>
+
+    <?php if (in_array(current_role(), ['super_admin', 'admin'], true)): ?>
+    <div class="sidebar-group">
+        <a class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'users.php' ? 'is-current' : '' ?>" href="users.php"><span class="sidebar-icon" aria-hidden="true">⚙</span><span>مدیریت کاربران</span></a>
+        <div class="sidebar-submenu">
+            <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'users.php' ? 'is-current' : '' ?>" href="users.php">فهرست و افزودن کاربران</a>
+        </div>
+    </div>
+    <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'database_updates.php' ? 'is-current' : '' ?>" href="database_updates.php"><span class="sidebar-icon" aria-hidden="true">↻</span><span>به‌روزرسانی پایگاه داده</span></a>
+    <?php endif; ?>
+</nav>
         <div class="sidebar-bottom">
             <span class="sidebar-user-avatar" aria-hidden="true"><?= escape(substr($username, 0, 1)) ?></span>
             <div class="sidebar-user-copy"><strong><?= escape($username) ?></strong><small><?= escape($roleLabels[$actorRole] ?? $actorRole) ?></small></div>
