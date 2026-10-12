@@ -56,10 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
    $pdo->commit(); $success=$kind==='assigned'?'ثبت‌نام در صنف انجام شد.':'انتقال انجام شد و در تاریخچه ثبت شد.';
   } elseif ($action === 'promote') {
    $fromYear=school_post_id('from_year'); $toSection=school_post_id('to_section'); $student=school_post_id('student_id');
-   $st=$pdo->prepare('SELECT school_year_id,grade,is_closed FROM class_sections JOIN school_years ON school_years.id=school_year_id WHERE class_sections.id=?'); $st->execute([$toSection]); $dest=$st->fetch();
-   $st=$pdo->prepare('SELECT e.* FROM student_enrollments e JOIN class_sections cs ON cs.id=e.class_section_id WHERE e.student_id=? AND e.school_year_id=? AND e.is_current=1'); $st->execute([$student,$fromYear]); $old=$st->fetch();
+   $st=$pdo->prepare('SELECT cs.school_year_id,cs.grade,sy.is_closed FROM class_sections cs JOIN school_years sy ON sy.id=cs.school_year_id WHERE cs.id=?'); $st->execute([$toSection]); $dest=$st->fetch();
+   $st=$pdo->prepare('SELECT e.*,cs.grade AS old_grade FROM student_enrollments e JOIN class_sections cs ON cs.id=e.class_section_id WHERE e.student_id=? AND e.school_year_id=? AND e.is_current=1'); $st->execute([$student,$fromYear]); $old=$st->fetch();
    if(!$old || !$dest || (int)$dest['is_closed']===1 || (int)$dest['school_year_id']===$fromYear) throw new RuntimeException('ثبت‌نام قبلی یا صنف سال بعد معتبر نیست.');
-   if((int)$dest['grade'] !== min(12, (int)$old['class_section_id']*0 + (int)$dest['grade'])) { throw new RuntimeException('پایه انتخاب‌شده معتبر نیست.'); }
+   if((int)$old['old_grade']>=12 || (int)$dest['grade'] !== (int)$old['old_grade']+1) throw new RuntimeException('برای ارتقا باید صنف مقصد دقیقاً یک پایه بالاتر باشد.');
    $pdo->beginTransaction();
    $pdo->prepare("UPDATE student_enrollments SET is_current=0,status='promoted',ended_at=NOW() WHERE id=?")->execute([$old['id']]);
    $pdo->prepare("INSERT INTO student_enrollments(student_id,school_year_id,class_section_id,status,notes) VALUES(?,?,?,'enrolled','Promoted from previous school year')")->execute([$student,$dest['school_year_id'],$toSection]);
