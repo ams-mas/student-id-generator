@@ -13,3 +13,9 @@ uploads/*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Database exports and local backups must never be committed to a public repository
+*_backup_*.sql
+*_backup_*.sql.gz
+*.dump
+*.sql.gz
