@@ -90,10 +90,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $params['id'] = $id;
                 $stmt = $pdo->prepare('UPDATE students SET student_number=:number, register_book_number=:book_number, first_name=:first, last_name=:last, father_name=:father_name, grandfather_name=:grandfather_name, gender=:gender, date_of_birth=:dob, class_name=:class, phone=:phone, guardian_name=:guardian, guardian_phone=:guardian_phone, address=:address WHERE id=:id');
                 $stmt->execute($params);
+                $verifyBookStmt = $pdo->prepare('SELECT register_book_number FROM students WHERE id = :id LIMIT 1');
+                $verifyBookStmt->execute(['id' => $id]);
+                $savedBookNumber = $verifyBookStmt->fetchColumn();
+                if (($bookNumber === '' && $savedBookNumber !== null) || ($bookNumber !== '' && (string)$savedBookNumber !== $bookNumber)) {
+                    throw new RuntimeException('شماره کتاب اساس در پایگاه داده ذخیره نشد. لطفاً صفحه را تازه‌سازی کنید و دوباره تلاش کنید.');
+                }
                 $_SESSION['students_flash'] = ['success' => 'پرونده دانش‌آموز به‌روزرسانی شد.'];
             } else {
                 $stmt = $pdo->prepare('INSERT INTO students (student_number, register_book_number, first_name, last_name, father_name, grandfather_name, gender, date_of_birth, class_name, phone, guardian_name, guardian_phone, address) VALUES (:number,:book_number,:first,:last,:father_name,:grandfather_name,:gender,:dob,:class,:phone,:guardian,:guardian_phone,:address)');
                 $stmt->execute($params);
+                $newStudentId = (int)$pdo->lastInsertId();
+                $verifyBookStmt = $pdo->prepare('SELECT register_book_number FROM students WHERE id = :id LIMIT 1');
+                $verifyBookStmt->execute(['id' => $newStudentId]);
+                $savedBookNumber = $verifyBookStmt->fetchColumn();
+                if (($bookNumber === '' && $savedBookNumber !== null) || ($bookNumber !== '' && (string)$savedBookNumber !== $bookNumber)) {
+                    throw new RuntimeException('شماره کتاب اساس در پایگاه داده ذخیره نشد. لطفاً صفحه را تازه‌سازی کنید و دوباره تلاش کنید.');
+                }
                 $_SESSION['students_flash'] = ['success' => 'دانش‌آموز با موفقیت ثبت شد.'];
             }
             header('Location: students.php');
