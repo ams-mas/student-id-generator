@@ -35,3 +35,29 @@ html[lang="fa"] .login-submit span{transform:none}
 html[lang="fa"] .login-form input{text-align:right}
 html[lang="fa"] .login-footer{text-align:center}
 html[lang="fa"] .login-panel-heading h2,html[lang="fa"] .login-brand h1{letter-spacing:0}
+
+
+/* Admin profile page */
+.profile-page{min-height:100vh}
+.profile-shell{max-width:1000px}
+.profile-card{display:flex;align-items:center;gap:20px;margin-bottom:22px}
+.profile-avatar{display:grid;place-items:center;flex:0 0 76px;width:76px;height:76px;border-radius:22px;background:linear-gradient(140deg,#2449a5,#3d79bd);color:#fff;font-size:2rem;font-weight:800}
+.profile-summary{flex:1;min-width:0}
+.profile-summary .eyebrow{margin-bottom:8px}
+.profile-summary h2{margin:0 0 6px;font-size:1.6rem;overflow-wrap:anywhere}
+.profile-summary .muted{margin:0}
+.profile-status{padding:7px 13px;border-radius:999px;background:#e4f7ed;color:#17643a;font-size:.82rem;font-weight:700}
+.profile-details,.profile-next{margin-bottom:22px}
+.profile-details h2,.profile-next h2{margin-bottom:18px}
+.profile-info-list{margin:0}
+.profile-info-list>div{display:grid;grid-template-columns:180px minmax(0,1fr);gap:18px;padding:14px 0;border-bottom:1px solid var(--line)}
+.profile-info-list>div:last-child{border-bottom:0}
+.profile-info-list dt{color:var(--muted)}
+.profile-info-list dd{margin:0;font-weight:700;overflow-wrap:anywhere}
+.profile-next>.muted{margin-bottom:22px}
+.profile-feature-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.profile-feature-list>div{display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid var(--line);border-radius:12px;background:#fbfcff}
+.profile-feature-list>div>span{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border-radius:10px;background:#e9f0ff;color:var(--blue);font-size:.75rem;font-weight:800}
+.profile-feature-list strong{display:block;margin:3px 0 7px}
+.profile-feature-list p{margin:0;color:var(--muted);font-size:.82rem;line-height:1.6}
+@media(max-width:680px){.profile-card{align-items:flex-start;flex-wrap:wrap}.profile-status{margin-right:auto}.profile-info-list>div{grid-template-columns:1fr;gap:6px}.profile-feature-list{grid-template-columns:1fr}.profile-feature-list>div{padding:13px}}
