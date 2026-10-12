@@ -283,7 +283,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <div class="student-field"><label for="guardian_phone">شماره تماس سرپرست</label><input id="guardian_phone" name="guardian_phone" maxlength="40" value="<?= student_escape($editing['guardian_phone'] ?? '') ?>"></div>
 <div class="student-field student-field-wide"><label for="address">نشانی</label><textarea id="address" name="address" maxlength="500"><?= student_escape($editing['address'] ?? '') ?></textarea></div>
 </div></div>
-<div class="form-actions"><button class="button button-primary" type="submit"><?= $editing ? 'ذخیره تغییرات' : 'ثبت دانش‌آموز' ?></button><a class="button button-secondary" href="students.php">بازگشت به فهرست</a></div>
+<div class="form-actions"><button class="button button-primary" type="submit"><?= $editing ? 'ذخیره تغییرات' : 'ثبت دانش‌آموز' ?></button></div>
 </form></section>
 <?php endif; ?>
 <?php if (!$showForm): ?><section class="panel"><h2>فهرست دانش‌آموزان</h2>
