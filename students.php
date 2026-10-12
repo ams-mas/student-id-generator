@@ -45,6 +45,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $guardian = trim((string)($_POST['guardian_name'] ?? ''));
             $guardianPhone = trim((string)($_POST['guardian_phone'] ?? ''));
             $address = trim((string)($_POST['address'] ?? ''));
+            $discountType = (string)($_POST['discount_type'] ?? 'none');
+            $discountRaw = trim((string)($_POST['discount_value'] ?? ''));
+            $discountValue = $discountRaw === '' ? 0.0 : filter_var($discountRaw, FILTER_VALIDATE_FLOAT);
+            if (!in_array($discountType, ['none', 'percent', 'amount'], true)) {
+                throw new RuntimeException('نوع تخفیف معتبر نیست.');
+            }
+            if ($discountValue === false || !is_finite((float)$discountValue) || $discountValue < 0) {
+                throw new RuntimeException('مقدار تخفیف باید صفر یا یک عدد مثبت باشد.');
+            }
+            if ($discountType === 'percent' && $discountValue > 100) {
+                throw new RuntimeException('تخفیف درصدی نمی‌تواند بیشتر از ۱۰۰ درصد باشد.');
+            }
+            if ($discountType !== 'none' && $discountValue <= 0) {
+                throw new RuntimeException('برای ثبت تخفیف، مقدار آن باید بیشتر از صفر باشد.');
+            }
             if ($id && !preg_match('/^[A-Za-z0-9._\\/-]{1,40}$/', $number)) {
                 throw new RuntimeException('شماره مسلسل معتبر نیست.');
             }
@@ -104,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (($bookNumber === '' && $savedBookNumber !== null) || ($bookNumber !== '' && (string)$savedBookNumber !== $bookNumber)) {
                     throw new RuntimeException('شماره کتاب اساس در پایگاه داده ذخیره نشد. لطفاً صفحه را تازه‌سازی کنید و دوباره تلاش کنید.');
                 }
-                $_SESSION['students_flash'] = ['success' => 'پرونده دانش‌آموز به‌روزرسانی شد.'];
+                $savedStudentId = (int)$id;
             } else {
                 $stmt = $pdo->prepare('INSERT INTO students (student_number, register_book_number, first_name, last_name, father_name, grandfather_name, gender, date_of_birth, class_name, phone, guardian_name, guardian_phone, address) VALUES (:number,:book_number,:first,:last,:father_name,:grandfather_name,:gender,:dob,:class,:phone,:guardian,:guardian_phone,:address)');
                 $stmt->execute($params);
@@ -123,8 +138,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (($bookNumber === '' && $savedBookNumber !== null) || ($bookNumber !== '' && (string)$savedBookNumber !== $bookNumber)) {
                     throw new RuntimeException('شماره کتاب اساس در پایگاه داده ذخیره نشد. لطفاً صفحه را تازه‌سازی کنید و دوباره تلاش کنید.');
                 }
-                $_SESSION['students_flash'] = ['success' => 'دانش‌آموز با موفقیت ثبت شد.'];
+                $savedStudentId = $newStudentId;
             }
+            if ($activeSchoolYearId < 1) {
+                throw new RuntimeException('برای ثبت تخفیف، سال تحصیلی فعلی باید فعال باشد.');
+            }
+            if ($discountType === 'none') {
+                $discountDeleteStmt = $pdo->prepare('DELETE FROM student_year_discounts WHERE student_id = :student_id AND school_year_id = :year_id');
+                $discountDeleteStmt->execute(['student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId]);
+            } else {
+                $discountSaveStmt = $pdo->prepare('INSERT INTO student_year_discounts (student_id, school_year_id, discount_type, discount_value) VALUES (:student_id, :year_id, :discount_type, :discount_value) ON DUPLICATE KEY UPDATE discount_type = VALUES(discount_type), discount_value = VALUES(discount_value)');
+                $discountSaveStmt->execute(['student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId, 'discount_type' => $discountType, 'discount_value' => $discountValue]);
+            }
+            $_SESSION['students_flash'] = ['success' => $id ? 'پرونده دانش‌آموز به‌روزرسانی شد.' : 'دانش‌آموز با موفقیت ثبت شد.'];
             header('Location: students.php');
             exit;
         }
@@ -214,6 +240,19 @@ $students = $stmt->fetchAll();
 $total = (int)$pdo->query('SELECT COUNT(*) FROM students')->fetchColumn();
 $active = (int)$pdo->query('SELECT COUNT(*) FROM students WHERE is_active=1')->fetchColumn();
 $activeSchoolYear = $pdo->query('SELECT id, name FROM school_years WHERE is_active = 1 AND is_closed = 0 ORDER BY id DESC LIMIT 1')->fetch() ?: null;
+$currentDiscount = ['discount_type' => 'none', 'discount_value' => ''];
+if ($editing && $activeSchoolYear) {
+    try {
+        $discountReadStmt = $pdo->prepare('SELECT discount_type, discount_value FROM student_year_discounts WHERE student_id = :student_id AND school_year_id = :year_id LIMIT 1');
+        $discountReadStmt->execute(['student_id' => (int)$editing['id'], 'year_id' => (int)$activeSchoolYear['id']]);
+        $savedDiscount = $discountReadStmt->fetch();
+        if ($savedDiscount) {
+            $currentDiscount = ['discount_type' => (string)$savedDiscount['discount_type'], 'discount_value' => (string)$savedDiscount['discount_value']];
+        }
+    } catch (PDOException $e) {
+        // The migration may not have been applied yet; the form remains usable without a saved discount.
+    }
+}
 $classOptions = [];
 if ($activeSchoolYear) {
     $sectionOptionsStmt = $pdo->prepare('SELECT id, grade, section_name FROM class_sections WHERE school_year_id = :year_id AND is_active = 1 ORDER BY grade ASC, section_name ASC');
@@ -319,6 +358,10 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <div class="student-field"><label for="gender">جنسیت</label><select id="gender" name="gender"><option value="unspecified">ثبت نشده</option><option value="female" <?= (($editing['gender'] ?? '')==='female')?'selected':'' ?>>دختر</option><option value="male" <?= (($editing['gender'] ?? '')==='male')?'selected':'' ?>>پسر</option></select></div>
 <div class="student-field"><label for="date_of_birth">تاریخ تولد (هجری شمسی)</label><input id="date_of_birth" name="date_of_birth" type="date" data-persian-date value="<?= student_escape($editing['date_of_birth'] ?? '') ?>"></div>
 <div class="student-field"><label for="class_section_id">صنف / کلاس سال تحصیلی فعلی *</label><select id="class_section_id" name="class_section_id" required><option value="">انتخاب صنف</option><?php foreach ($classOptions as $classOption): ?><option value="<?= (int)$classOption['id'] ?>" <?= ((int)($editing['class_section_id'] ?? 0) === (int)$classOption['id'] || (($editing['class_name'] ?? '') === ((string)$classOption['grade'].' '.(string)$classOption['section_name']))) ? 'selected' : '' ?>><?= student_escape((string)$classOption['grade'].' '.(string)$classOption['section_name']) ?></option><?php endforeach; ?></select><?php if (!$activeSchoolYear): ?><small>ابتدا سال تحصیلی فعلی را فعال کنید.</small><?php elseif (!$classOptions): ?><small>برای سال تحصیلی <?= student_escape($activeSchoolYear['name']) ?> هنوز صنفی تعریف نشده است. ابتدا در تنظیمات مدرسه صنف‌ها را ایجاد کنید.</small><?php else: ?><small>فقط صنف‌های فعال سال تحصیلی <?= student_escape($activeSchoolYear['name']) ?> نمایش داده می‌شوند.</small><?php endif; ?></div>
+</div></div>
+<div class="student-form-section"><h3>تخفیف شهریه سال تحصیلی <?= student_escape($activeSchoolYear['name'] ?? '') ?></h3><div class="student-form-fields">
+<div class="student-field"><label for="discount_type">نوع تخفیف</label><select id="discount_type" name="discount_type"><option value="none" <?= ($currentDiscount['discount_type'] ?? 'none') === 'none' ? 'selected' : '' ?>>بدون تخفیف</option><option value="percent" <?= ($currentDiscount['discount_type'] ?? '') === 'percent' ? 'selected' : '' ?>>درصدی (%)</option><option value="amount" <?= ($currentDiscount['discount_type'] ?? '') === 'amount' ? 'selected' : '' ?>>مبلغ ثابت</option></select><small>این تخفیف فقط برای سال تحصیلی فعلی ذخیره می‌شود.</small></div>
+<div class="student-field"><label for="discount_value">مقدار تخفیف</label><input id="discount_value" name="discount_value" type="number" min="0" step="0.01" value="<?= student_escape($currentDiscount['discount_value'] ?? '') ?>" placeholder="مثلاً ۱۰ یا ۵۰۰"><small>برای تخفیف درصدی از ۱ تا ۱۰۰ وارد کنید؛ برای مبلغ ثابت، مبلغ تخفیف را وارد کنید.</small></div>
 </div></div>
 <div class="student-form-section"><h3>اطلاعات تماس و سرپرست</h3><div class="student-form-fields">
 <div class="student-field"><label for="phone">شماره تماس دانش‌آموز</label><input id="phone" name="phone" maxlength="40" value="<?= student_escape($editing['phone'] ?? '') ?>"></div>
