@@ -267,3 +267,18 @@ label{font-weight:700}
  .login-panel{padding:22px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+
+
+/* Keep the menu control pinned to the viewport's top-right while the drawer slides. */
+@media(min-width:761px){
+ .admin-sidebar:not(.is-open),.admin-sidebar:not(.is-open):hover,.admin-sidebar:not(.is-open):focus-within{transform:translateX(calc(100% - 68px))!important}
+ .admin-sidebar.is-open,.admin-sidebar.is-open:hover,.admin-sidebar.is-open:focus-within{transform:translateX(0)!important}
+ .sidebar-toggle{position:fixed!important;top:16px!important;right:12px!important}
+ .admin-sidebar.is-open .sidebar-toggle{position:fixed!important;top:17px!important;right:18px!important}
+}
+@media(max-width:760px){
+ .admin-sidebar{transform:translateX(calc(100% - 68px))}
+ .admin-sidebar.is-open{transform:translateX(0)}
+ .sidebar-toggle{position:fixed;top:16px;right:12px}
+ .admin-sidebar.is-open .sidebar-toggle{position:fixed;top:17px;right:18px}
+}
