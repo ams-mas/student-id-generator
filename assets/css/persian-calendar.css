@@ -25,3 +25,19 @@
 /* Overlay the date picker so opening it never pushes or scrolls the page layout. */
 .persian-calendar-container{position:relative;width:100%;min-width:0}
 .persian-calendar-container .persian-calendar-popup{position:absolute;top:calc(100% + 4px);right:0;left:auto;margin-top:0;z-index:10000;max-width:min(340px,calc(100vw - 32px));}
+
+/* Improve spacing and prevent date-picker text from touching borders or clipping. */
+.persian-calendar-popup{box-sizing:border-box;padding:14px;line-height:1.5;overflow:visible}
+.persian-calendar-popup *{box-sizing:border-box}
+.pc-head{gap:8px;margin-bottom:12px}
+.pc-head button{flex:0 0 36px;padding:6px;line-height:1.4}
+.pc-selectors{gap:8px}
+.pc-selectors select{height:40px;padding:7px 10px;line-height:1.4;text-align:center}
+.pc-selectors .pc-month-select{flex:1 1 58%;width:58%;max-width:58%}
+.pc-selectors .pc-year-select{flex:1 1 42%;width:42%;max-width:42%}
+.pc-week,.pc-days{column-gap:5px;row-gap:5px}
+.pc-week span{display:flex;align-items:center;justify-content:center;min-height:30px;padding:3px 0;line-height:1.4}
+.pc-days button{display:flex;align-items:center;justify-content:center;width:100%;min-width:0;min-height:36px;padding:6px 2px;line-height:1.4;white-space:nowrap}
+.pc-empty{min-height:36px}
+.pc-foot{gap:8px;margin-top:12px}
+.pc-foot button{min-height:34px;padding:7px 11px;line-height:1.4}
