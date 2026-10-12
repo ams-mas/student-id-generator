@@ -168,7 +168,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 .student-form-panel{max-width:1100px;margin-inline:auto}
 .student-form-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--line)}
 .student-form-heading h2{margin:0 0 6px}
-.student-serial-heading{margin:0 0 12px;font-weight:700;font-size:17px;color:var(--ink)}
+
 .student-form-heading p{margin:0}
 .student-form-section{padding:18px 0;border-bottom:1px solid var(--line)}
 .student-form-section:last-of-type{border-bottom:0}
@@ -266,10 +266,11 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <?php if (!$showForm): ?><div class="student-toolbar"><?php if ($canEdit): ?><a class="button button-primary" href="students.php?new=1">＋ ثبت دانش‌آموز</a><?php endif; ?><a class="button button-secondary" href="students.php">فهرست دانش‌آموزان</a></div><?php endif; ?>
 <div class="students-grid">
 <?php if ($showForm): ?>
-<section class="panel student-form-panel"><div class="student-form-heading"><div><p class="student-serial-heading">شماره مسلسل: <?= 'R' . sprintf('%07d', (int)($editing['id'] ?? 0)) ?></p><h2><?= $editing ? 'ویرایش دانش‌آموز فعلی' : 'ثبت دانش‌آموز جدید' ?></h2></div></div>
+<section class="panel student-form-panel"><div class="student-form-heading"><div><h2><?= $editing ? 'ویرایش دانش‌آموز فعلی' : 'ثبت دانش‌آموز جدید' ?></h2></div></div>
 <form class="students-form" method="post" action="students.php">
 <input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="student_id" value="<?= student_escape($editing['id'] ?? '') ?>">
 <div class="student-form-section"><h3>مشخصات دانش‌آموز</h3><div class="student-form-fields">
+<div class="student-field"><label>شماره مسلسل</label><input type="text" value="<?= 'R' . sprintf('%07d', (int)($editing['id'] ?? 0)) ?>" readonly aria-readonly="true"><small>پس از ثبت، شماره مسلسل دائمی اختصاص داده می‌شود.</small></div>
 <div class="student-field"><label for="register_book_number">شماره کتاب اساس (برای دانش‌آموزان قبلی)</label><input id="register_book_number" name="register_book_number" maxlength="100" value="<?= student_escape($editing['register_book_number'] ?? '') ?>" placeholder="شماره ثبت‌شده در کتاب اساس"><small>برای دانش‌آموزانی که پیش از این سامانه ثبت شده‌اند.</small></div>
 
 <div class="student-field"><label for="first_name">نام *</label><input id="first_name" name="first_name" required maxlength="100" value="<?= student_escape($editing['first_name'] ?? '') ?>"></div>
