@@ -126,6 +126,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
+$usersQuery = $pdo->query('SELECT id, username, role, is_active, created_at FROM users ORDER BY id ASC');
+$allUsers = $usersQuery->fetchAll();
+
 $username = (string) $_SESSION['username'];
 ?>
 <!doctype html>
@@ -210,6 +213,7 @@ try {
         <button type="button" class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'users.php' ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">⚙</span><span>مدیریت کاربران</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
         <div class="sidebar-submenu">
             <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'users.php' ? 'is-current' : '' ?>" href="users.php">لیست کاربران</a>
+            <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'add_user.php' ? 'is-current' : '' ?>" href="add_user.php">افزودن کاربر</a>
         </div>
     </div>
     <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'database_updates.php' ? 'is-current' : '' ?>" href="database_updates.php"><span class="sidebar-icon" aria-hidden="true">↻</span><span>به‌روزرسانی پایگاه داده</span></a>
@@ -224,34 +228,45 @@ try {
 
     <main class="admin-main">
         <header class="page-header dashboard-header">
-            <div><p class="eyebrow">پنل مدیریت</p><h1>مدیریت کاربران</h1><p class="muted">ساخت حساب و تعیین سطح دسترسی کاربران سامانه.</p></div>
+            <div><p class="eyebrow">پنل مدیریت</p><h1>لیست کاربران</h1><p class="muted">تمام حساب‌های کاربری، ادمین‌ها و سوپر ادمین‌ها به ترتیب شناسه نمایش داده می‌شوند.</p></div>
             <div class="account-actions"><span class="signed-in-as">نقش شما: <strong><?= escape($roleLabels[$actorRole] ?? $actorRole) ?></strong></span><a class="button button-secondary" href="dashboard.php">بازگشت به پروفایل</a></div>
         </header>
 
         <?php if ($success !== ''): ?><div class="user-alert user-alert-success" role="status"><?= escape($success) ?></div><?php endif; ?>
         <?php if ($error !== ''): ?><div class="user-alert user-alert-error" role="alert"><?= escape($error) ?></div><?php endif; ?>
 
-        <section class="panel user-create-panel" aria-labelledby="create-user-title">
-            <h2 id="create-user-title">افزودن حساب جدید</h2>
-            <p class="muted">نام کاربری و رمز عبور را تعیین کنید و نوع حساب را انتخاب کنید.</p>
-            <form method="post" action="users.php" class="user-create-form">
-                <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>">
-                <input type="hidden" name="action" value="add">
-                <label for="new-username">نام کاربری</label>
-                <input id="new-username" name="username" required minlength="3" maxlength="80" pattern="[a-zA-Z0-9_.-]+" autocomplete="off" placeholder="مثال: school.user">
-                <label for="new-role">نوع حساب</label>
-                <select id="new-role" name="role" required>
-                    <option value="user">کاربر</option>
-                    <option value="admin">ادمین</option>
-                    <?php if ($isSuperAdmin): ?><option value="super_admin">سوپر ادمین</option><?php endif; ?>
-                </select>
-                <p class="help-text"><?= $isSuperAdmin ? 'شما می‌توانید هر سه نوع حساب را ایجاد کنید.' : 'شما می‌توانید کاربر یا ادمین ایجاد کنید؛ ساخت سوپر ادمین فقط برای سوپر ادمین مجاز است.' ?></p>
-                <label for="new-password">رمز عبور (حداقل ۸ کاراکتر)</label>
-                <input id="new-password" name="password" type="password" required minlength="8" maxlength="4096" autocomplete="new-password">
-                <label for="new-password-confirm">تکرار رمز عبور</label>
-                <input id="new-password-confirm" name="password_confirm" type="password" required minlength="8" maxlength="4096" autocomplete="new-password">
-                <button class="button button-primary" type="submit">ساخت حساب</button>
-            </form>
+        <section class="panel" aria-labelledby="users-list-title">
+            <h2 id="users-list-title">تمام کاربران (<?= count($allUsers) ?>)</h2>
+            <div class="students-table-wrap">
+                <table class="students-table">
+                    <thead><tr><th>شناسه</th><th>نام کاربری</th><th>نوع حساب</th><th>وضعیت</th><th>تاریخ ایجاد</th><th>عملیات</th></tr></thead>
+                    <tbody>
+                    <?php if (!$allUsers): ?><tr><td colspan="6">هیچ حسابی ثبت نشده است.</td></tr><?php endif; ?>
+                    <?php foreach ($allUsers as $listedUser): ?>
+                        <tr>
+                            <td><?= (int)$listedUser['id'] ?></td>
+                            <td><?= escape($listedUser['username']) ?></td>
+                            <td><?= escape($roleLabels[$listedUser['role']] ?? $listedUser['role']) ?></td>
+                            <td><?= (int)$listedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال' ?></td>
+                            <td><?= escape($listedUser['created_at'] ?? '—') ?></td>
+                            <td><div class="student-actions">
+                                <?php if ((int)$listedUser['id'] !== $actorId): ?>
+                                <form method="post" action="users.php" onsubmit="return confirm('آیا از تغییر وضعیت این حساب مطمئن هستید؟');">
+                                    <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="user_id" value="<?= (int)$listedUser['id'] ?>">
+                                    <button class="button button-secondary" type="submit"><?= (int)$listedUser['is_active'] === 1 ? 'غیرفعال‌سازی' : 'فعال‌سازی' ?></button>
+                                </form>
+                                <form method="post" action="users.php" onsubmit="return confirm('این حساب برای همیشه حذف شود؟');">
+                                    <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="user_id" value="<?= (int)$listedUser['id'] ?>">
+                                    <button class="button button-danger" type="submit">حذف</button>
+                                </form>
+                                <?php else: ?><span>حساب فعلی</span><?php endif; ?>
+                            </div></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <p class="help-text">فهرست بدون محدودیت تعداد، از شناسه کوچک به بزرگ مرتب شده است.</p>
         </section>
 
         <footer class="page-footer">سامانه مدیریت دانش‌آموزان · مدیریت کاربران</footer>
