@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($action === 'save') {
             $id = filter_var($_POST['student_id'] ?? null, FILTER_VALIDATE_INT);
             $number = trim((string)($_POST['student_number'] ?? ''));
+            $bookNumber = trim((string)($_POST['register_book_number'] ?? ''));
             $first = trim((string)($_POST['first_name'] ?? ''));
             $last = trim((string)($_POST['last_name'] ?? ''));
             $gender = (string)($_POST['gender'] ?? 'unspecified');
@@ -44,6 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!preg_match('/^[A-Za-z0-9._\/-]{1,40}$/', $number)) {
                 throw new RuntimeException('شماره دانش‌آموزی الزامی است و فقط می‌تواند شامل حروف انگلیسی، عدد و . _ / - باشد.');
             }
+            if (mb_strlen($bookNumber) > 100) {
+                throw new RuntimeException('شماره کتاب اساس نباید بیشتر از ۱۰۰ نویسه باشد.');
+            }
             if ($first === '' || $last === '' || mb_strlen($first) > 100 || mb_strlen($last) > 100) {
                 throw new RuntimeException('نام و نام خانوادگی الزامی است و نباید بیشتر از ۱۰۰ نویسه باشد.');
             }
@@ -53,14 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($dob !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dob)) {
                 throw new RuntimeException('تاریخ تولد معتبر نیست.');
             }
-            $params = ['number'=>$number,'first'=>$first,'last'=>$last,'gender'=>$gender,'dob'=>$dob !== '' ? $dob : null,'class'=>$class,'phone'=>$phone,'guardian'=>$guardian,'guardian_phone'=>$guardianPhone,'address'=>$address];
+            $params = ['number'=>$number,'book_number'=>$bookNumber !== '' ? $bookNumber : null,'first'=>$first,'last'=>$last,'gender'=>$gender,'dob'=>$dob !== '' ? $dob : null,'class'=>$class,'phone'=>$phone,'guardian'=>$guardian,'guardian_phone'=>$guardianPhone,'address'=>$address];
             if ($id) {
                 $params['id'] = $id;
-                $stmt = $pdo->prepare('UPDATE students SET student_number=:number, first_name=:first, last_name=:last, gender=:gender, date_of_birth=:dob, class_name=:class, phone=:phone, guardian_name=:guardian, guardian_phone=:guardian_phone, address=:address WHERE id=:id');
+                $stmt = $pdo->prepare('UPDATE students SET student_number=:number, register_book_number=:book_number, first_name=:first, last_name=:last, gender=:gender, date_of_birth=:dob, class_name=:class, phone=:phone, guardian_name=:guardian, guardian_phone=:guardian_phone, address=:address WHERE id=:id');
                 $stmt->execute($params);
                 $_SESSION['students_flash'] = ['success' => 'پرونده دانش‌آموز به‌روزرسانی شد.'];
             } else {
-                $stmt = $pdo->prepare('INSERT INTO students (student_number, first_name, last_name, gender, date_of_birth, class_name, phone, guardian_name, guardian_phone, address) VALUES (:number,:first,:last,:gender,:dob,:class,:phone,:guardian,:guardian_phone,:address)');
+                $stmt = $pdo->prepare('INSERT INTO students (student_number, register_book_number, first_name, last_name, gender, date_of_birth, class_name, phone, guardian_name, guardian_phone, address) VALUES (:number,:book_number,:first,:last,:gender,:dob,:class,:phone,:guardian,:guardian_phone,:address)');
                 $stmt->execute($params);
                 $_SESSION['students_flash'] = ['success' => 'دانش‌آموز با موفقیت ثبت شد.'];
             }
@@ -101,9 +105,9 @@ $search = trim((string)($_GET['q'] ?? ''));
 $sql = 'SELECT * FROM students';
 $params = [];
 if ($search !== '') {
-    $sql .= ' WHERE student_number LIKE :q1 OR first_name LIKE :q2 OR last_name LIKE :q3 OR class_name LIKE :q4 OR guardian_name LIKE :q5';
+    $sql .= ' WHERE student_number LIKE :q1 OR first_name LIKE :q2 OR last_name LIKE :q3 OR class_name LIKE :q4 OR guardian_name LIKE :q5 OR register_book_number LIKE :q6';
     $term = '%'.$search.'%';
-    $params = ['q1'=>$term, 'q2'=>$term, 'q3'=>$term, 'q4'=>$term, 'q5'=>$term];
+    $params = ['q1'=>$term, 'q2'=>$term, 'q3'=>$term, 'q4'=>$term, 'q5'=>$term, 'q6'=>$term];
 }
 $sql .= ' ORDER BY is_active DESC, last_name ASC, first_name ASC LIMIT 500';
 $stmt = $pdo->prepare($sql);
@@ -203,7 +207,8 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <section class="panel"><h2><?= $editing ? 'ویرایش پرونده' : 'ثبت دانش‌آموز جدید' ?></h2>
 <form class="students-form" method="post" action="students.php">
 <input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="student_id" value="<?= student_escape($editing['id'] ?? '') ?>">
-<label for="student_number">شماره دانش‌آموزی *</label><input id="student_number" name="student_number" required maxlength="40" value="<?= student_escape($editing['student_number'] ?? '') ?>" placeholder="مثلاً ST-1001">
+<label for="register_book_number">شماره کتاب اساس (برای دانش‌آموزان قبلی)</label><input id="register_book_number" name="register_book_number" maxlength="100" value="<?= student_escape($editing['register_book_number'] ?? '') ?>" placeholder="شماره ثبت‌شده در کتاب اساس"><p class="help-text">اگر دانش‌آموز پیش از ایجاد این سامانه ثبت شده، شماره اصلی کتاب اساس را اینجا وارد کنید.</p>
+<label for="student_number">شماره دانش‌آموزی داخلی *</label><input id="student_number" name="student_number" required maxlength="40" value="<?= student_escape($editing['student_number'] ?? '') ?>" placeholder="مثلاً ST-1001">
 <label for="first_name">نام *</label><input id="first_name" name="first_name" required maxlength="100" value="<?= student_escape($editing['first_name'] ?? '') ?>">
 <label for="last_name">نام خانوادگی *</label><input id="last_name" name="last_name" required maxlength="100" value="<?= student_escape($editing['last_name'] ?? '') ?>">
 <label for="gender">جنسیت</label><select id="gender" name="gender"><option value="unspecified">ثبت نشده</option><option value="female" <?= (($editing['gender'] ?? '')==='female')?'selected':'' ?>>دختر</option><option value="male" <?= (($editing['gender'] ?? '')==='male')?'selected':'' ?>>پسر</option></select>
@@ -217,10 +222,10 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 </form></section>
 <?php endif; ?>
 <section class="panel"><h2>فهرست دانش‌آموزان</h2>
-<form class="students-search" method="get" action="students.php"><input type="search" name="q" value="<?= student_escape($search) ?>" placeholder="جست‌وجو با شماره، نام، صنف یا سرپرست"><button class="button button-primary" type="submit">جست‌وجو</button><?php if ($search !== ''): ?><a class="button button-secondary" href="students.php">پاک کردن</a><?php endif; ?></form>
-<div class="students-table-wrap"><table class="students-table"><thead><tr><th>شماره</th><th>نام کامل</th><th>صنف / کلاس</th><th>سرپرست</th><th>وضعیت</th><?php if ($canEdit): ?><th>عملیات</th><?php endif; ?></tr></thead><tbody>
-<?php if (!$students): ?><tr><td colspan="<?= $canEdit ? 6 : 5 ?>">هنوز دانش‌آموزی ثبت نشده است.</td></tr><?php endif; ?>
-<?php foreach ($students as $student): ?><tr class="<?= (int)$student['is_active']===1 ? '' : 'student-inactive' ?>"><td><?= student_escape($student['student_number']) ?></td><td><?= student_escape($student['first_name'].' '.$student['last_name']) ?></td><td><?= student_escape($student['class_name'] ?: '—') ?></td><td><?= student_escape($student['guardian_name'] ?: '—') ?></td><td><?= (int)$student['is_active']===1 ? 'فعال' : 'غیرفعال' ?></td><?php if ($canEdit): ?><td><div class="student-actions"><a class="button button-secondary" href="students.php?edit=<?= (int)$student['id'] ?>">ویرایش</a><form method="post" action="students.php"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-secondary" type="submit"><?= (int)$student['is_active']===1 ? 'غیرفعال‌سازی' : 'فعال‌سازی' ?></button></form></div></td><?php endif; ?></tr><?php endforeach; ?>
+<form class="students-search" method="get" action="students.php"><input type="search" name="q" value="<?= student_escape($search) ?>" placeholder="جست‌وجو با S/N، شماره کتاب اساس، نام یا صنف"><button class="button button-primary" type="submit">جست‌وجو</button><?php if ($search !== ''): ?><a class="button button-secondary" href="students.php">پاک کردن</a><?php endif; ?></form>
+<div class="students-table-wrap"><table class="students-table"><thead><tr><th>S/N دائمی</th><th>شماره کتاب اساس</th><th>شماره داخلی</th><th>نام کامل</th><th>صنف / کلاس</th><th>سرپرست</th><th>وضعیت</th><?php if ($canEdit): ?><th>عملیات</th><?php endif; ?></tr></thead><tbody>
+<?php if (!$students): ?><tr><td colspan="<?= $canEdit ? 8 : 7 ?>">هنوز دانش‌آموزی ثبت نشده است.</td></tr><?php endif; ?>
+<?php foreach ($students as $student): ?><tr class="<?= (int)$student['is_active']===1 ? '' : 'student-inactive' ?>"><td><?= (int)$student['id'] ?></td><td><?= student_escape($student['register_book_number'] ?: '—') ?></td><td><?= student_escape($student['student_number']) ?></td><td><?= student_escape($student['first_name'].' '.$student['last_name']) ?></td><td><?= student_escape($student['class_name'] ?: '—') ?></td><td><?= student_escape($student['guardian_name'] ?: '—') ?></td><td><?= (int)$student['is_active']===1 ? 'فعال' : 'غیرفعال' ?></td><?php if ($canEdit): ?><td><div class="student-actions"><a class="button button-secondary" href="students.php?edit=<?= (int)$student['id'] ?>">ویرایش</a><form method="post" action="students.php"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-secondary" type="submit"><?= (int)$student['is_active']===1 ? 'غیرفعال‌سازی' : 'فعال‌سازی' ?></button></form></div></td><?php endif; ?></tr><?php endforeach; ?>
 </tbody></table></div>
 <p class="help-text">حداکثر ۵۰۰ پرونده در این فهرست نمایش داده می‌شود. از جست‌وجو برای پیدا کردن رکوردها استفاده کنید.</p>
 </section></div>
