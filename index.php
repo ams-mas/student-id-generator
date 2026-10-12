@@ -7,8 +7,6 @@ if (is_logged_in()) {
     header('Location: dashboard.php');
     exit;
 }
-
-$error = isset($_GET['error']) ? 'Your session has ended. Please sign in again.' : '';
 ?>
 <!doctype html>
 <html lang="en">
@@ -40,14 +38,11 @@ $error = isset($_GET['error']) ? 'Your session has ended. Please sign in again.'
                 <p class="muted">Enter your account details to continue.</p>
             </div>
 
-            <?php if ($error !== ''): ?>
-                <div class="login-alert" role="alert"><?= escape($error) ?></div>
-            <?php endif; ?>
             <?php if (isset($_GET['invalid'])): ?>
                 <div class="login-alert" role="alert">The username or password is incorrect.</div>
             <?php endif; ?>
-            <?php if (isset($_GET['setup'])): ?>
-                <div class="login-notice" role="status">Create your first account using the setup instructions in README.md.</div>
+            <?php if (isset($_GET['database'])): ?>
+                <div class="login-alert" role="alert">The login service is unavailable. Start MySQL, import database/schema.sql, and create an account using the README instructions.</div>
             <?php endif; ?>
 
             <form action="login.php" method="post" class="login-form">
@@ -57,9 +52,7 @@ $error = isset($_GET['error']) ? 'Your session has ended. Please sign in again.'
                 <input id="username" name="username" type="text" autocomplete="username"
                        maxlength="80" required autofocus>
 
-                <div class="password-label-row">
-                    <label for="password">Password</label>
-                </div>
+                <label for="password">Password</label>
                 <input id="password" name="password" type="password" autocomplete="current-password"
                        maxlength="4096" required>
 
