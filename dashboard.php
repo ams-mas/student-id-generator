@@ -32,6 +32,9 @@ $canManageUsers = in_array($role, ['super_admin', 'admin'], true);
             <nav class="sidebar-nav">
                 <a class="sidebar-link" href="students.php"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span></a>
                 <a class="sidebar-link" href="school.php"><span class="sidebar-icon" aria-hidden="true">▦</span><span>سال تحصیلی و صنف‌ها</span></a>
+                <?php if ($canManageUsers): ?>
+                <a class="sidebar-link" href="database_updates.php"><span class="sidebar-icon" aria-hidden="true">↻</span><span>به‌روزرسانی پایگاه داده</span></a>
+                <?php endif; ?>
                 <a class="sidebar-link is-current" href="dashboard.php" aria-current="page">
                     <span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span>
                 </a>
