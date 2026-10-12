@@ -953,3 +953,12 @@ input:focus, select:focus, textarea:focus {
   color: #cbd5e1;
   font-size: .62rem;
 }
+
+
+/* Click-to-expand sidebar groups */
+.admin-sidebar [data-submenu-toggle] { appearance:none; cursor:pointer; font:inherit; text-align:right; border:0; background:transparent; }
+.admin-sidebar .sidebar-submenu { display:none !important; }
+.admin-sidebar .sidebar-group.is-expanded > .sidebar-submenu { display:flex !important; }
+.admin-sidebar .submenu-chevron { margin-right:auto; margin-left:3px; font-size:18px; line-height:1; transition:transform .18s ease; }
+.admin-sidebar .sidebar-group.is-expanded > [data-submenu-toggle] .submenu-chevron { transform:rotate(180deg); }
+.admin-sidebar .sidebar-group-title:focus-visible { outline:2px solid #93c5fd; outline-offset:2px; }
