@@ -140,6 +140,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $statement = $pdo->prepare('UPDATE users SET is_active = :active WHERE id = :id');
             $statement->execute(['active' => $newStatus, 'id' => $targetId]);
             $_SESSION['users_flash'] = ['success' => $newStatus ? 'حساب فعال شد.' : 'حساب غیرفعال شد.'];
+        } elseif ($action === 'reset_lockout') {
+            $targetId = filter_var($_POST['user_id'] ?? null, FILTER_VALIDATE_INT);
+            if (!$targetId) {
+                throw new RuntimeException('شناسه حساب معتبر نیست.');
+            }
+            $targetStmt = $pdo->prepare('SELECT id, role FROM users WHERE id = :id LIMIT 1');
+            $targetStmt->execute(['id' => $targetId]);
+            $target = $targetStmt->fetch();
+            if (!$target) {
+                throw new RuntimeException('حساب کاربری پیدا نشد.');
+            }
+            if (!$isSuperAdmin && $target['role'] === 'super_admin') {
+                throw new RuntimeException('فقط سوپر ادمین می‌تواند قفل حساب سوپر ادمین را باز کند.');
+            }
+            $resetStmt = $pdo->prepare('DELETE FROM user_login_lockouts WHERE user_id = :user_id');
+            $resetStmt->execute(['user_id' => $targetId]);
+            $_SESSION['users_flash'] = ['success' => 'قفل ورود حساب با موفقیت بازنشانی شد.'];
         } elseif ($action === 'delete') {
             $targetId = filter_var($_POST['user_id'] ?? null, FILTER_VALIDATE_INT);
             if (!$targetId || $targetId === $actorId) {
@@ -195,7 +212,14 @@ if (isset($_GET['edit'])) {
     }
 }
 
-$usersQuery = $pdo->query('SELECT id, username, role, is_active, created_at FROM users ORDER BY id ASC');
+$usersQuery = $pdo->query(
+    'SELECT u.id, u.username, u.role, u.is_active, u.created_at,
+            ul.locked_until,
+            CASE WHEN ul.locked_until > UTC_TIMESTAMP() THEN 1 ELSE 0 END AS is_locked
+     FROM users u
+     LEFT JOIN user_login_lockouts ul ON ul.user_id = u.id
+     ORDER BY u.id ASC'
+);
 $allUsers = $usersQuery->fetchAll();
 
 $username = (string) $_SESSION['username'];
@@ -358,19 +382,32 @@ try {
             <h2 id="users-list-title">تمام کاربران (<?= count($allUsers) ?>)</h2>
             <div class="user-table-wrap">
                 <table class="user-table">
-                    <thead><tr><th>شناسه</th><th>نام کاربری</th><th>نوع حساب</th><th>وضعیت</th><th>تاریخ ایجاد</th><th>عملیات</th></tr></thead>
+                    <thead><tr><th>شناسه</th><th>نام کاربری</th><th>قفل ورود</th><th>نوع حساب</th><th>وضعیت</th><th>تاریخ ایجاد</th><th>عملیات</th></tr></thead>
                     <tbody>
-                    <?php if (!$allUsers): ?><tr><td colspan="6">هیچ حسابی ثبت نشده است.</td></tr><?php endif; ?>
+                    <?php if (!$allUsers): ?><tr><td colspan="7">هیچ حسابی ثبت نشده است.</td></tr><?php endif; ?>
                     <?php foreach ($allUsers as $listedUser): ?>
                         <tr>
                             <td><?= (int)$listedUser['id'] ?></td>
                             <td><?= escape($listedUser['username']) ?></td>
+                            <td>
+                                <?php if ((int)$listedUser['is_locked'] === 1): ?>
+                                    <span class="account-state state-inactive">قفل‌شده تا <?= escape((string)$listedUser['locked_until']) ?> UTC</span>
+                                <?php else: ?>
+                                    <span class="account-state state-active">قفل نیست</span>
+                                <?php endif; ?>
+                            </td>
                             <td><?= escape($roleLabels[$listedUser['role']] ?? $listedUser['role']) ?></td>
                             <td><span class="account-state <?= (int)$listedUser['is_active'] === 1 ? 'state-active' : 'state-inactive' ?>"><?= (int)$listedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال' ?></span></td>
                             <td><?= escape($listedUser['created_at'] ?? '—') ?></td>
                             <td><div class="user-actions">
                                 <?php if ($isSuperAdmin || $listedUser['role'] !== 'super_admin'): ?>
                                 <a class="button button-primary" href="users.php?edit=<?= (int)$listedUser['id'] ?>">ویرایش</a>
+                                <?php endif; ?>
+                                <?php if ((int)$listedUser['is_locked'] === 1 && ($isSuperAdmin || $listedUser['role'] !== 'super_admin')): ?>
+                                <form method="post" action="users.php" onsubmit="return confirm('قفل ورود این حساب بازنشانی شود؟');">
+                                    <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>"><input type="hidden" name="action" value="reset_lockout"><input type="hidden" name="user_id" value="<?= (int)$listedUser['id'] ?>">
+                                    <button class="button button-secondary" type="submit">بازنشانی قفل</button>
+                                </form>
                                 <?php endif; ?>
                                 <?php if ((int)$listedUser['id'] !== $actorId): ?>
                                 <form method="post" action="users.php" onsubmit="return confirm('آیا از تغییر وضعیت این حساب مطمئن هستید؟');">
