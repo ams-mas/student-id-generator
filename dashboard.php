@@ -98,48 +98,32 @@ try {
 
             <p class="sidebar-section-label">منوی اصلی</p>
             <nav class="sidebar-nav">
-    <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'dashboard.php' ? 'is-current' : '' ?>" href="dashboard.php"><span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span></a>
-
-    <div class="sidebar-group">
-        <button type="button" class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'students.php' ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
-        <div class="sidebar-submenu">
-            <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'students.php' ? 'is-current' : '' ?>" href="students.php">فهرست و ثبت دانش‌آموزان</a>
-            <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">انتقال و ارتقای صنف <small>به‌زودی</small></span>
-            <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">تاریخچه تحصیلی <small>به‌زودی</small></span>
-        </div>
-    </div>
-
-    <div class="sidebar-group">
-        <button type="button" class="sidebar-group-title" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">♟</span><span>مدیریت آموزگاران</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
-        <div class="sidebar-submenu">
-            <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">فهرست آموزگاران <small>به‌زودی</small></span>
-            <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">ثبت آموزگار <small>به‌زودی</small></span>
-            <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">تعیین صنف مسئول <small>به‌زودی</small></span>
-        </div>
-    </div>
-
-    <div class="sidebar-group">
-        <button type="button" class="sidebar-group-title <?= in_array(basename($_SERVER['PHP_SELF']), ['school.php', 'school_configuration.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">▦</span><span>تنظیمات مدرسه</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
-        <div class="sidebar-submenu">
-            <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'school_configuration.php' ? 'is-current' : '' ?>" href="school_configuration.php">مشخصات مدرسه</a>
-            <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'school.php' ? 'is-current' : '' ?>" href="school.php">سال تحصیلی</a>
-            <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'classes.php' ? 'is-current' : '' ?>" href="classes.php">مدیریت صنف‌ها</a>
-        </div>
-    </div>
-
-    <?php if (in_array(current_role(), ['super_admin', 'admin'], true)): ?>
-    <div class="sidebar-group">
-        <button type="button" class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'users.php' ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">⚙</span><span>مدیریت کاربران</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
-        <div class="sidebar-submenu">
-            <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'users.php' ? 'is-current' : '' ?>" href="users.php">لیست کاربران</a>
-            <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'add_user.php' ? 'is-current' : '' ?>" href="add_user.php">افزودن کاربر</a>
-        </div>
-    </div>
-    <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'reports.php' ? 'is-current' : '' ?>" href="#" aria-disabled="true" title="بخش گزارشات بعداً اضافه می‌شود"><span class="sidebar-icon" aria-hidden="true">▤</span><span>گزارشات</span></a>
-    <a class="sidebar-link" href="#" aria-disabled="true" title="بخش مالی بعداً اضافه می‌شود"><span class="sidebar-icon" aria-hidden="true">◈</span><span>بخش مالی</span></a>
-    <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'database_updates.php' ? 'is-current' : '' ?>" href="database_updates.php"><span class="sidebar-icon" aria-hidden="true">↻</span><span>به‌روزرسانی پایگاه داده</span></a>
-    <?php endif; ?>
-</nav>
+                <div class="sidebar-group">
+                    <button type="button" class="sidebar-group-title <?= in_array(basename($_SERVER['PHP_SELF']), ['dashboard.php', 'students.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="true">
+                        <span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span><span class="submenu-chevron" aria-hidden="true">⌄</span>
+                    </button>
+                    <div class="sidebar-submenu" style="display:block">
+                        <a class="sidebar-link" href="students.php">۱. افزودن دانش‌آموز جدید</a>
+                        <a class="sidebar-link" href="students.php">۲. مشاهده همه دانش‌آموزان</a>
+                        <a class="sidebar-link" href="students.php">۳. ویرایش اطلاعات دانش‌آموز</a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۴. پروفایل دانش‌آموز <small>به‌زودی</small></a>
+                        <a class="sidebar-link" href="students.php">۵. جست‌وجوی دانش‌آموزان</a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۶. ارتقای دانش‌آموزان به صنف بالاتر <small>به‌زودی</small></a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۷. انتقال دانش‌آموزان <small>به‌زودی</small></a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۸. مدیریت ثبت‌نام دانش‌آموزان <small>به‌زودی</small></a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۹. مدیریت حاضری دانش‌آموزان <small>به‌زودی</small></a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۱۰. مدیریت اسناد دانش‌آموزان <small>به‌زودی</small></a>
+                        <a class="sidebar-link" href="generate.php">۱۱. کارت هویت دانش‌آموز</a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۱۲. سوابق تحصیلی دانش‌آموز <small>به‌زودی</small></a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۱۳. مدیریت اولیا و سرپرستان <small>به‌زودی</small></a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۱۴. تعلیق یا انصراف دانش‌آموز <small>به‌زودی</small></a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۱۵. فارغ‌التحصیلان <small>به‌زودی</small></a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۱۶. واردکردن دانش‌آموزان از Excel/CSV <small>به‌زودی</small></a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۱۷. صادرکردن پرونده‌های دانش‌آموزان <small>به‌زودی</small></a>
+                        <a class="sidebar-link sidebar-link-disabled" href="#" aria-disabled="true" onclick="return false">۱۸. دانش‌آموزان حذف‌شده / بایگانی‌شده <small>به‌زودی</small></a>
+                    </div>
+                </div>
+            </nav>
 
             <div class="sidebar-bottom">
                 <span class="sidebar-user-avatar" aria-hidden="true"><?= escape(substr($username, 0, 1)) ?></span>
