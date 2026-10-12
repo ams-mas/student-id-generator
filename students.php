@@ -42,8 +42,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $guardian = trim((string)($_POST['guardian_name'] ?? ''));
             $guardianPhone = trim((string)($_POST['guardian_phone'] ?? ''));
             $address = trim((string)($_POST['address'] ?? ''));
-            if (!preg_match('/^[A-Za-z0-9._\/-]{1,40}$/', $number)) {
-                throw new RuntimeException('شماره دانش‌آموزی الزامی است و فقط می‌تواند شامل حروف انگلیسی، عدد و . _ / - باشد.');
+            if ($id && !preg_match('/^[A-Za-z0-9._\\/-]{1,40}$/', $number)) {
+                throw new RuntimeException('شماره دانش‌آموزی داخلی معتبر نیست.');
+            }
+            if (!$id) {
+                $number = 'ST-' . strtoupper(bin2hex(random_bytes(6)));
             }
             if (mb_strlen($bookNumber) > 100) {
                 throw new RuntimeException('شماره کتاب اساس نباید بیشتر از ۱۰۰ نویسه باشد.');
@@ -208,7 +211,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <form class="students-form" method="post" action="students.php">
 <input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="student_id" value="<?= student_escape($editing['id'] ?? '') ?>">
 <label for="register_book_number">شماره کتاب اساس (برای دانش‌آموزان قبلی)</label><input id="register_book_number" name="register_book_number" maxlength="100" value="<?= student_escape($editing['register_book_number'] ?? '') ?>" placeholder="شماره ثبت‌شده در کتاب اساس"><p class="help-text">اگر دانش‌آموز پیش از ایجاد این سامانه ثبت شده، شماره اصلی کتاب اساس را اینجا وارد کنید.</p>
-<label for="student_number">شماره دانش‌آموزی داخلی *</label><input id="student_number" name="student_number" required maxlength="40" value="<?= student_escape($editing['student_number'] ?? '') ?>" placeholder="مثلاً ST-1001">
+<?php if ($editing): ?><label for="student_number">شماره دانش‌آموزی داخلی</label><input id="student_number" name="student_number" required maxlength="40" value="<?= student_escape($editing['student_number'] ?? '') ?>"><?php else: ?><p class="help-text">شماره دانش‌آموزی داخلی هنگام ثبت به‌صورت خودکار ساخته می‌شود.</p><?php endif; ?>
 <label for="first_name">نام *</label><input id="first_name" name="first_name" required maxlength="100" value="<?= student_escape($editing['first_name'] ?? '') ?>">
 <label for="last_name">نام خانوادگی *</label><input id="last_name" name="last_name" required maxlength="100" value="<?= student_escape($editing['last_name'] ?? '') ?>">
 <label for="gender">جنسیت</label><select id="gender" name="gender"><option value="unspecified">ثبت نشده</option><option value="female" <?= (($editing['gender'] ?? '')==='female')?'selected':'' ?>>دختر</option><option value="male" <?= (($editing['gender'] ?? '')==='male')?'selected':'' ?>>پسر</option></select>
