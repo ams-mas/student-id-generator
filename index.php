@@ -64,7 +64,7 @@ if (is_logged_in()) {
 
             <p class="login-footnote">دسترسی فقط برای کاربران مجاز است. از رمز عبور قوی و اختصاصی استفاده کنید.</p>
         </section>
-        <footer class="login-footer">سامانه ساخت کارت شناسایی · حفظ حریم خصوصی اطلاعات دانش‌آموزان</footer>
+        <footer class="login-footer">سامانه مدیریت دانش‌آموزان · حفظ حریم خصوصی اطلاعات دانش‌آموزان</footer>
     </main>
 </body>
 </html>
