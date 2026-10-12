@@ -69,3 +69,24 @@ If XAMPP is installed in another folder, change the PHP executable path accordin
 - Use fictional student information while developing. Do not commit real student records, student photos, passwords, or database secrets.
 - Before public deployment, use HTTPS, a dedicated database account, persistent login rate limiting, audit logging, and production server configuration.
 
+
+
+## School-year and class management
+
+The school administration page is `school.php`. It supports school-year setup, teacher records, grades 1–12 with named sections, teacher assignment to a section, student enrollment, same-year transfers, promotion to the next grade in a different school year, current enrollment lists, and an enrollment-change history.
+
+### Upgrade an existing XAMPP database
+
+1. Back up the `student_id_generator` database in phpMyAdmin.
+2. Open phpMyAdmin and select the existing database.
+3. Import `database/migrations/2026_10_12_school_years_sections_enrollments.sql`.
+4. Pull the latest code:
+   ```bat
+   cd /d E:\xampp\htdocs\student-id-generator
+   git pull origin main
+   ```
+5. Sign in as an administrator and open `http://localhost/student-id-generator/school.php`.
+
+Run the migration only once on the existing database. It adds tables and does not delete student or user records. First create the school years, sections and teachers, then enroll students. Promotion must target a section exactly one grade higher in a different, open school year; grade 12 students cannot be promoted. Test with a non-production database before using real student records.
+
+**Current limitation:** teacher records are managed separately from login accounts; connecting a teacher record to a login account is optional at the database level and teacher-specific access restrictions still need a later implementation. Promotion is an administrative action and should be performed only after results/eligibility have been confirmed.
