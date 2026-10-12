@@ -260,7 +260,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <header class="page-header dashboard-header"><div><p class="eyebrow">پرونده‌ها</p><h1>مدیریت دانش‌آموزان</h1><p class="muted">ثبت، جست‌وجو و به‌روزرسانی پرونده‌های دانش‌آموزان.</p></div><div class="account-actions"><span class="signed-in-as">نقش شما: <strong><?= student_escape($roleLabels[$role] ?? $role) ?></strong></span></div></header>
 <?php if ($success !== ''): ?><div class="students-flash" role="status"><?= student_escape($success) ?></div><?php endif; ?>
 <?php if ($error !== ''): ?><div class="students-flash students-error" role="alert"><?= student_escape($error) ?></div><?php endif; ?>
-<div class="students-metrics"><div class="students-metric"><span>همه دانش‌آموزان</span><strong><?= $total ?></strong></div><div class="students-metric"><span>پرونده‌های فعال</span><strong><?= $active ?></strong></div></div>
+<?php if (!$showForm): ?><div class="students-metrics"><div class="students-metric"><span>همه دانش‌آموزان</span><strong><?= $total ?></strong></div><div class="students-metric"><span>پرونده‌های فعال</span><strong><?= $active ?></strong></div></div><?php endif; ?>
 <?php $mode = (string)($_GET['mode'] ?? ''); ?>
 <?php if (!$showForm): ?><div class="student-toolbar"><?php if ($canEdit): ?><a class="button button-primary" href="students.php?new=1">＋ ثبت دانش‌آموز</a><?php endif; ?><a class="button button-secondary" href="students.php">فهرست دانش‌آموزان</a></div><?php endif; ?>
 <div class="students-grid">
