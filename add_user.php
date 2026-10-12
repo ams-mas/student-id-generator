@@ -186,28 +186,7 @@ $username = (string) $_SESSION['username'];
         <footer class="page-footer">سامانه مدیریت دانش‌آموزان · مدیریت کاربران</footer>
     </main>
 </div>
-<script>
-(function () {
-    const sidebar = document.getElementById('admin-sidebar');
-    const toggle = document.getElementById('sidebar-toggle');
-    if (!sidebar || !toggle) return;
-    toggle.addEventListener('click', function () {
-        const isOpen = sidebar.classList.toggle('is-open');
-        toggle.setAttribute('aria-expanded', String(isOpen));
-        toggle.setAttribute('aria-label', isOpen ? 'بستن منو' : 'باز کردن منو');
-        toggle.querySelector('.sidebar-toggle-icon').textContent = isOpen ? '×' : '☰';
-    });
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
-            sidebar.classList.remove('is-open');
-            toggle.setAttribute('aria-expanded', 'false');
-            toggle.setAttribute('aria-label', 'باز کردن منو');
-            toggle.querySelector('.sidebar-toggle-icon').textContent = '☰';
-            toggle.focus();
-        }
-    });
-}());
-</script>
+
     <script src="assets/js/sidebar-clock.js" defer></script>
     <script src="assets/js/sidebar-submenus.js" defer></script>
 </body>
