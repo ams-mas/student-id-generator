@@ -6,7 +6,7 @@ require_roles(['super_admin', 'admin']);
 require_once __DIR__ . '/config/database.php';
 
 $pdo = database_connection();
-$migrationDirectory = __DIR__ . '/database/migrations';
+$migrationDirectories = [__DIR__ . '/sql_updates', __DIR__ . '/database/migrations'];
 $message = '';
 $messageType = 'info';
 $results = [];
@@ -38,7 +38,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $requestedMigration = (string) ($_POST['migration'] ?? '');
-    $availableFiles = glob($migrationDirectory . DIRECTORY_SEPARATOR . '*.sql') ?: [];
+    $availableFiles = [];
+    foreach ($migrationDirectories as $directory) {
+        $availableFiles = array_merge($availableFiles, glob($directory . DIRECTORY_SEPARATOR . '*.sql') ?: []);
+    }
     $selectedPath = null;
     foreach ($availableFiles as $filePath) {
         if (hash_equals(basename($filePath), $requestedMigration)) {
@@ -96,7 +99,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$availableFiles = glob($migrationDirectory . DIRECTORY_SEPARATOR . '*.sql') ?: [];
+$availableFiles = [];
+foreach ($migrationDirectories as $directory) {
+    $availableFiles = array_merge($availableFiles, glob($directory . DIRECTORY_SEPARATOR . '*.sql') ?: []);
+}
 usort($availableFiles, static fn(string $a, string $b): int => strcmp(basename($a), basename($b)));
 foreach ($availableFiles as $filePath) {
     $name = basename($filePath);
@@ -133,7 +139,7 @@ foreach ($availableFiles as $filePath) {
     <section class="migration-panel">
         <p class="eyebrow">مدیریت سیستم</p>
         <h1>به‌روزرسانی پایگاه داده</h1>
-        <p>هر تغییر جدید در جدول‌ها باید به‌صورت یک فایل SQL جدید در پوشه database/migrations/ اضافه شود. این صفحه فایل‌های اجرا‌نشده را نمایش می‌دهد.</p>
+        <p>هر تغییر جدید در جدول‌ها باید به‌صورت یک فایل SQL جدید در پوشه sql_updates/ اضافه شود. فایل‌های قدیمی database/migrations/ نیز همچنان نمایش داده می‌شوند. این صفحه فایل‌های اجرا‌نشده را نمایش می‌دهد.</p>
         <div class="migration-warning">پیش از اجرای هر تغییر، از پایگاه داده نسخه پشتیبان بگیرید. فایل‌های SQL می‌توانند جدول یا ستون بسازند، تغییر دهند یا حذف کنند. دستورهایی مانند DROP TABLE و DROP COLUMN داده‌ها را برای همیشه حذف می‌کنند. اگر خطا رخ دهد، ممکن است بخشی از تغییرات اعمال شده باشد.</div>
         <?php if ($message !== ''): ?>
             <div class="migration-alert <?= update_page_escape($messageType) ?>" role="status"><?= update_page_escape($message) ?></div>
