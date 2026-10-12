@@ -61,6 +61,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'role' => $requestedRole,
             ]);
             $_SESSION['users_flash'] = ['success' => 'حساب کاربری با موفقیت ساخته شد.'];
+        } elseif ($action === 'update') {
+            $targetId = filter_var($_POST['user_id'] ?? null, FILTER_VALIDATE_INT);
+            $newUsername = strtolower(trim((string)($_POST['username'] ?? '')));
+            $newRole = (string)($_POST['role'] ?? 'user');
+            $newPassword = (string)($_POST['password'] ?? '');
+            $confirmPassword = (string)($_POST['password_confirm'] ?? '');
+            if (!$targetId) throw new RuntimeException('شناسه حساب معتبر نیست.');
+            if (!preg_match('/^[a-z0-9_.-]{3,80}$/', $newUsername)) {
+                throw new RuntimeException('نام کاربری باید ۳ تا ۸۰ حرف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.');
+            }
+            $targetStmt = $pdo->prepare('SELECT id, username, role, is_active FROM users WHERE id = :id LIMIT 1');
+            $targetStmt->execute(['id' => $targetId]);
+            $target = $targetStmt->fetch();
+            if (!$target) throw new RuntimeException('حساب کاربری پیدا نشد.');
+            if (!$isSuperAdmin && $target['role'] === 'super_admin') {
+                throw new RuntimeException('فقط سوپر ادمین می‌تواند حساب سوپر ادمین را ویرایش کند.');
+            }
+            $allowedRoles = $isSuperAdmin ? ['super_admin', 'admin', 'user'] : ['admin', 'user'];
+            if (!in_array($newRole, $allowedRoles, true)) {
+                throw new RuntimeException('شما اجازه تعیین این نوع حساب را ندارید.');
+            }
+            if ($target['role'] === 'super_admin' && $newRole !== 'super_admin') {
+                $activeSuperAdmins = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'super_admin' AND is_active = 1")->fetchColumn();
+                if ((int)$target['is_active'] === 1 && $activeSuperAdmins <= 1) {
+                    throw new RuntimeException('نمی‌توان نقش آخرین سوپر ادمین فعال را تغییر داد.');
+                }
+            }
+            if ($newPassword !== '' && (strlen($newPassword) < 8 || strlen($newPassword) > 4096)) {
+                throw new RuntimeException('رمز عبور جدید باید حداقل ۸ کاراکتر داشته باشد.');
+            }
+            if ($newPassword !== '' && !hash_equals($newPassword, $confirmPassword)) {
+                throw new RuntimeException('رمز عبور جدید و تکرار آن یکسان نیستند.');
+            }
+            $duplicateStmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = :username AND id <> :id');
+            $duplicateStmt->execute(['username' => $newUsername, 'id' => $targetId]);
+            if ((int)$duplicateStmt->fetchColumn() > 0) {
+                throw new RuntimeException('این نام کاربری قبلاً استفاده شده است.');
+            }
+            if ($newPassword !== '') {
+                $updateStmt = $pdo->prepare('UPDATE users SET username = :username, role = :role, password_hash = :password_hash WHERE id = :id');
+                $updateStmt->execute(['username' => $newUsername, 'role' => $newRole, 'password_hash' => password_hash($newPassword, PASSWORD_DEFAULT), 'id' => $targetId]);
+            } else {
+                $updateStmt = $pdo->prepare('UPDATE users SET username = :username, role = :role WHERE id = :id');
+                $updateStmt->execute(['username' => $newUsername, 'role' => $newRole, 'id' => $targetId]);
+            }
+            if ($targetId === $actorId) {
+                $_SESSION['username'] = $newUsername;
+                if ($newRole !== $actorRole) {
+                    $_SESSION['users_flash'] = ['success' => 'حساب شما به‌روزرسانی شد. برای اعمال نقش جدید، دوباره وارد شوید.'];
+                } else {
+                    $_SESSION['users_flash'] = ['success' => 'حساب کاربری با موفقیت به‌روزرسانی شد.'];
+                }
+            } else {
+                $_SESSION['users_flash'] = ['success' => 'حساب کاربری با موفقیت به‌روزرسانی شد.'];
+            }
         } elseif ($action === 'toggle') {
             $targetId = filter_var($_POST['user_id'] ?? null, FILTER_VALIDATE_INT);
             if (!$targetId || $targetId === $actorId) {
@@ -124,6 +179,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     header('Location: users.php');
     exit;
+}
+
+$editUser = null;
+if (isset($_GET['edit'])) {
+    $editUserId = filter_var($_GET['edit'], FILTER_VALIDATE_INT);
+    if ($editUserId) {
+        $editStmt = $pdo->prepare('SELECT id, username, role, is_active FROM users WHERE id = :id LIMIT 1');
+        $editStmt->execute(['id' => $editUserId]);
+        $editUser = $editStmt->fetch() ?: null;
+        if ($editUser && !$isSuperAdmin && $editUser['role'] === 'super_admin') {
+            $editUser = null;
+            $error = 'فقط سوپر ادمین می‌تواند حساب سوپر ادمین را ویرایش کند.';
+        }
+    }
 }
 
 $usersQuery = $pdo->query('SELECT id, username, role, is_active, created_at FROM users ORDER BY id ASC');
@@ -235,6 +304,31 @@ try {
         <?php if ($success !== ''): ?><div class="user-alert user-alert-success" role="status"><?= escape($success) ?></div><?php endif; ?>
         <?php if ($error !== ''): ?><div class="user-alert user-alert-error" role="alert"><?= escape($error) ?></div><?php endif; ?>
 
+        <?php if ($editUser): ?>
+        <section class="panel user-create-panel" aria-labelledby="edit-user-title">
+            <h2 id="edit-user-title">ویرایش حساب: <?= escape($editUser['username']) ?></h2>
+            <p class="muted">نام کاربری و نوع حساب را تغییر دهید. برای حفظ رمز فعلی، فیلدهای رمز را خالی بگذارید.</p>
+            <form method="post" action="users.php" class="user-create-form">
+                <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="user_id" value="<?= (int)$editUser['id'] ?>">
+                <label for="edit-username">نام کاربری</label>
+                <input id="edit-username" name="username" required minlength="3" maxlength="80" pattern="[a-zA-Z0-9_.-]+" autocomplete="off" value="<?= escape($editUser['username']) ?>">
+                <label for="edit-role">نوع حساب</label>
+                <select id="edit-role" name="role" required>
+                    <option value="user" <?= $editUser['role'] === 'user' ? 'selected' : '' ?>>کاربر</option>
+                    <option value="admin" <?= $editUser['role'] === 'admin' ? 'selected' : '' ?>>ادمین</option>
+                    <?php if ($isSuperAdmin): ?><option value="super_admin" <?= $editUser['role'] === 'super_admin' ? 'selected' : '' ?>>سوپر ادمین</option><?php endif; ?>
+                </select>
+                <label for="edit-password">رمز عبور جدید (اختیاری، حداقل ۸ کاراکتر)</label>
+                <input id="edit-password" name="password" type="password" minlength="8" maxlength="4096" autocomplete="new-password">
+                <label for="edit-password-confirm">تکرار رمز عبور جدید</label>
+                <input id="edit-password-confirm" name="password_confirm" type="password" minlength="8" maxlength="4096" autocomplete="new-password">
+                <div class="form-actions"><button class="button button-primary" type="submit">ذخیره تغییرات</button> <a class="button button-secondary" href="users.php">انصراف</a></div>
+            </form>
+        </section>
+        <?php endif; ?>
+
         <section class="panel" aria-labelledby="users-list-title">
             <h2 id="users-list-title">تمام کاربران (<?= count($allUsers) ?>)</h2>
             <div class="students-table-wrap">
@@ -250,6 +344,9 @@ try {
                             <td><?= (int)$listedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال' ?></td>
                             <td><?= escape($listedUser['created_at'] ?? '—') ?></td>
                             <td><div class="student-actions">
+                                <?php if ($isSuperAdmin || $listedUser['role'] !== 'super_admin'): ?>
+                                <a class="button button-primary" href="users.php?edit=<?= (int)$listedUser['id'] ?>">ویرایش</a>
+                                <?php endif; ?>
                                 <?php if ((int)$listedUser['id'] !== $actorId): ?>
                                 <form method="post" action="users.php" onsubmit="return confirm('آیا از تغییر وضعیت این حساب مطمئن هستید؟');">
                                     <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="user_id" value="<?= (int)$listedUser['id'] ?>">
