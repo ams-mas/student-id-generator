@@ -13,20 +13,20 @@ if (is_logged_in()) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="ورود به سامانه ساخت کارت شناسایی دانش‌آموزان و دانشجویان">
-    <title>ورود | سامانه ساخت کارت شناسایی</title>
+    <meta name="description" content="ورود به سامانه مدیریت دانش‌آموزان">
+    <title>ورود | سامانه مدیریت دانش‌آموزان</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="login-page">
     <main class="login-shell">
-        <section class="login-brand" aria-label="سامانه خدمات دانش‌آموزی">
+        <section class="login-brand" aria-label="سامانه مدیریت دانش‌آموزان">
             <div class="brand-mark" aria-hidden="true">م‌د</div>
             <p class="login-eyebrow">سامانه خدمات دانش‌آموزی</p>
-            <h1>سامانه ساخت کارت شناسایی</h1>
-            <p class="login-intro">فضایی ساده برای طراحی، پیش‌نمایش و چاپ کارت شناسایی دانش‌آموزان و دانشجویان.</p>
+            <h1>سامانه مدیریت دانش‌آموزان</h1>
+            <p class="login-intro">سامانه‌ای برای ثبت، جست‌وجو و مدیریت اطلاعات دانش‌آموزان از یک پنل امن.</p>
             <div class="login-feature-list">
-                <p><span aria-hidden="true">✓</span> ساخت و مشاهده پیش‌نمایش کارت شناسایی</p>
-                <p><span aria-hidden="true">✓</span> چاپ کارت پس از آماده‌شدن</p>
+                <p><span aria-hidden="true">✓</span> ثبت و به‌روزرسانی پرونده دانش‌آموزان</p>
+                <p><span aria-hidden="true">✓</span> جست‌وجو و مشاهده اطلاعات دانش‌آموزان</p>
                 <p><span aria-hidden="true">✓</span> ورود کاربران مجاز برای دسترسی به سامانه</p>
             </div>
         </section>
