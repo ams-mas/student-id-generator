@@ -132,3 +132,13 @@ html[lang="fa"] .login-panel-heading h2,html[lang="fa"] .login-brand h1{letter-s
   .sidebar-toggle{display:none}
 }
 @media(prefers-reduced-motion:reduce){.admin-sidebar{transition:none}}
+
+
+/* Final override: opening is controlled only by the click-added .is-open class. */
+@media(min-width:851px){
+  .admin-sidebar:not(.is-open):hover,
+  .admin-sidebar:not(.is-open):focus-within{transform:translateX(calc(100% - 10px)) !important}
+  .admin-sidebar.is-open,
+  .admin-sidebar.is-open:hover,
+  .admin-sidebar.is-open:focus-within{transform:translateX(0) !important}
+}
