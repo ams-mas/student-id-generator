@@ -29,11 +29,11 @@ if (!preg_match('/^[a-z0-9_.-]{3,80}$/', $username)) {
     exit(1);
 }
 
-$password = prompt('Choose a strong password (at least 12 characters): ');
+$password = prompt('Choose a password (at least 8 characters): ');
 $confirmation = prompt('Confirm password: ');
 
-if (strlen($password) < 12) {
-    fwrite(STDERR, "Password must be at least 12 characters.\n");
+if (strlen($password) < 8) {
+    fwrite(STDERR, "Password must be at least 8 characters.\n");
     exit(1);
 }
 if (!hash_equals($password, $confirmation)) {
