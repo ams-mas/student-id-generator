@@ -1,0 +1,15 @@
+# Local secrets
+.env
+.env.*
+!.env.example
+config/database.local.php
+
+# Student uploads
+uploads/*
+!uploads/.gitkeep
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
