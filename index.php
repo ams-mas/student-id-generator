@@ -41,6 +41,9 @@ if (is_logged_in()) {
             <?php if (isset($_GET['invalid'])): ?>
                 <div class="login-alert" role="alert">نام کاربری یا رمز عبور نادرست است.</div>
             <?php endif; ?>
+            <?php if (isset($_GET['inactive'])): ?>
+                <div class="login-alert" role="alert">این حساب غیرفعال است. برای دسترسی با مدیر سامانه تماس بگیرید.</div>
+            <?php endif; ?>
             <?php if (isset($_GET['database'])): ?>
                 <div class="login-alert" role="alert">سرویس ورود در دسترس نیست. اجرای MySQL، وارد کردن فایل database/schema.sql و ایجاد حساب کاربری را بررسی کنید.</div>
             <?php endif; ?>
