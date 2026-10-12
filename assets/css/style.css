@@ -834,3 +834,61 @@ input:focus, select:focus, textarea:focus {
 .user-alert-error { background: #fee2e2 !important; color: #991b1b !important; }
 .state-active, .profile-status { background: #dcfce7; color: #166534; }
 .state-inactive { background: #e2e8f0; color: #475569; }
+
+
+/* Permanent navigation: never slide, hide, or resize the sidebar on hover. */
+.admin-layout { direction: rtl !important; }
+.admin-layout > .admin-sidebar,
+.admin-layout > .admin-sidebar:hover,
+.admin-layout > .admin-sidebar:focus,
+.admin-layout > .admin-sidebar:focus-within,
+.admin-layout > .admin-sidebar:not(.is-open),
+.admin-layout > .admin-sidebar:not(.is-open):hover,
+.admin-layout > .admin-sidebar:not(.is-open):focus-within,
+.admin-layout > .admin-sidebar.is-open,
+.admin-layout > .admin-sidebar.is-open:hover,
+.admin-layout > .admin-sidebar.is-open:focus-within {
+  transform: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+@media (min-width: 851px) {
+  .admin-layout > .admin-sidebar,
+  .admin-layout > .admin-sidebar:hover,
+  .admin-layout > .admin-sidebar:focus-within,
+  .admin-layout > .admin-sidebar:not(.is-open),
+  .admin-layout > .admin-sidebar.is-open {
+    position: fixed !important;
+    inset: 0 0 0 auto !important;
+    width: 286px !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    z-index: 1000 !important;
+    overflow-y: auto !important;
+  }
+  .admin-layout > .admin-main {
+    margin-right: 286px !important;
+    margin-left: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+}
+@media (max-width: 850px) {
+  .admin-layout > .admin-sidebar,
+  .admin-layout > .admin-sidebar:hover,
+  .admin-layout > .admin-sidebar:focus-within,
+  .admin-layout > .admin-sidebar:not(.is-open),
+  .admin-layout > .admin-sidebar.is-open {
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    transform: none !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  .admin-layout > .admin-main { margin: 0 !important; width: 100% !important; }
+}
