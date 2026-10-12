@@ -112,3 +112,23 @@ html[lang="fa"] .login-panel-heading h2,html[lang="fa"] .login-brand h1{letter-s
   .admin-sidebar::after{content:"☰  منو";position:absolute;top:42%;right:calc(100% - 1px);display:flex;align-items:center;justify-content:center;gap:8px;width:82px;height:48px;padding:0 8px;border:1px solid #d7e1f4;border-right:0;border-radius:12px 0 0 12px;background:#2449a5;color:#fff;box-shadow:-5px 5px 16px rgb(20 40 80 / 14%);font-size:.83rem;font-weight:800;white-space:nowrap;writing-mode:horizontal-tb;cursor:pointer}
   .admin-sidebar:hover::after,.admin-sidebar:focus-within::after{opacity:0;pointer-events:none}
 }
+
+
+/* Click-controlled sidebar: the edge handle remains visible while closed. */
+@media(min-width:851px){
+  .admin-sidebar{transform:translateX(calc(100% - 10px));transition:transform .25s ease}
+  .admin-sidebar.is-open{transform:translateX(0)}
+  .admin-sidebar::before{display:none}
+  .admin-sidebar::after{content:none}
+  .sidebar-toggle{position:absolute;top:42%;right:calc(100% - 1px);z-index:2;display:flex;align-items:center;justify-content:center;gap:8px;width:82px;height:48px;padding:0 8px;border:1px solid #d7e1f4;border-right:0;border-radius:12px 0 0 12px;background:#2449a5;color:#fff;box-shadow:-5px 5px 16px rgb(20 40 80 / 14%);font:inherit;font-size:.83rem;font-weight:800;white-space:nowrap;cursor:pointer}
+  .sidebar-toggle:hover,.sidebar-toggle:focus-visible{background:#173579}
+  .sidebar-toggle:focus-visible{outline:3px solid #8fb2ff;outline-offset:2px}
+  .admin-sidebar.is-open .sidebar-toggle{right:8px;top:12px;width:40px;height:40px;padding:0;border:0;border-radius:9px;background:#edf1f7;color:var(--ink);box-shadow:none;font-size:1.2rem}
+  .sidebar-toggle-label{display:inline}
+  .admin-sidebar.is-open .sidebar-toggle-label{display:none}
+  .admin-sidebar.is-open .sidebar-toggle-icon{transform:rotate(180deg)}
+}
+@media(max-width:850px){
+  .sidebar-toggle{display:none}
+}
+@media(prefers-reduced-motion:reduce){.admin-sidebar{transition:none}}
