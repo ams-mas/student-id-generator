@@ -57,8 +57,12 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
             </div>
         </div>
         <div class="sidebar-group">
-            <button type="button" class="sidebar-group-title" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">♟</span><span>مدیریت آموزگاران</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
-            <div class="sidebar-submenu"><span class="sidebar-link sidebar-link-disabled" aria-disabled="true">فهرست آموزگاران <small>به‌زودی</small></span><span class="sidebar-link sidebar-link-disabled" aria-disabled="true">ثبت آموزگار <small>به‌زودی</small></span><span class="sidebar-link sidebar-link-disabled" aria-disabled="true">تعیین صنف مسئول <small>به‌زودی</small></span></div>
+            <button type="button" class="sidebar-group-title <?= $sidebarCurrentPage === 'teachers.php' ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">♟</span><span>مدیریت آموزگاران</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
+            <div class="sidebar-submenu">
+                <a class="sidebar-link <?= $sidebarCurrentPage === 'teachers.php' && (!isset($_GET['mode']) || $_GET['mode'] === 'add') ? 'is-current' : '' ?>" href="teachers.php?mode=add">ثبت آموزگار</a>
+                <a class="sidebar-link <?= $sidebarCurrentPage === 'teachers.php' && ($_GET['mode'] ?? '') === 'edit' ? 'is-current' : '' ?>" href="teachers.php?mode=edit">ویرایش آموزگار</a>
+                <a class="sidebar-link <?= $sidebarCurrentPage === 'teachers.php' && ($_GET['mode'] ?? '') === 'delete' ? 'is-current' : '' ?>" href="teachers.php?mode=delete">حذف آموزگار</a>
+            </div>
         </div>
         <div class="sidebar-group">
             <button type="button" class="sidebar-group-title <?= $sidebarCurrentPage === 'classes.php' ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">▦</span><span>مدیریت صنف‌ها</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
