@@ -282,3 +282,27 @@ label{font-weight:700}
  .sidebar-toggle{position:fixed;top:16px;right:12px}
  .admin-sidebar.is-open .sidebar-toggle{position:fixed;top:17px;right:18px}
 }
+
+
+/* Fix: keep the menu button inside the visible portion of the closed drawer. */
+.admin-sidebar:not(.is-open) .sidebar-toggle,
+.admin-sidebar:not(.is-open):hover .sidebar-toggle,
+.admin-sidebar:not(.is-open):focus-within .sidebar-toggle{
+  position:absolute!important;
+  top:16px!important;
+  right:calc(100% - 56px)!important;
+  left:auto!important;
+  z-index:1003;
+  display:flex!important;
+}
+.admin-sidebar.is-open .sidebar-toggle{
+  position:absolute!important;
+  top:17px!important;
+  right:18px!important;
+  left:auto!important;
+}
+@media(max-width:760px){
+  .admin-sidebar{z-index:1000}
+  .admin-sidebar:not(.is-open) .sidebar-toggle{right:calc(100% - 56px)!important}
+  .admin-sidebar.is-open .sidebar-toggle{right:18px!important}
+}
