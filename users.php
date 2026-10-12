@@ -191,7 +191,7 @@ $username = (string) $_SESSION['username'];
             </form>
         </section>
 
-        <footer class="page-footer">سامانه ساخت کارت شناسایی · مدیریت کاربران</footer>
+        <footer class="page-footer">سامانه مدیریت دانش‌آموزان · مدیریت کاربران</footer>
     </main>
 </div>
 <script>
