@@ -68,6 +68,7 @@ html[lang="fa"] .login-panel-heading h2,html[lang="fa"] .login-brand h1{letter-s
 .admin-sidebar{position:sticky;top:0;display:flex;flex-direction:column;min-height:100vh;height:100vh;padding:25px 17px 18px;background:#fff;border-left:1px solid var(--line);box-shadow:-8px 0 30px rgb(20 40 80 / 3%)}
 .sidebar-brand{display:flex;align-items:center;gap:12px;padding:4px 8px 25px;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
 .sidebar-brand-mark{display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;border-radius:13px;background:linear-gradient(140deg,#2449a5,#3d79bd);color:#fff;font-size:.85rem;font-weight:900;direction:ltr}
+.sidebar-school-logo{display:block;flex:0 0 43px;width:43px;height:43px;max-width:43px;max-height:43px;object-fit:contain;border-radius:10px}
 .sidebar-brand strong,.sidebar-brand small{display:block}
 .sidebar-brand strong{font-size:.98rem}
 .sidebar-brand small{margin-top:4px;color:var(--muted);font-size:.72rem}
