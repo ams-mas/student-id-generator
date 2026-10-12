@@ -143,7 +143,8 @@ $username = (string) $_SESSION['username'];
         <a class="sidebar-brand" href="dashboard.php"><span class="sidebar-brand-mark" aria-hidden="true">ID</span><span><strong>پنل مدیریت</strong><small>سامانه کارت شناسایی</small></span></a>
         <p class="sidebar-section-label">منوی اصلی</p>
         <nav class="sidebar-nav">
-            <a class="sidebar-link" href="dashboard.php"><span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span></a>\n            <a class="sidebar-link" href="students.php"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span></a>
+            <a class="sidebar-link" href="dashboard.php"><span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span></a>
+            <a class="sidebar-link" href="students.php"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span></a>
             <div class="sidebar-group">
                 <div class="sidebar-group-title"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت کاربران</span></div>
                 <div class="sidebar-submenu">
