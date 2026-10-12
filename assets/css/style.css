@@ -710,3 +710,33 @@ html[lang="fa"] .muted{
 @media (max-width: 480px) {
   .admin-sidebar .sidebar-nav { grid-template-columns: 1fr; }
 }
+
+
+/* Prevent sidebar hover/focus styles from changing its visibility or geometry. */
+.admin-sidebar,
+.admin-sidebar:hover,
+.admin-sidebar:focus,
+.admin-sidebar:focus-within,
+.admin-sidebar.is-open,
+.admin-sidebar.is-open:hover,
+.admin-sidebar.is-open:focus-within {
+  transform: none !important;
+  transition: none !important;
+}
+@media (min-width: 851px) {
+  .admin-sidebar,
+  .admin-sidebar:hover,
+  .admin-sidebar:focus-within,
+  .admin-sidebar.is-open,
+  .admin-sidebar.is-open:hover,
+  .admin-sidebar.is-open:focus-within {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 286px !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}
