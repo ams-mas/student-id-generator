@@ -153,7 +153,7 @@ try {
 
         <main class="admin-main dashboard-main">
             <header class="dash-heading">
-                <div><p class="dash-eyebrow">پنل مدیریت</p><h1>داشبورد</h1><p class="dash-muted">خلاصه وضعیت سامانه مدیریت دانش‌آموزان</p></div>
+                <div></div>
                 <div class="dash-year"><span>سال تحصیلی فعلی</span><strong><?= htmlspecialchars($activeYearName, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></strong></div>
             </header>
             <section class="dash-stat-grid" aria-label="آمار کلی">
