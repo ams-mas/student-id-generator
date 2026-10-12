@@ -21,3 +21,7 @@
 .pc-selectors select{font:inherit;max-width:58%;min-width:0;padding:7px 5px;border:1px solid #cbd5e1;border-radius:7px;background:#f8fafc;color:#17233b;cursor:pointer}
 .pc-selectors .pc-year-select{max-width:42%;}
 .pc-head{gap:5px}
+
+/* Overlay the date picker so opening it never pushes or scrolls the page layout. */
+.persian-calendar-container{position:relative;width:100%;min-width:0}
+.persian-calendar-container .persian-calendar-popup{position:absolute;top:calc(100% + 4px);right:0;left:auto;margin-top:0;z-index:10000;max-width:min(340px,calc(100vw - 32px));}
