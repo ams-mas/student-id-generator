@@ -105,3 +105,10 @@ html[lang="fa"] .login-panel-heading h2,html[lang="fa"] .login-brand h1{letter-s
   .admin-main{padding:36px clamp(18px,3vw,42px) 24px}
 }
 @media(prefers-reduced-motion:reduce){.admin-sidebar{transition:none}}
+
+
+/* Visible edge handle tells users that the hidden sidebar is available. */
+@media(min-width:851px){
+  .admin-sidebar::after{content:"☰  منو";position:absolute;top:42%;right:calc(100% - 1px);display:flex;align-items:center;justify-content:center;gap:8px;width:82px;height:48px;padding:0 8px;border:1px solid #d7e1f4;border-right:0;border-radius:12px 0 0 12px;background:#2449a5;color:#fff;box-shadow:-5px 5px 16px rgb(20 40 80 / 14%);font-size:.83rem;font-weight:800;white-space:nowrap;writing-mode:horizontal-tb;cursor:pointer}
+  .admin-sidebar:hover::after,.admin-sidebar:focus-within::after{opacity:0;pointer-events:none}
+}
