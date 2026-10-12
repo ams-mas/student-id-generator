@@ -72,16 +72,25 @@
     const wrapper = document.createElement('div');
     wrapper.className = 'persian-calendar-popup';
     wrapper.hidden = true;
-    wrapper.innerHTML = '<div class="pc-head"><button type="button" data-step="-1" aria-label="ماه قبل">‹</button><strong class="pc-title"></strong><button type="button" data-step="1" aria-label="ماه بعد">›</button></div><div class="pc-week"></div><div class="pc-days"></div><div class="pc-foot"><button type="button" class="pc-today">امروز</button><button type="button" class="pc-clear">پاک کردن</button><button type="button" class="pc-close">بستن</button></div>';
+    wrapper.innerHTML = '<div class="pc-head"><button type="button" data-step="-1" aria-label="ماه قبل">‹</button><div class="pc-selectors"><select class="pc-month-select" aria-label="ماه"></select><select class="pc-year-select" aria-label="سال"></select></div><button type="button" data-step="1" aria-label="ماه بعد">›</button></div><div class="pc-week"></div><div class="pc-days"></div><div class="pc-foot"><button type="button" class="pc-today">امروز</button><button type="button" class="pc-clear">پاک کردن</button><button type="button" class="pc-close">بستن</button></div>';
     visible.parentNode.insertBefore(wrapper, visible.nextSibling);
-    const title = wrapper.querySelector('.pc-title');
+    const monthSelect = wrapper.querySelector('.pc-month-select');
+    const yearSelect = wrapper.querySelector('.pc-year-select');
+    months.forEach((month, index) => { const option = document.createElement('option'); option.value = String(index + 1); option.textContent = month; monthSelect.appendChild(option); });
+    const current = partsOf(new Date());
+    for (let year = current.year - 120; year <= current.year + 10; year++) { const option = document.createElement('option'); option.value = String(year); option.textContent = faDigits(year); yearSelect.appendChild(option); }
+    monthSelect.addEventListener('change', () => { shown.month = Number(monthSelect.value); render(); });
+    yearSelect.addEventListener('change', () => { shown.year = Number(yearSelect.value); render(); });
     const week = wrapper.querySelector('.pc-week');
     const days = wrapper.querySelector('.pc-days');
     weekdays.forEach(day => { const item=document.createElement('span'); item.textContent=day; week.appendChild(item); });
     let shown = partsOf(fromIso(hidden.value) || new Date());
-    const current = partsOf(new Date());
     function render() {
-      title.textContent = faDigits(shown.year) + ' ' + months[shown.month-1];
+      if (shown.year < Number(yearSelect.options[0].value) || shown.year > Number(yearSelect.options[yearSelect.options.length - 1].value)) {
+        const option = document.createElement('option'); option.value = String(shown.year); option.textContent = faDigits(shown.year); yearSelect.add(option);
+      }
+      monthSelect.value = String(shown.month);
+      yearSelect.value = String(shown.year);
       days.replaceChildren();
       const dates = monthDays(shown.year, shown.month);
       if (!dates.length) return;
