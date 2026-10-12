@@ -1,6 +1,6 @@
 
 /* Shared Persian Solar Hijri date picker */
-.persian-calendar-popup{position:absolute;z-index:1000;width:min(320px,calc(100vw - 36px));padding:12px;background:#fff;border:1px solid #d7deea;border-radius:12px;box-shadow:0 14px 36px rgba(15,23,42,.18);margin-top:4px;color:#17233b}
+.persian-calendar-popup{position:relative;z-index:1000;width:min(320px,100%);padding:12px;background:#fff;border:1px solid #d7deea;border-radius:12px;box-shadow:0 14px 36px rgba(15,23,42,.18);margin-top:4px;color:#17233b}
 .persian-calendar-popup[hidden]{display:none}
 .pc-head,.pc-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px}
 .pc-head button,.pc-foot button,.pc-days button{font:inherit;cursor:pointer;border:0;border-radius:7px;padding:7px 9px;background:#eef2f8;color:#17233b}
