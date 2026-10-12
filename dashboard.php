@@ -104,28 +104,7 @@ $femalePercent = $genderTotal > 0 ? 100 - $malePercent : 0;
         @media(max-width:1100px){.dash-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-middle-grid{grid-template-columns:1fr}}@media(max-width:620px){.dashboard-main{padding:18px 12px}.dash-heading{align-items:flex-start;flex-direction:column}.dash-year{width:100%}.dash-stat-grid{gap:9px}.dash-stat{padding:13px 10px;gap:9px}.dash-stat-icon{width:35px;height:35px;flex-basis:35px;font-size:1.2rem}.dash-stat small{display:none}.dash-gender-content{flex-wrap:wrap}.dash-panel{padding:15px}.dash-bar-row{grid-template-columns:60px minmax(35px,1fr) 25px;gap:7px}}
         </style>
     </div>
-    <script>
-    (function () {
-        const sidebar = document.getElementById('admin-sidebar');
-        const toggle = document.getElementById('sidebar-toggle');
-        if (!sidebar || !toggle) return;
-        toggle.addEventListener('click', function () {
-            const isOpen = sidebar.classList.toggle('is-open');
-            toggle.setAttribute('aria-expanded', String(isOpen));
-            toggle.setAttribute('aria-label', isOpen ? 'بستن منو' : 'باز کردن منو');
-            toggle.querySelector('.sidebar-toggle-icon').textContent = isOpen ? '×' : '☰';
-        });
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
-                sidebar.classList.remove('is-open');
-                toggle.setAttribute('aria-expanded', 'false');
-                toggle.setAttribute('aria-label', 'باز کردن منو');
-                toggle.querySelector('.sidebar-toggle-icon').textContent = '☰';
-                toggle.focus();
-            }
-        });
-    }());
-    </script>
+    
     <script src="assets/js/sidebar-clock.js" defer></script>
     <script src="assets/js/sidebar-submenus.js" defer></script>
 </body>
