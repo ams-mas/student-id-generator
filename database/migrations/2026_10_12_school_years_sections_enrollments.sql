@@ -55,10 +55,30 @@ CREATE TABLE IF NOT EXISTS student_enrollments (
   ended_at DATETIME NULL,
   notes VARCHAR(500) NOT NULL DEFAULT '',
   PRIMARY KEY (id),
-  UNIQUE KEY uq_student_year (student_id, school_year_id),
   KEY idx_enrollment_section (class_section_id, is_current),
   KEY idx_enrollment_year (school_year_id, is_current),
   CONSTRAINT fk_enrollment_student FOREIGN KEY (student_id) REFERENCES students(id),
   CONSTRAINT fk_enrollment_year FOREIGN KEY (school_year_id) REFERENCES school_years(id),
   CONSTRAINT fk_enrollment_section FOREIGN KEY (class_section_id) REFERENCES class_sections(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS student_enrollment_history (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  enrollment_id BIGINT UNSIGNED NOT NULL,
+  student_id BIGINT UNSIGNED NOT NULL,
+  school_year_id BIGINT UNSIGNED NOT NULL,
+  from_section_id BIGINT UNSIGNED NULL,
+  to_section_id BIGINT UNSIGNED NOT NULL,
+  changed_by BIGINT UNSIGNED NULL,
+  change_type ENUM('assigned','transferred','promoted') NOT NULL,
+  notes VARCHAR(500) NOT NULL DEFAULT '',
+  changed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_history_student (student_id, changed_at),
+  CONSTRAINT fk_history_enrollment FOREIGN KEY (enrollment_id) REFERENCES student_enrollments(id),
+  CONSTRAINT fk_history_student FOREIGN KEY (student_id) REFERENCES students(id),
+  CONSTRAINT fk_history_year FOREIGN KEY (school_year_id) REFERENCES school_years(id),
+  CONSTRAINT fk_history_from_section FOREIGN KEY (from_section_id) REFERENCES class_sections(id) ON DELETE SET NULL,
+  CONSTRAINT fk_history_to_section FOREIGN KEY (to_section_id) REFERENCES class_sections(id),
+  CONSTRAINT fk_history_user FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
