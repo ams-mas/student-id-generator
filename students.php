@@ -35,6 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $bookNumber = trim((string)($_POST['register_book_number'] ?? ''));
             $first = trim((string)($_POST['first_name'] ?? ''));
             $last = trim((string)($_POST['last_name'] ?? ''));
+            $fatherName = trim((string)($_POST['father_name'] ?? ''));
+            $grandfatherName = trim((string)($_POST['grandfather_name'] ?? ''));
             $gender = (string)($_POST['gender'] ?? 'unspecified');
             $dob = trim((string)($_POST['date_of_birth'] ?? ''));
             $class = trim((string)($_POST['class_name'] ?? ''));
@@ -60,14 +62,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($dob !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dob)) {
                 throw new RuntimeException('تاریخ تولد معتبر نیست.');
             }
-            $params = ['number'=>$number,'book_number'=>$bookNumber !== '' ? $bookNumber : null,'first'=>$first,'last'=>$last,'gender'=>$gender,'dob'=>$dob !== '' ? $dob : null,'class'=>$class,'phone'=>$phone,'guardian'=>$guardian,'guardian_phone'=>$guardianPhone,'address'=>$address];
+            if (mb_strlen($fatherName) > 100 || mb_strlen($grandfatherName) > 100) {
+                throw new RuntimeException('نام پدر و نام پدرکلان نباید بیشتر از ۱۰۰ نویسه باشد.');
+            }
+            $params = ['number'=>$number,'book_number'=>$bookNumber !== '' ? $bookNumber : null,'first'=>$first,'last'=>$last,'father_name'=>$fatherName !== '' ? $fatherName : null,'grandfather_name'=>$grandfatherName !== '' ? $grandfatherName : null,'gender'=>$gender,'dob'=>$dob !== '' ? $dob : null,'class'=>$class,'phone'=>$phone,'guardian'=>$guardian,'guardian_phone'=>$guardianPhone,'address'=>$address];
             if ($id) {
                 $params['id'] = $id;
-                $stmt = $pdo->prepare('UPDATE students SET student_number=:number, register_book_number=:book_number, first_name=:first, last_name=:last, gender=:gender, date_of_birth=:dob, class_name=:class, phone=:phone, guardian_name=:guardian, guardian_phone=:guardian_phone, address=:address WHERE id=:id');
+                $stmt = $pdo->prepare('UPDATE students SET student_number=:number, register_book_number=:book_number, first_name=:first, last_name=:last, father_name=:father_name, grandfather_name=:grandfather_name, gender=:gender, date_of_birth=:dob, class_name=:class, phone=:phone, guardian_name=:guardian, guardian_phone=:guardian_phone, address=:address WHERE id=:id');
                 $stmt->execute($params);
                 $_SESSION['students_flash'] = ['success' => 'پرونده دانش‌آموز به‌روزرسانی شد.'];
             } else {
-                $stmt = $pdo->prepare('INSERT INTO students (student_number, register_book_number, first_name, last_name, gender, date_of_birth, class_name, phone, guardian_name, guardian_phone, address) VALUES (:number,:book_number,:first,:last,:gender,:dob,:class,:phone,:guardian,:guardian_phone,:address)');
+                $stmt = $pdo->prepare('INSERT INTO students (student_number, register_book_number, first_name, last_name, father_name, grandfather_name, gender, date_of_birth, class_name, phone, guardian_name, guardian_phone, address) VALUES (:number,:book_number,:first,:last,:father_name,:grandfather_name,:gender,:dob,:class,:phone,:guardian,:guardian_phone,:address)');
                 $stmt->execute($params);
                 $_SESSION['students_flash'] = ['success' => 'دانش‌آموز با موفقیت ثبت شد.'];
             }
@@ -121,9 +126,9 @@ $filterAge = trim((string)($_GET['age'] ?? ''));
 $where = [];
 $params = [];
 if ($search !== '') {
-    $where[] = "(student_number LIKE :q1 OR CONCAT('R', LPAD(id, 8, '0')) LIKE :q7 OR first_name LIKE :q2 OR last_name LIKE :q3 OR class_name LIKE :q4 OR guardian_name LIKE :q5 OR register_book_number LIKE :q6)";
+    $where[] = "(student_number LIKE :q1 OR CONCAT('R', LPAD(id, 8, '0')) LIKE :q7 OR first_name LIKE :q2 OR last_name LIKE :q3 OR father_name LIKE :q8 OR grandfather_name LIKE :q9 OR class_name LIKE :q4 OR guardian_name LIKE :q5 OR register_book_number LIKE :q6)";
     $term = '%'.$search.'%';
-    $params += ['q1'=>$term, 'q2'=>$term, 'q3'=>$term, 'q4'=>$term, 'q5'=>$term, 'q6'=>$term, 'q7'=>$term];
+    $params += ['q1'=>$term, 'q2'=>$term, 'q3'=>$term, 'q4'=>$term, 'q5'=>$term, 'q6'=>$term, 'q7'=>$term, 'q8'=>$term, 'q9'=>$term];
 }
 if (in_array($filterGender, ['female','male','unspecified'], true)) {
     $where[] = 'gender = :filter_gender';
@@ -279,6 +284,8 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 
 <div class="student-field"><label for="first_name">نام *</label><input id="first_name" name="first_name" required maxlength="100" value="<?= student_escape($editing['first_name'] ?? '') ?>"></div>
 <div class="student-field"><label for="last_name">نام خانوادگی *</label><input id="last_name" name="last_name" required maxlength="100" value="<?= student_escape($editing['last_name'] ?? '') ?>"></div>
+<div class="student-field"><label for="father_name">نام پدر</label><input id="father_name" name="father_name" maxlength="100" value="<?= student_escape($editing['father_name'] ?? '') ?>"></div>
+<div class="student-field"><label for="grandfather_name">نام پدرکلان</label><input id="grandfather_name" name="grandfather_name" maxlength="100" value="<?= student_escape($editing['grandfather_name'] ?? '') ?>"></div>
 <div class="student-field"><label for="gender">جنسیت</label><select id="gender" name="gender"><option value="unspecified">ثبت نشده</option><option value="female" <?= (($editing['gender'] ?? '')==='female')?'selected':'' ?>>دختر</option><option value="male" <?= (($editing['gender'] ?? '')==='male')?'selected':'' ?>>پسر</option></select></div>
 <div class="student-field"><label for="date_of_birth">تاریخ تولد (هجری شمسی)</label><input id="date_of_birth" name="date_of_birth" type="date" data-persian-date value="<?= student_escape($editing['date_of_birth'] ?? '') ?>"></div>
 <div class="student-field"><label for="class_name">صنف / کلاس</label><input id="class_name" name="class_name" maxlength="100" value="<?= student_escape($editing['class_name'] ?? '') ?>" placeholder="مثلاً ۱ الف"></div>
@@ -300,9 +307,9 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <label>سن<select name="age"><option value="">همه سنین</option><?php for($a=4;$a<=30;$a++): ?><option value="<?= $a ?>" <?= $filterAge===(string)$a?'selected':'' ?>><?= $a ?> سال</option><?php endfor; ?></select></label>
 <div class="filter-actions"><button class="button button-primary" type="submit">اعمال فیلتر</button><a class="button button-secondary" href="students.php">پاک کردن فیلتر</a></div>
 </form>
-<div class="students-table-wrap"><table class="students-table"><thead><tr><th>S/N دائمی</th><th>شماره کتاب اساس</th><th>شماره مسلسل</th><th>نام کامل</th><th>صنف / کلاس</th><th>سرپرست</th><th>وضعیت</th><?php if ($canEdit): ?><th>عملیات</th><?php endif; ?></tr></thead><tbody>
-<?php if (!$students): ?><tr><td colspan="<?= $canEdit ? 8 : 7 ?>">هنوز دانش‌آموزی ثبت نشده است.</td></tr><?php endif; ?>
-<?php foreach ($students as $student): ?><tr class="<?= (int)$student['is_active']===1 ? '' : 'student-inactive' ?>"><td><?= (int)$student['id'] ?></td><td><?= student_escape($student['register_book_number'] ?: '—') ?></td><td><?= 'R' . sprintf('%08d', (int)$student['id']) ?></td><td><?= student_escape($student['first_name'].' '.$student['last_name']) ?></td><td><?= student_escape($student['class_name'] ?: '—') ?></td><td><?= student_escape($student['guardian_name'] ?: '—') ?></td><td><?= (int)$student['is_active']===1 ? 'فعال' : 'غیرفعال' ?></td><?php if ($canEdit): ?><td><div class="student-actions"><?php if (($mode = (string)($_GET['mode'] ?? '')) !== 'delete'): ?><a class="button button-secondary" href="students.php?edit=<?= (int)$student['id'] ?>">ویرایش</a><?php endif; ?><form method="post" action="students.php" onsubmit="return confirm('آیا مطمئن هستید که می‌خواهید پرونده این دانش‌آموز را برای همیشه حذف کنید؟ این کار قابل بازگشت نیست.');"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-danger" type="submit">حذف</button></form><?php if (($_GET['mode'] ?? '') !== 'edit'): ?><form method="post" action="students.php"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-secondary" type="submit"><?= (int)$student['is_active']===1 ? 'غیرفعال‌سازی' : 'فعال‌سازی' ?></button></form><?php endif; ?></div></td><?php endif; ?></tr><?php endforeach; ?>
+<div class="students-table-wrap"><table class="students-table"><thead><tr><th>S/N دائمی</th><th>شماره کتاب اساس</th><th>شماره مسلسل</th><th>نام کامل</th><th>نام پدر</th><th>نام پدرکلان</th><th>صنف / کلاس</th><th>سرپرست</th><th>وضعیت</th><?php if ($canEdit): ?><th>عملیات</th><?php endif; ?></tr></thead><tbody>
+<?php if (!$students): ?><tr><td colspan="<?= $canEdit ? 10 : 9 ?>">هنوز دانش‌آموزی ثبت نشده است.</td></tr><?php endif; ?>
+<?php foreach ($students as $student): ?><tr class="<?= (int)$student['is_active']===1 ? '' : 'student-inactive' ?>"><td><?= (int)$student['id'] ?></td><td><?= student_escape($student['register_book_number'] ?: '—') ?></td><td><?= 'R' . sprintf('%08d', (int)$student['id']) ?></td><td><?= student_escape($student['first_name'].' '.$student['last_name']) ?></td><td><?= student_escape($student['father_name'] ?: '—') ?></td><td><?= student_escape($student['grandfather_name'] ?: '—') ?></td><td><?= student_escape($student['class_name'] ?: '—') ?></td><td><?= student_escape($student['guardian_name'] ?: '—') ?></td><td><?= (int)$student['is_active']===1 ? 'فعال' : 'غیرفعال' ?></td><?php if ($canEdit): ?><td><div class="student-actions"><?php if (($mode = (string)($_GET['mode'] ?? '')) !== 'delete'): ?><a class="button button-secondary" href="students.php?edit=<?= (int)$student['id'] ?>">ویرایش</a><?php endif; ?><form method="post" action="students.php" onsubmit="return confirm('آیا مطمئن هستید که می‌خواهید پرونده این دانش‌آموز را برای همیشه حذف کنید؟ این کار قابل بازگشت نیست.');"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-danger" type="submit">حذف</button></form><?php if (($_GET['mode'] ?? '') !== 'edit'): ?><form method="post" action="students.php"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-secondary" type="submit"><?= (int)$student['is_active']===1 ? 'غیرفعال‌سازی' : 'فعال‌سازی' ?></button></form><?php endif; ?></div></td><?php endif; ?></tr><?php endforeach; ?>
 </tbody></table></div>
 <p class="help-text">حداکثر ۵۰۰ پرونده در این فهرست نمایش داده می‌شود. از فیلترها برای پیدا کردن رکوردها استفاده کنید.</p>
 </section><?php endif; ?></div>
