@@ -9,59 +9,59 @@ if (is_logged_in()) {
 }
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Sign in to the Student ID Card Generator.">
-    <title>Sign In | Student ID Card Generator</title>
+    <meta name="description" content="ورود به سامانه ساخت کارت شناسایی دانش‌آموزان و دانشجویان">
+    <title>ورود | سامانه ساخت کارت شناسایی</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="login-page">
     <main class="login-shell">
-        <section class="login-brand" aria-label="Student ID Card Generator">
-            <div class="brand-mark" aria-hidden="true">SU</div>
-            <p class="login-eyebrow">STUDENT SERVICES PORTAL</p>
-            <h1>Student ID Card Generator</h1>
-            <p class="login-intro">A simple workspace for preparing student identification cards.</p>
+        <section class="login-brand" aria-label="سامانه خدمات دانش‌آموزی">
+            <div class="brand-mark" aria-hidden="true">م‌د</div>
+            <p class="login-eyebrow">سامانه خدمات دانش‌آموزی</p>
+            <h1>سامانه ساخت کارت شناسایی</h1>
+            <p class="login-intro">فضایی ساده برای طراحی، پیش‌نمایش و چاپ کارت شناسایی دانش‌آموزان و دانشجویان.</p>
             <div class="login-feature-list">
-                <p><span aria-hidden="true">✓</span> Create and preview student ID cards</p>
-                <p><span aria-hidden="true">✓</span> Print cards when they are ready</p>
-                <p><span aria-hidden="true">✓</span> Sign-in required to access the workspace</p>
+                <p><span aria-hidden="true">✓</span> ساخت و مشاهده پیش‌نمایش کارت شناسایی</p>
+                <p><span aria-hidden="true">✓</span> چاپ کارت پس از آماده‌شدن</p>
+                <p><span aria-hidden="true">✓</span> ورود کاربران مجاز برای دسترسی به سامانه</p>
             </div>
         </section>
 
         <section class="login-panel" aria-labelledby="login-title">
             <div class="login-panel-heading">
-                <p class="eyebrow">WELCOME BACK</p>
-                <h2 id="login-title">Sign in to your account</h2>
-                <p class="muted">Enter your account details to continue.</p>
+                <p class="eyebrow">خوش آمدید</p>
+                <h2 id="login-title">ورود به حساب کاربری</h2>
+                <p class="muted">برای ادامه، نام کاربری و رمز عبور خود را وارد کنید.</p>
             </div>
 
             <?php if (isset($_GET['invalid'])): ?>
-                <div class="login-alert" role="alert">The username or password is incorrect.</div>
+                <div class="login-alert" role="alert">نام کاربری یا رمز عبور نادرست است.</div>
             <?php endif; ?>
             <?php if (isset($_GET['database'])): ?>
-                <div class="login-alert" role="alert">The login service is unavailable. Start MySQL, import database/schema.sql, and create an account using the README instructions.</div>
+                <div class="login-alert" role="alert">سرویس ورود در دسترس نیست. اجرای MySQL، وارد کردن فایل database/schema.sql و ایجاد حساب کاربری را بررسی کنید.</div>
             <?php endif; ?>
 
             <form action="login.php" method="post" class="login-form">
                 <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>">
 
-                <label for="username">Username</label>
+                <label for="username">نام کاربری</label>
                 <input id="username" name="username" type="text" autocomplete="username"
                        maxlength="80" required autofocus>
 
-                <label for="password">Password</label>
+                <label for="password">رمز عبور</label>
                 <input id="password" name="password" type="password" autocomplete="current-password"
                        maxlength="4096" required>
 
-                <button class="button button-primary login-submit" type="submit">Sign in <span aria-hidden="true">→</span></button>
+                <button class="button button-primary login-submit" type="submit">ورود به سامانه <span aria-hidden="true">←</span></button>
             </form>
 
-            <p class="login-footnote">Authorized users only. Use a strong, unique password.</p>
+            <p class="login-footnote">دسترسی فقط برای کاربران مجاز است. از رمز عبور قوی و اختصاصی استفاده کنید.</p>
         </section>
-        <footer class="login-footer">Student ID Generator · Keep student information private</footer>
+        <footer class="login-footer">سامانه ساخت کارت شناسایی · حفظ حریم خصوصی اطلاعات دانش‌آموزان</footer>
     </main>
 </body>
 </html>
