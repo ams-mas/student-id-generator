@@ -147,6 +147,10 @@ $total = (int)$pdo->query('SELECT COUNT(*) FROM students')->fetchColumn();
 $active = (int)$pdo->query('SELECT COUNT(*) FROM students WHERE is_active=1')->fetchColumn();
 $classOptions = $pdo->query("SELECT DISTINCT class_name FROM students WHERE class_name IS NOT NULL AND TRIM(class_name) <> '' ORDER BY class_name")->fetchAll(PDO::FETCH_COLUMN);
 $showForm = $canEdit && (isset($_GET['new']) || $editing !== null);
+$nextStudentId = (int)($pdo->query("SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'students'")->fetchColumn() ?: 0);
+if ($nextStudentId < 1) {
+    $nextStudentId = (int)$pdo->query('SELECT COALESCE(MAX(id), 0) + 1 FROM students')->fetchColumn();
+}
 function student_escape(mixed $value): string { return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت نشده'];
 ?>
@@ -270,7 +274,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <form class="students-form" method="post" action="students.php">
 <input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="student_id" value="<?= student_escape($editing['id'] ?? '') ?>">
 <div class="student-form-section"><h3>مشخصات دانش‌آموز</h3><div class="student-form-fields">
-<div class="student-field"><label>شماره مسلسل</label><input type="text" value="<?= 'R' . sprintf('%07d', (int)($editing['id'] ?? 0)) ?>" readonly aria-readonly="true"><small>پس از ثبت، شماره مسلسل دائمی اختصاص داده می‌شود.</small></div>
+<div class="student-field"><label>شماره مسلسل</label><input type="text" value="<?= 'R' . sprintf('%08d', (int)($editing['id'] ?? (isset($_GET['new']) ? $nextStudentId : 1))) ?>" readonly aria-readonly="true"><small>شماره مسلسل بعدی به‌صورت خودکار و به‌ترتیب اختصاص داده می‌شود.</small></div>
 <div class="student-field"><label for="register_book_number">شماره کتاب اساس (برای دانش‌آموزان قبلی)</label><input id="register_book_number" name="register_book_number" maxlength="100" value="<?= student_escape($editing['register_book_number'] ?? '') ?>" placeholder="شماره ثبت‌شده در کتاب اساس"><small>برای دانش‌آموزانی که پیش از این سامانه ثبت شده‌اند.</small></div>
 
 <div class="student-field"><label for="first_name">نام *</label><input id="first_name" name="first_name" required maxlength="100" value="<?= student_escape($editing['first_name'] ?? '') ?>"></div>
