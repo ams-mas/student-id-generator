@@ -122,8 +122,8 @@ try {
     <?php endif; ?>
 </nav>
         <div class="sidebar-bottom">
-            <div class="sidebar-user-copy"><strong><?= school_settings_h($_SESSION['username'] ?? '') ?></strong></div>
-            <form action="logout.php" method="post"><input type="hidden" name="csrf_token" value="<?= school_settings_h(csrf_token()) ?>"><button class="sidebar-logout" type="submit">خروج</button></form>
+            <div class="sidebar-user-copy"><strong><?= classes_h($_SESSION['username'] ?? '') ?></strong></div>
+            <form action="logout.php" method="post"><input type="hidden" name="csrf_token" value="<?= classes_h(csrf_token()) ?>"><button class="sidebar-logout" type="submit">خروج</button></form>
         </div>
     </aside>
 <main class="admin-main"><header class="page-header"><p class="eyebrow">تنظیمات مدرسه</p><h1>مدیریت صنف‌ها</h1><p class="muted">صنف‌هایی مانند اول الف، اول ب، اول ج و دوم الف را برای سال تحصیلی فعلی بسازید.</p></header>
