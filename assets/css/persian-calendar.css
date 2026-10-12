@@ -1,0 +1,17 @@
+
+/* Shared Persian Solar Hijri date picker */
+.persian-calendar-popup{position:absolute;z-index:1000;width:min(320px,calc(100vw - 36px));padding:12px;background:#fff;border:1px solid #d7deea;border-radius:12px;box-shadow:0 14px 36px rgba(15,23,42,.18);margin-top:4px;color:#17233b}
+.persian-calendar-popup[hidden]{display:none}
+.pc-head,.pc-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px}
+.pc-head button,.pc-foot button,.pc-days button{font:inherit;cursor:pointer;border:0;border-radius:7px;padding:7px 9px;background:#eef2f8;color:#17233b}
+.pc-head button{font-size:20px;min-width:36px}
+.pc-title{font-size:14px}
+.pc-week,.pc-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.pc-week{margin-bottom:5px;color:#64748b;font-size:12px}
+.pc-days button{padding:8px 0;background:#f8fafc}
+.pc-days button:hover{background:#dbeafe}
+.pc-days button.is-selected{background:#2449a5;color:#fff}
+.pc-days button.is-today{outline:2px solid #16a34a;outline-offset:-2px}
+.pc-empty{min-height:34px}
+.pc-foot{margin:10px 0 0;flex-wrap:wrap}
+.pc-foot button{font-size:12px}
