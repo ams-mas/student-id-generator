@@ -6,6 +6,9 @@ require_login();
 
 $username = (string) $_SESSION['username'];
 $userId = (int) $_SESSION['user_id'];
+$role = current_role();
+$roleLabels = ['super_admin' => 'سوپر ادمین', 'admin' => 'ادمین', 'user' => 'کاربر'];
+$canManageUsers = in_array($role, ['super_admin', 'admin'], true);
 ?>
 <!doctype html>
 <html lang="fa" dir="rtl">
@@ -30,19 +33,17 @@ $userId = (int) $_SESSION['user_id'];
                 <a class="sidebar-link is-current" href="dashboard.php" aria-current="page">
                     <span class="sidebar-icon" aria-hidden="true">⌂</span><span>پروفایل مدیر</span>
                 </a>
+                <?php if ($canManageUsers): ?>
                 <div class="sidebar-group">
                     <div class="sidebar-group-title"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت کاربران</span></div>
-                    <div class="sidebar-submenu">
-                        <button type="button" class="sidebar-link sidebar-link-disabled" disabled><span>افزودن کاربر</span><small>بعداً</small></button>
-                        <button type="button" class="sidebar-link sidebar-link-disabled" disabled><span>حذف کاربر</span><small>بعداً</small></button>
-                        <button type="button" class="sidebar-link sidebar-link-disabled" disabled><span>غیرفعال‌کردن کاربر</span><small>بعداً</small></button>
-                    </div>
+                    <div class="sidebar-submenu"><a class="sidebar-link" href="users.php"><span>افزودن و مدیریت کاربران</span></a></div>
                 </div>
+                <?php endif; ?>
             </nav>
 
             <div class="sidebar-bottom">
                 <span class="sidebar-user-avatar" aria-hidden="true"><?= escape(substr($username, 0, 1)) ?></span>
-                <div class="sidebar-user-copy"><strong><?= escape($username) ?></strong><small>حساب واردشده</small></div>
+                <div class="sidebar-user-copy"><strong><?= escape($username) ?></strong><small><?= escape($roleLabels[$role] ?? $role) ?></small></div>
                 <form action="logout.php" method="post">
                     <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>">
                     <button class="sidebar-logout" type="submit" aria-label="خروج از حساب" title="خروج از حساب">↪</button>
@@ -55,7 +56,7 @@ $userId = (int) $_SESSION['user_id'];
                 <div>
                     <p class="eyebrow">پنل مدیریت</p>
                     <h1>پروفایل مدیر</h1>
-                    <p class="muted">به پنل مدیریت سامانه ساخت کارت شناسایی خوش آمدید.</p>
+                    <p class="muted">به پنل سامانه ساخت کارت شناسایی خوش آمدید.</p>
                 </div>
                 <div class="account-actions">
                     <span class="signed-in-as">وارد شده‌اید با نام <strong><?= escape($username) ?></strong></span>
@@ -71,7 +72,7 @@ $userId = (int) $_SESSION['user_id'];
                 <div class="profile-summary">
                     <p class="eyebrow">حساب کاربری</p>
                     <h2 id="profile-title"><?= escape($username) ?></h2>
-                    <p class="muted">مدیر سامانه</p>
+                    <p class="muted"><?= escape($roleLabels[$role] ?? $role) ?></p>
                 </div>
                 <span class="profile-status">فعال</span>
             </section>
@@ -81,6 +82,7 @@ $userId = (int) $_SESSION['user_id'];
                 <dl class="profile-info-list">
                     <div><dt>نام کاربری</dt><dd><?= escape($username) ?></dd></div>
                     <div><dt>شناسه حساب</dt><dd><?= escape((string) $userId) ?></dd></div>
+                    <div><dt>نوع حساب</dt><dd><?= escape($roleLabels[$role] ?? $role) ?></dd></div>
                     <div><dt>وضعیت حساب</dt><dd>فعال</dd></div>
                 </dl>
                 <p class="help-text">در مرحله بعد می‌توانیم نام کامل، ایمیل، تصویر پروفایل و تغییر رمز عبور را اضافه کنیم.</p>
