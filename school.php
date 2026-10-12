@@ -152,7 +152,7 @@ foreach ($years as $year) {
     <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'dashboard.php' ? 'is-current' : '' ?>" href="dashboard.php"><span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span></a>
 
     <div class="sidebar-group">
-        <a class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'students.php' ? 'is-current' : '' ?>" href="students.php"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span></a>
+        <button type="button" class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'students.php' ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
         <div class="sidebar-submenu">
             <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'students.php' ? 'is-current' : '' ?>" href="students.php">فهرست و ثبت دانش‌آموزان</a>
             <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">انتقال و ارتقای صنف <small>به‌زودی</small></span>
@@ -161,7 +161,7 @@ foreach ($years as $year) {
     </div>
 
     <div class="sidebar-group">
-        <span class="sidebar-group-title"><span class="sidebar-icon" aria-hidden="true">♟</span><span>مدیریت آموزگاران</span></span>
+        <button type="button" class="sidebar-group-title" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">♟</span><span>مدیریت آموزگاران</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
         <div class="sidebar-submenu">
             <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">فهرست آموزگاران <small>به‌زودی</small></span>
             <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">ثبت آموزگار <small>به‌زودی</small></span>
@@ -170,7 +170,7 @@ foreach ($years as $year) {
     </div>
 
     <div class="sidebar-group">
-        <a class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'school.php' ? 'is-current' : '' ?>" href="school.php"><span class="sidebar-icon" aria-hidden="true">▦</span><span>تنظیمات مدرسه</span></a>
+        <button type="button" class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'school.php' ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">▦</span><span>تنظیمات مدرسه</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
         <div class="sidebar-submenu">
             <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'school.php' ? 'is-current' : '' ?>" href="school.php">سال تحصیلی</a>
             <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">صنف‌ها و بخش‌ها <small>به‌زودی</small></span>
@@ -179,7 +179,7 @@ foreach ($years as $year) {
 
     <?php if (in_array(current_role(), ['super_admin', 'admin'], true)): ?>
     <div class="sidebar-group">
-        <a class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'users.php' ? 'is-current' : '' ?>" href="users.php"><span class="sidebar-icon" aria-hidden="true">⚙</span><span>مدیریت کاربران</span></a>
+        <button type="button" class="sidebar-group-title <?= basename($_SERVER['PHP_SELF']) === 'users.php' ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">⚙</span><span>مدیریت کاربران</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
         <div class="sidebar-submenu">
             <a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'users.php' ? 'is-current' : '' ?>" href="users.php">فهرست و افزودن کاربران</a>
         </div>
@@ -267,5 +267,6 @@ foreach ($years as $year) {
 <link rel="stylesheet" href="assets/css/persian-calendar.css">
 <script src="assets/js/persian-calendar.js"></script>
 <script src="assets/js/app.js"></script>
+    <script src="assets/js/sidebar-submenus.js" defer></script>
 </body>
 </html>
