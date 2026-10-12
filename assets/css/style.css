@@ -94,3 +94,14 @@ html[lang="fa"] .login-panel-heading h2,html[lang="fa"] .login-brand h1{letter-s
 .admin-main .profile-card,.admin-main .profile-details,.admin-main .profile-next{margin-bottom:20px}
 @media(max-width:850px){.admin-layout{grid-template-columns:1fr}.admin-sidebar{position:relative;top:auto;min-height:0;height:auto;padding:14px 16px;border-left:0;border-bottom:1px solid var(--line)}.sidebar-brand{padding-bottom:14px}.sidebar-section-label{margin-top:15px}.sidebar-nav{gap:4px}.sidebar-bottom{margin-top:15px;padding-top:12px}.admin-main{padding:25px 16px}.admin-main .dashboard-header{align-items:flex-start}}
 @media(max-width:480px){.sidebar-submenu{margin-right:10px}.admin-main .account-actions{align-items:flex-start;flex-direction:column}.admin-main .signed-in-as{white-space:normal}}
+
+
+/* Sidebar stays tucked away until the pointer reaches the right edge. */
+@media(min-width:851px){
+  .admin-layout{display:block}
+  .admin-sidebar{position:fixed;z-index:1000;top:0;right:0;width:280px;height:100vh;min-height:100vh;transform:translateX(calc(100% - 10px));transition:transform .25s ease;box-shadow:-8px 0 30px rgb(20 40 80 / 10%)}
+  .admin-sidebar::before{content:"";position:absolute;top:0;right:100%;width:10px;height:100%;background:transparent}
+  .admin-sidebar:hover,.admin-sidebar:focus-within{transform:translateX(0)}
+  .admin-main{padding:36px clamp(18px,3vw,42px) 24px}
+}
+@media(prefers-reduced-motion:reduce){.admin-sidebar{transition:none}}
