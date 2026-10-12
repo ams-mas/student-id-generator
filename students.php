@@ -101,8 +101,9 @@ $search = trim((string)($_GET['q'] ?? ''));
 $sql = 'SELECT * FROM students';
 $params = [];
 if ($search !== '') {
-    $sql .= ' WHERE student_number LIKE :q OR first_name LIKE :q OR last_name LIKE :q OR class_name LIKE :q OR guardian_name LIKE :q';
-    $params['q'] = '%'.$search.'%';
+    $sql .= ' WHERE student_number LIKE :q1 OR first_name LIKE :q2 OR last_name LIKE :q3 OR class_name LIKE :q4 OR guardian_name LIKE :q5';
+    $term = '%'.$search.'%';
+    $params = ['q1'=>$term, 'q2'=>$term, 'q3'=>$term, 'q4'=>$term, 'q5'=>$term];
 }
 $sql .= ' ORDER BY is_active DESC, last_name ASC, first_name ASC LIMIT 500';
 $stmt = $pdo->prepare($sql);
