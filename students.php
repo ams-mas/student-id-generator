@@ -150,12 +150,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         throw new RuntimeException('درخواست نامعتبر است.');
     } catch (RuntimeException $e) {
         $error = $e->getMessage();
+        // Keep the edit form visible after validation errors instead of silently
+        // returning to the list when the POST request has no ?edit=... query.
+        $postedStudentId = filter_var($_POST['student_id'] ?? null, FILTER_VALIDATE_INT);
+        if ($action === 'save' && $postedStudentId) {
+            $reloadEditingStmt = $pdo->prepare('SELECT * FROM students WHERE id = :id LIMIT 1');
+            $reloadEditingStmt->execute(['id' => $postedStudentId]);
+            $editing = $reloadEditingStmt->fetch() ?: null;
+        }
     } catch (PDOException $e) {
         if ($e->getCode() === '23000') {
             $error = 'این شماره دانش‌آموزی قبلاً ثبت شده است.';
         } else {
             error_log('Student management error: '.$e->getMessage());
             $error = 'ذخیره اطلاعات انجام نشد. وجود جدول دانش‌آموزان در پایگاه داده را بررسی کنید.';
+        }
+        $postedStudentId = filter_var($_POST['student_id'] ?? null, FILTER_VALIDATE_INT);
+        if ($action === 'save' && $postedStudentId) {
+            $reloadEditingStmt = $pdo->prepare('SELECT * FROM students WHERE id = :id LIMIT 1');
+            $reloadEditingStmt->execute(['id' => $postedStudentId]);
+            $editing = $reloadEditingStmt->fetch() ?: null;
         }
     }
 }
@@ -366,7 +380,7 @@ try {
 <?php if ($showForm): ?>
 <section class="panel student-form-panel"><div class="student-form-heading"><div><h2><?= $editing ? 'ویرایش دانش‌آموز فعلی' : 'ثبت دانش‌آموز جدید' ?></h2></div></div>
 <form class="students-form" method="post" action="students.php">
-<input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="student_id" value="<?= student_escape($editing['id'] ?? '') ?>">
+<input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="student_id" value="<?= student_escape($editing['id'] ?? '') ?>"><input type="hidden" name="student_number" value="<?= student_escape($editing['student_number'] ?? '') ?>">
 <div class="student-form-section"><h3>مشخصات دانش‌آموز</h3><div class="student-form-fields">
 <div class="student-field"><label>شماره مسلسل</label><input type="text" value="<?= 'R' . sprintf('%08d', (int)($editing['id'] ?? (isset($_GET['new']) ? $nextStudentId : 1))) ?>" readonly aria-readonly="true"><small>شماره مسلسل بعدی به‌صورت خودکار و به‌ترتیب اختصاص داده می‌شود.</small></div>
 <div class="student-field"><label for="register_book_number">شماره کتاب اساس (برای دانش‌آموزان قبلی)</label><input id="register_book_number" name="register_book_number" maxlength="100" value="<?= student_escape($editing['register_book_number'] ?? '') ?>" placeholder="شماره ثبت‌شده در کتاب اساس"><small>برای دانش‌آموزانی که پیش از این سامانه ثبت شده‌اند.</small></div>
