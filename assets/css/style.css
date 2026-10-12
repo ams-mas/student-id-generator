@@ -740,3 +740,32 @@ html[lang="fa"] .muted{
     visibility: visible !important;
   }
 }
+
+
+/* Final override: legacy slide-out rules must never react to mouse hover. */
+.admin-layout .admin-sidebar,
+.admin-layout .admin-sidebar:not(.is-open),
+.admin-layout .admin-sidebar:not(.is-open):hover,
+.admin-layout .admin-sidebar:not(.is-open):focus,
+.admin-layout .admin-sidebar:not(.is-open):focus-within,
+.admin-layout .admin-sidebar.is-open,
+.admin-layout .admin-sidebar.is-open:hover,
+.admin-layout .admin-sidebar.is-open:focus,
+.admin-layout .admin-sidebar.is-open:focus-within {
+  transform: translateX(0) !important;
+  transition: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+@media (min-width: 851px) {
+  .admin-layout .admin-sidebar,
+  .admin-layout .admin-sidebar:not(.is-open),
+  .admin-layout .admin-sidebar:not(.is-open):hover,
+  .admin-layout .admin-sidebar:not(.is-open):focus-within,
+  .admin-layout .admin-sidebar.is-open,
+  .admin-layout .admin-sidebar.is-open:hover,
+  .admin-layout .admin-sidebar.is-open:focus-within {
+    right: 0 !important;
+    left: auto !important;
+  }
+}
