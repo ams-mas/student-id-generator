@@ -90,6 +90,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $params['id'] = $id;
                 $stmt = $pdo->prepare('UPDATE students SET student_number=:number, register_book_number=:book_number, first_name=:first, last_name=:last, father_name=:father_name, grandfather_name=:grandfather_name, gender=:gender, date_of_birth=:dob, class_name=:class, phone=:phone, guardian_name=:guardian, guardian_phone=:guardian_phone, address=:address WHERE id=:id');
                 $stmt->execute($params);
+
+                // Write the register-book number separately with an explicit PDO type.
+                // This makes the value's persistence independent of the larger student update.
+                $bookUpdateStmt = $pdo->prepare('UPDATE students SET register_book_number = :book_number WHERE id = :id');
+                $bookUpdateStmt->bindValue(':book_number', $bookNumber === '' ? null : $bookNumber, $bookNumber === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
+                $bookUpdateStmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+                $bookUpdateStmt->execute();
+
                 $verifyBookStmt = $pdo->prepare('SELECT register_book_number FROM students WHERE id = :id LIMIT 1');
                 $verifyBookStmt->execute(['id' => $id]);
                 $savedBookNumber = $verifyBookStmt->fetchColumn();
