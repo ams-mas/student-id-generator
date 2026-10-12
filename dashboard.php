@@ -22,6 +22,9 @@ $canManageUsers = in_array($role, ['super_admin', 'admin'], true);
 /* School identity in the top of the sidebar */
 .admin-sidebar .sidebar-brand{align-items:center;}
 .admin-sidebar .sidebar-school-logo{width:48px;height:48px;min-width:48px;object-fit:contain;border-radius:10px;background:#fff;padding:4px;box-sizing:border-box;}
+.admin-sidebar .sidebar-system-clock{display:flex;flex-direction:column;align-items:center;gap:4px;margin:12px 12px 18px;padding:10px 8px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:rgba(255,255,255,.07);text-align:center;direction:rtl;}
+.admin-sidebar .sidebar-clock-date{font-size:12px;line-height:1.7;color:#dbeafe;}
+.admin-sidebar .sidebar-clock-time{font-size:20px;font-weight:700;letter-spacing:1px;line-height:1.4;color:#fff;font-variant-numeric:tabular-nums;}
 </style>
 </head>
 <body class="profile-page">
@@ -49,6 +52,11 @@ try {
     <?php endif; ?>
     <span><strong><?= htmlspecialchars($sidebarSchoolName !== '' ? $sidebarSchoolName : 'پنل مدیریت', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></strong><small>سامانه مدیریت دانش‌آموزان</small></span>
 </a>
+
+<div class="sidebar-system-clock" aria-label="تاریخ و ساعت فعلی سیستم">
+    <span class="sidebar-clock-date" data-sidebar-date></span>
+    <span class="sidebar-clock-time" data-sidebar-time></span>
+</div>
 
             <p class="sidebar-section-label">منوی اصلی</p>
             <nav class="sidebar-nav">
@@ -174,6 +182,7 @@ try {
         });
     }());
     </script>
+    <script src="assets/js/sidebar-clock.js" defer></script>
     <script src="assets/js/sidebar-submenus.js" defer></script>
 </body>
 </html>
