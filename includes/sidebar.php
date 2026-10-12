@@ -36,7 +36,7 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
         <div class="sidebar-group">
             <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['students.php', 'generate.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
             <div class="sidebar-submenu">
-                <a class="sidebar-link" href="students.php">۱. افزودن دانش‌آموز جدید</a>
+                <a class="sidebar-link" href="students.php?new=1">۱. افزودن دانش‌آموز جدید</a>
                 <a class="sidebar-link" href="students.php">۲. مشاهده همه دانش‌آموزان</a>
                 <a class="sidebar-link" href="students.php">۳. ویرایش اطلاعات دانش‌آموز</a>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۴. پروفایل دانش‌آموز <small>به‌زودی</small></span>
