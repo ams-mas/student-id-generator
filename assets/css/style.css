@@ -142,3 +142,36 @@ html[lang="fa"] .login-panel-heading h2,html[lang="fa"] .login-brand h1{letter-s
   .admin-sidebar.is-open:hover,
   .admin-sidebar.is-open:focus-within{transform:translateX(0) !important}
 }
+
+
+/* User management */
+.user-create-panel,.user-list-panel{margin-bottom:22px}
+.user-create-panel>h2,.user-list-panel>h2{margin-bottom:8px}
+.user-create-panel>.muted{margin-bottom:22px}
+.user-create-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px;align-items:end}
+.user-create-form label{display:block;margin:8px 0 0;font-size:.88rem;font-weight:700}
+.user-create-form input,.user-create-form select{width:100%;min-height:45px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:var(--ink);font:inherit}
+.user-create-form input:focus,.user-create-form select:focus{outline:3px solid rgb(36 73 165 / 15%);border-color:var(--blue)}
+.user-create-form .help-text{grid-column:1/-1;margin:0}
+.user-create-form .button{justify-self:start;margin-top:10px}
+.user-alert{margin:0 0 18px;padding:13px 16px;border-radius:10px;line-height:1.6}
+.user-alert-success{border:1px solid #b7e4c7;background:#edfbf1;color:#17643a}
+.user-alert-error{border:1px solid #f1c6c6;background:#fff1f1;color:#8f2525}
+.user-list-panel>h2{display:flex;align-items:center;gap:10px}
+.user-count{display:inline-grid;place-items:center;min-width:27px;height:27px;padding:0 7px;border-radius:999px;background:#eaf0ff;color:var(--blue);font-size:.8rem}
+.user-table-wrap{width:100%;overflow-x:auto}
+.user-table{width:100%;border-collapse:collapse;text-align:right;white-space:nowrap}
+.user-table th,.user-table td{padding:13px 11px;border-bottom:1px solid var(--line);vertical-align:middle}
+.user-table th{background:#f8faff;color:#586780;font-size:.8rem;font-weight:800}
+.user-table td{font-size:.84rem}
+.user-table tbody tr:last-child td{border-bottom:0}
+.account-state{display:inline-block;padding:5px 9px;border-radius:999px;font-size:.75rem;font-weight:800}
+.state-active{background:#e4f7ed;color:#17643a}
+.state-inactive{background:#f1f3f7;color:#667085}
+.you-label{color:var(--muted);font-size:.75rem}
+.user-actions{display:flex;align-items:center;gap:7px}
+.user-actions form{margin:0}
+.button-small{min-height:32px;padding:6px 9px;font-size:.75rem}
+.button-danger{background:#fff0f0;color:#a12626}
+.button-danger:hover{background:#ffe0e0}
+@media(max-width:680px){.user-create-form{grid-template-columns:1fr}.user-create-form .help-text{grid-column:auto}.user-create-form .button{width:100%}.user-table th,.user-table td{padding:10px 8px}}
