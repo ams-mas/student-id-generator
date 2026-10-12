@@ -18,7 +18,8 @@ $userId = (int) $_SESSION['user_id'];
 </head>
 <body class="profile-page">
     <div class="admin-layout">
-        <aside class="admin-sidebar" aria-label="منوی اصلی">
+        <aside class="admin-sidebar" id="admin-sidebar" aria-label="منوی اصلی">
+            <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-controls="admin-sidebar" aria-expanded="false" aria-label="باز کردن منو"><span class="sidebar-toggle-icon" aria-hidden="true">☰</span><span class="sidebar-toggle-label">منو</span></button>
             <a class="sidebar-brand" href="dashboard.php">
                 <span class="sidebar-brand-mark" aria-hidden="true">ID</span>
                 <span><strong>پنل مدیریت</strong><small>سامانه کارت شناسایی</small></span>
@@ -98,5 +99,27 @@ $userId = (int) $_SESSION['user_id'];
             <footer class="page-footer">سامانه ساخت کارت شناسایی · پنل مدیریت</footer>
         </main>
     </div>
+    <script>
+    (function () {
+        const sidebar = document.getElementById('admin-sidebar');
+        const toggle = document.getElementById('sidebar-toggle');
+        if (!sidebar || !toggle) return;
+        toggle.addEventListener('click', function () {
+            const isOpen = sidebar.classList.toggle('is-open');
+            toggle.setAttribute('aria-expanded', String(isOpen));
+            toggle.setAttribute('aria-label', isOpen ? 'بستن منو' : 'باز کردن منو');
+            toggle.querySelector('.sidebar-toggle-icon').textContent = isOpen ? '×' : '☰';
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                sidebar.classList.remove('is-open');
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.setAttribute('aria-label', 'باز کردن منو');
+                toggle.querySelector('.sidebar-toggle-icon').textContent = '☰';
+                toggle.focus();
+            }
+        });
+    }());
+    </script>
 </body>
 </html>
