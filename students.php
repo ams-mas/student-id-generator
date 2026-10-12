@@ -265,7 +265,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <?php if (!$showForm): ?><div class="student-toolbar"><?php if ($canEdit): ?><a class="button button-primary" href="students.php?new=1">＋ ثبت دانش‌آموز</a><?php endif; ?><a class="button button-secondary" href="students.php">فهرست دانش‌آموزان</a></div><?php endif; ?>
 <div class="students-grid">
 <?php if ($showForm): ?>
-<section class="panel student-form-panel"><div class="student-form-heading"><div><p class="eyebrow"><?= $editing ? 'ویرایش پرونده' : 'ثبت نام' ?></p><h2><?= $editing ? 'ویرایش دانش‌آموز فعلی' : 'ثبت دانش‌آموز جدید' ?></h2><p class="muted">اطلاعات را در بخش‌های زیر وارد کنید.</p></div><a class="button button-secondary" href="students.php">بازگشت به فهرست</a></div>
+<section class="panel student-form-panel"><div class="student-form-heading"><div><p class="eyebrow"><?= $editing ? 'ویرایش پرونده' : 'ثبت نام' ?></p><h2><?= $editing ? 'ویرایش دانش‌آموز فعلی' : 'ثبت دانش‌آموز جدید' ?></h2><p class="muted">اطلاعات را در بخش‌های زیر وارد کنید.</p></div></div>
 <form class="students-form" method="post" action="students.php">
 <input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="student_id" value="<?= student_escape($editing['id'] ?? '') ?>">
 <div class="student-form-section"><h3>مشخصات دانش‌آموز</h3><div class="student-form-fields">
