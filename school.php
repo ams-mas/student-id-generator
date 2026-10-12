@@ -179,7 +179,7 @@ foreach ($years as $year) {
                 <?php if ($currentYear !== null): ?>
                     <div class="year-current">
                         <strong><?= school_settings_h($currentYear['name']) ?></strong>
-                        <div class="year-muted">شروع: <?= school_settings_h($currentYear['starts_on'] ?: 'تعیین نشده') ?> · پایان: <?= school_settings_h($currentYear['ends_on'] ?: 'تعیین نشده') ?></div>
+                        <div class="year-muted">شروع: <?php if (!empty($currentYear['starts_on'])): ?><span data-persian-display-date="<?= school_settings_h($currentYear['starts_on']) ?>"></span><?php else: ?>تعیین نشده<?php endif; ?> · پایان: <?php if (!empty($currentYear['ends_on'])): ?><span data-persian-display-date="<?= school_settings_h($currentYear['ends_on']) ?>"></span><?php else: ?>تعیین نشده<?php endif; ?></div>
                         <div>وضعیت: فعال</div>
                     </div>
                 <?php else: ?>
@@ -211,8 +211,8 @@ foreach ($years as $year) {
                         <?php else: foreach ($years as $year): ?>
                             <tr>
                                 <td><?= school_settings_h($year['name']) ?></td>
-                                <td><?= school_settings_h($year['starts_on'] ?: '—') ?></td>
-                                <td><?= school_settings_h($year['ends_on'] ?: '—') ?></td>
+                                <td><?php if (!empty($year['starts_on'])): ?><span data-persian-display-date="<?= school_settings_h($year['starts_on']) ?>"></span><?php else: ?>—<?php endif; ?></td>
+                                <td><?php if (!empty($year['ends_on'])): ?><span data-persian-display-date="<?= school_settings_h($year['ends_on']) ?>"></span><?php else: ?>—<?php endif; ?></td>
                                 <td><?= (int) $year['is_active'] === 1 ? 'سال فعلی' : ((int) $year['is_closed'] === 1 ? 'بسته' : 'غیرفعال') ?></td>
                                 <td><div class="year-actions">
                                     <?php if ((int) $year['is_active'] !== 1 && (int) $year['is_closed'] !== 1): ?>
