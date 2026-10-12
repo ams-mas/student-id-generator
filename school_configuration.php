@@ -171,7 +171,7 @@ try {
 </div>
 <div class="sidebar-group">
 <button type="button" class="sidebar-group-title <?= in_array($currentPage, ['school.php','school_configuration.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">▦</span><span>تنظیمات مدرسه</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
-<div class="sidebar-submenu"><a class="sidebar-link <?= $currentPage === 'school_configuration.php' ? 'is-current' : '' ?>" href="school_configuration.php">مشخصات مدرسه</a><a class="sidebar-link <?= $currentPage === 'school.php' ? 'is-current' : '' ?>" href="school.php">سال تحصیلی</a><span class="sidebar-link sidebar-link-disabled" aria-disabled="true">صنف‌ها و بخش‌ها <small>به‌زودی</small></span></div>
+<div class="sidebar-submenu"><a class="sidebar-link <?= $currentPage === 'school_configuration.php' ? 'is-current' : '' ?>" href="school_configuration.php">مشخصات مدرسه</a><a class="sidebar-link <?= $currentPage === 'school.php' ? 'is-current' : '' ?>" href="school.php">سال تحصیلی</a><a class="sidebar-link <?= basename($_SERVER['PHP_SELF']) === 'classes.php' ? 'is-current' : '' ?>" href="classes.php">مدیریت صنف‌ها</a></div>
 </div>
 <?php if (in_array(current_role(), ['super_admin','admin'], true)): ?>
 <div class="sidebar-group">
