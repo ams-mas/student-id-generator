@@ -71,7 +71,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (preg_match('/^USE\s+[`\w]+\s*$/i', $statementSql)) {
                         continue;
                     }
-                    $pdo->exec($statementSql);
+                    // Use query() and fully consume any result set (for example SELECT 1
+                    // in idempotent migrations) before executing the next statement.
+                    $statement = $pdo->query($statementSql);
+                    if ($statement instanceof PDOStatement) {
+                        if ($statement->columnCount() > 0) {
+                            $statement->fetchAll(PDO::FETCH_ASSOC);
+                        }
+                        $statement->closeCursor();
+                    }
                 }
                 $track = $pdo->prepare('INSERT INTO schema_migrations (migration_name) VALUES (:name)');
                 $track->execute(['name' => basename($selectedPath)]);
@@ -126,7 +134,7 @@ foreach ($availableFiles as $filePath) {
         <p class="eyebrow">مدیریت سیستم</p>
         <h1>به‌روزرسانی پایگاه داده</h1>
         <p>هر تغییر جدید در جدول‌ها باید به‌صورت یک فایل SQL جدید در پوشه database/migrations/ اضافه شود. این صفحه فایل‌های اجرا‌نشده را نمایش می‌دهد.</p>
-        <div class="migration-warning">پیش از اجرای هر تغییر، از پایگاه داده نسخه پشتیبان بگیرید. اگر خطا رخ دهد، ممکن است MySQL بخشی از تغییرات را اعمال کرده باشد.</div>
+        <div class="migration-warning">پیش از اجرای هر تغییر، از پایگاه داده نسخه پشتیبان بگیرید. فایل‌های SQL می‌توانند جدول یا ستون بسازند، تغییر دهند یا حذف کنند. دستورهایی مانند DROP TABLE و DROP COLUMN داده‌ها را برای همیشه حذف می‌کنند. اگر خطا رخ دهد، ممکن است بخشی از تغییرات اعمال شده باشد.</div>
         <?php if ($message !== ''): ?>
             <div class="migration-alert <?= update_page_escape($messageType) ?>" role="status"><?= update_page_escape($message) ?></div>
         <?php endif; ?>
