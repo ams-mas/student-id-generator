@@ -61,3 +61,36 @@ html[lang="fa"] .login-panel-heading h2,html[lang="fa"] .login-brand h1{letter-s
 .profile-feature-list strong{display:block;margin:3px 0 7px}
 .profile-feature-list p{margin:0;color:var(--muted);font-size:.82rem;line-height:1.6}
 @media(max-width:680px){.profile-card{align-items:flex-start;flex-wrap:wrap}.profile-status{margin-right:auto}.profile-info-list>div{grid-template-columns:1fr;gap:6px}.profile-feature-list{grid-template-columns:1fr}.profile-feature-list>div{padding:13px}}
+
+
+/* Right-side admin navigation */
+.admin-layout{width:min(1500px,100%);min-height:100vh;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 280px;direction:rtl}
+.admin-sidebar{position:sticky;top:0;display:flex;flex-direction:column;min-height:100vh;height:100vh;padding:25px 17px 18px;background:#fff;border-left:1px solid var(--line);box-shadow:-8px 0 30px rgb(20 40 80 / 3%)}
+.sidebar-brand{display:flex;align-items:center;gap:12px;padding:4px 8px 25px;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+.sidebar-brand-mark{display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;border-radius:13px;background:linear-gradient(140deg,#2449a5,#3d79bd);color:#fff;font-size:.85rem;font-weight:900;direction:ltr}
+.sidebar-brand strong,.sidebar-brand small{display:block}
+.sidebar-brand strong{font-size:.98rem}
+.sidebar-brand small{margin-top:4px;color:var(--muted);font-size:.72rem}
+.sidebar-section-label{margin:26px 10px 10px;color:#8994a7;font-size:.72rem;font-weight:800}
+.sidebar-nav{display:flex;flex-direction:column;gap:6px}
+.sidebar-link,.sidebar-group-title{display:flex;align-items:center;gap:11px;width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:#45536b;text-align:right;text-decoration:none;font:inherit;font-size:.87rem}
+.sidebar-link.is-current{background:#eaf0ff;color:var(--blue);font-weight:800}
+.sidebar-icon{display:grid;place-items:center;flex:0 0 25px;width:25px;font-size:1.15rem}
+.sidebar-group{margin-top:4px}
+.sidebar-group-title{color:var(--ink);font-weight:800}
+.sidebar-submenu{display:flex;flex-direction:column;gap:3px;margin:5px 18px 0 0;padding-right:12px;border-right:2px solid #e7ecf5}
+.sidebar-link-disabled{justify-content:space-between;min-height:40px;padding:9px 10px;color:#667085;cursor:not-allowed;text-align:right}
+.sidebar-link-disabled:disabled{opacity:1}
+.sidebar-link-disabled small{padding:3px 6px;border-radius:5px;background:#f1f3f7;color:#8a94a5;font-size:.65rem;white-space:nowrap}
+.sidebar-bottom{display:flex;align-items:center;gap:10px;margin-top:auto;padding:16px 4px 0;border-top:1px solid var(--line)}
+.sidebar-user-avatar{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:12px;background:#eaf0ff;color:var(--blue);font-weight:800}
+.sidebar-user-copy{display:flex;flex:1;flex-direction:column;min-width:0;gap:4px}
+.sidebar-user-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem}
+.sidebar-user-copy small{color:var(--muted);font-size:.7rem}
+.sidebar-bottom form{margin:0}
+.sidebar-logout{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:9px;background:#f1f4f9;color:var(--ink);cursor:pointer;font:inherit;font-size:1.1rem}
+.admin-main{min-width:0;padding:36px clamp(18px,3vw,42px) 24px}
+.admin-main .dashboard-header{align-items:center}
+.admin-main .profile-card,.admin-main .profile-details,.admin-main .profile-next{margin-bottom:20px}
+@media(max-width:850px){.admin-layout{grid-template-columns:1fr}.admin-sidebar{position:relative;top:auto;min-height:0;height:auto;padding:14px 16px;border-left:0;border-bottom:1px solid var(--line)}.sidebar-brand{padding-bottom:14px}.sidebar-section-label{margin-top:15px}.sidebar-nav{gap:4px}.sidebar-bottom{margin-top:15px;padding-top:12px}.admin-main{padding:25px 16px}.admin-main .dashboard-header{align-items:flex-start}}
+@media(max-width:480px){.sidebar-submenu{margin-right:10px}.admin-main .account-actions{align-items:flex-start;flex-direction:column}.admin-main .signed-in-as{white-space:normal}}
