@@ -1,0 +1,13 @@
+# Security defaults for Apache/XAMPP. These rules require AllowOverride to permit .htaccess.
+Options -Indexes
+
+<FilesMatch "(?i)(^\.|\.(sql|log|ini|env|bak|backup|old|orig|dist|conf|ya?ml)$)">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
