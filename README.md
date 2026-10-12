@@ -90,3 +90,8 @@ The school administration page is `school.php`. It supports school-year setup, t
 Run the migration only once on the existing database. It adds tables and does not delete student or user records. First create the school years, sections and teachers, then enroll students. Promotion must target a section exactly one grade higher in a different, open school year; grade 12 students cannot be promoted. Test with a non-production database before using real student records.
 
 **Current limitation:** teacher records are managed separately from login accounts; connecting a teacher record to a login account is optional at the database level and teacher-specific access restrictions still need a later implementation. Promotion is an administrative action and should be performed only after results/eligibility have been confirmed.
+
+
+## Shared Persian calendar rule
+
+All date fields in this project must use the shared Afghanistan Solar Hijri calendar (`assets/js/persian-calendar.js` and `assets/css/persian-calendar.css`). Add `data-persian-date` to each `<input type="date">` that should use it, and include the shared stylesheet and script on that page. Keep calendar layout, dropdowns, padding, and popup behavior in these shared assets so fixes apply consistently to every page. Display dates with the Afghanistan month names: حمل، ثور، جوزا، سرطان، اسد، سنبله، میزان، عقرب، قوس، جدی، دلو، حوت. Store dates in the database as Gregorian `YYYY-MM-DD`; convert only for display and input.
