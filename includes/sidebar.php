@@ -61,8 +61,16 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
             <div class="sidebar-submenu"><span class="sidebar-link sidebar-link-disabled" aria-disabled="true">فهرست آموزگاران <small>به‌زودی</small></span><span class="sidebar-link sidebar-link-disabled" aria-disabled="true">ثبت آموزگار <small>به‌زودی</small></span><span class="sidebar-link sidebar-link-disabled" aria-disabled="true">تعیین صنف مسئول <small>به‌زودی</small></span></div>
         </div>
         <div class="sidebar-group">
-            <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['school.php', 'school_configuration.php', 'classes.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">▦</span><span>تنظیمات مدرسه</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
-            <div class="sidebar-submenu"><a class="sidebar-link <?= $sidebarCurrentPage === 'school_configuration.php' ? 'is-current' : '' ?>" href="school_configuration.php">مشخصات مدرسه</a><a class="sidebar-link <?= $sidebarCurrentPage === 'school.php' ? 'is-current' : '' ?>" href="school.php">سال تحصیلی</a><a class="sidebar-link <?= $sidebarCurrentPage === 'classes.php' ? 'is-current' : '' ?>" href="classes.php">مدیریت صنف‌ها</a></div>
+            <button type="button" class="sidebar-group-title <?= $sidebarCurrentPage === 'classes.php' ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">▦</span><span>مدیریت صنف‌ها</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
+            <div class="sidebar-submenu">
+                <a class="sidebar-link <?= $sidebarCurrentPage === 'classes.php' && (!isset($_GET['mode']) || $_GET['mode'] === 'add') ? 'is-current' : '' ?>" href="classes.php?mode=add">اضافه کردن صنف</a>
+                <a class="sidebar-link <?= $sidebarCurrentPage === 'classes.php' && ($_GET['mode'] ?? '') === 'edit' ? 'is-current' : '' ?>" href="classes.php?mode=edit">ویرایش صنف</a>
+                <a class="sidebar-link <?= $sidebarCurrentPage === 'classes.php' && ($_GET['mode'] ?? '') === 'delete' ? 'is-current' : '' ?>" href="classes.php?mode=delete">حذف صنف</a>
+            </div>
+        </div>
+        <div class="sidebar-group">
+            <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['school.php', 'school_configuration.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">🏫</span><span>تنظیمات مدرسه</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
+            <div class="sidebar-submenu"><a class="sidebar-link <?= $sidebarCurrentPage === 'school_configuration.php' ? 'is-current' : '' ?>" href="school_configuration.php">مشخصات مدرسه</a><a class="sidebar-link <?= $sidebarCurrentPage === 'school.php' ? 'is-current' : '' ?>" href="school.php">سال تحصیلی</a></div>
         </div>
         <?php if (in_array($sidebarRole, ['super_admin', 'admin'], true)): ?>
         <div class="sidebar-group">
