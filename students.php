@@ -236,7 +236,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <script>
 (function(){const sidebar=document.getElementById('admin-sidebar');const toggle=document.getElementById('sidebar-toggle');if(!sidebar||!toggle)return;toggle.addEventListener('click',function(){const open=sidebar.classList.toggle('is-open');toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'بستن منو':'باز کردن منو');const icon=toggle.querySelector('.sidebar-toggle-icon');if(icon)icon.textContent=open?'×':'☰';});document.addEventListener('keydown',function(event){if(event.key==='Escape'){sidebar.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','باز کردن منو');const icon=toggle.querySelector('.sidebar-toggle-icon');if(icon)icon.textContent='☰';}});})();
 </script>
-<link rel="stylesheet" href="assets/css/persian-calendar.css">
+<link rel="stylesheet" href="assets/css/persian-calendar.css?v=20261012-calendar-spacing">
 <script src="assets/js/persian-calendar.js"></script>
     <script src="assets/js/sidebar-submenus.js" defer></script>
 </body></html>
