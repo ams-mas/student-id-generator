@@ -39,7 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $grandfatherName = trim((string)($_POST['grandfather_name'] ?? ''));
             $gender = (string)($_POST['gender'] ?? 'unspecified');
             $dob = trim((string)($_POST['date_of_birth'] ?? ''));
-            $class = trim((string)($_POST['class_name'] ?? ''));
+            $classSectionId = filter_var($_POST['class_section_id'] ?? null, FILTER_VALIDATE_INT) ?: 0;
+            $class = '';
             $phone = trim((string)($_POST['phone'] ?? ''));
             $guardian = trim((string)($_POST['guardian_name'] ?? ''));
             $guardianPhone = trim((string)($_POST['guardian_phone'] ?? ''));
@@ -55,6 +56,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             if ($first === '' || $last === '' || mb_strlen($first) > 100 || mb_strlen($last) > 100) {
                 throw new RuntimeException('نام و نام خانوادگی الزامی است و نباید بیشتر از ۱۰۰ نویسه باشد.');
+            }
+            $activeYearStmt = $pdo->query('SELECT id FROM school_years WHERE is_active = 1 AND is_closed = 0 ORDER BY id DESC LIMIT 1');
+            $activeSchoolYearId = (int)($activeYearStmt->fetchColumn() ?: 0);
+            if ($classSectionId > 0) {
+                if ($activeSchoolYearId < 1) {
+                    throw new RuntimeException('ابتدا یک سال تحصیلی فعلی را در تنظیمات مدرسه فعال کنید.');
+                }
+                $sectionStmt = $pdo->prepare('SELECT grade, section_name FROM class_sections WHERE id = :id AND school_year_id = :year_id AND is_active = 1 LIMIT 1');
+                $sectionStmt->execute(['id' => $classSectionId, 'year_id' => $activeSchoolYearId]);
+                $selectedSection = $sectionStmt->fetch();
+                if (!$selectedSection) {
+                    throw new RuntimeException('صنف انتخاب‌شده مربوط به سال تحصیلی فعلی نیست یا فعال نمی‌باشد.');
+                }
+                $gradeDigits = (string)$selectedSection['grade'];
+                $class = $gradeDigits . ' ' . trim((string)$selectedSection['section_name']);
+            } elseif ($activeSchoolYearId > 0) {
+                throw new RuntimeException('لطفاً صنف دانش‌آموز را از فهرست صنف‌های سال تحصیلی فعلی انتخاب کنید.');
+            } else {
+                throw new RuntimeException('هیچ سال تحصیلی فعالی وجود ندارد. ابتدا سال تحصیلی را تنظیم کنید.');
             }
             if (!in_array($gender, ['female','male','unspecified'], true)) {
                 throw new RuntimeException('جنسیت انتخاب‌شده معتبر نیست.');
@@ -150,7 +170,13 @@ $stmt->execute($params);
 $students = $stmt->fetchAll();
 $total = (int)$pdo->query('SELECT COUNT(*) FROM students')->fetchColumn();
 $active = (int)$pdo->query('SELECT COUNT(*) FROM students WHERE is_active=1')->fetchColumn();
-$classOptions = $pdo->query("SELECT DISTINCT class_name FROM students WHERE class_name IS NOT NULL AND TRIM(class_name) <> '' ORDER BY class_name")->fetchAll(PDO::FETCH_COLUMN);
+$activeSchoolYear = $pdo->query('SELECT id, name FROM school_years WHERE is_active = 1 AND is_closed = 0 ORDER BY id DESC LIMIT 1')->fetch() ?: null;
+$classOptions = [];
+if ($activeSchoolYear) {
+    $sectionOptionsStmt = $pdo->prepare('SELECT id, grade, section_name FROM class_sections WHERE school_year_id = :year_id AND is_active = 1 ORDER BY grade ASC, section_name ASC');
+    $sectionOptionsStmt->execute(['year_id' => (int)$activeSchoolYear['id']]);
+    $classOptions = $sectionOptionsStmt->fetchAll();
+}
 $showForm = $canEdit && (isset($_GET['new']) || $editing !== null);
 $nextStudentId = (int)($pdo->query("SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'students'")->fetchColumn() ?: 0);
 if ($nextStudentId < 1) {
@@ -288,7 +314,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <div class="student-field"><label for="grandfather_name">نام پدرکلان</label><input id="grandfather_name" name="grandfather_name" maxlength="100" value="<?= student_escape($editing['grandfather_name'] ?? '') ?>"></div>
 <div class="student-field"><label for="gender">جنسیت</label><select id="gender" name="gender"><option value="unspecified">ثبت نشده</option><option value="female" <?= (($editing['gender'] ?? '')==='female')?'selected':'' ?>>دختر</option><option value="male" <?= (($editing['gender'] ?? '')==='male')?'selected':'' ?>>پسر</option></select></div>
 <div class="student-field"><label for="date_of_birth">تاریخ تولد (هجری شمسی)</label><input id="date_of_birth" name="date_of_birth" type="date" data-persian-date value="<?= student_escape($editing['date_of_birth'] ?? '') ?>"></div>
-<div class="student-field"><label for="class_name">صنف / کلاس</label><input id="class_name" name="class_name" maxlength="100" value="<?= student_escape($editing['class_name'] ?? '') ?>" placeholder="مثلاً ۱ الف"></div>
+<div class="student-field"><label for="class_section_id">صنف / کلاس سال تحصیلی فعلی *</label><select id="class_section_id" name="class_section_id" required><option value="">انتخاب صنف</option><?php foreach ($classOptions as $classOption): ?><option value="<?= (int)$classOption['id'] ?>" <?= ((int)($editing['class_section_id'] ?? 0) === (int)$classOption['id'] || (($editing['class_name'] ?? '') === ((string)$classOption['grade'].' '.(string)$classOption['section_name']))) ? 'selected' : '' ?>><?= student_escape((string)$classOption['grade'].' '.(string)$classOption['section_name']) ?></option><?php endforeach; ?></select><?php if (!$activeSchoolYear): ?><small>ابتدا سال تحصیلی فعلی را فعال کنید.</small><?php elseif (!$classOptions): ?><small>برای سال تحصیلی <?= student_escape($activeSchoolYear['name']) ?> هنوز صنفی تعریف نشده است. ابتدا در تنظیمات مدرسه صنف‌ها را ایجاد کنید.</small><?php else: ?><small>فقط صنف‌های فعال سال تحصیلی <?= student_escape($activeSchoolYear['name']) ?> نمایش داده می‌شوند.</small><?php endif; ?></div>
 </div></div>
 <div class="student-form-section"><h3>اطلاعات تماس و سرپرست</h3><div class="student-form-fields">
 <div class="student-field"><label for="phone">شماره تماس دانش‌آموز</label><input id="phone" name="phone" maxlength="40" value="<?= student_escape($editing['phone'] ?? '') ?>"></div>
