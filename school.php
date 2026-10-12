@@ -194,8 +194,8 @@ foreach ($years as $year) {
                     <input type="hidden" name="csrf_token" value="<?= school_settings_h(csrf_token()) ?>">
                     <input type="hidden" name="action" value="create_year">
                     <div><label for="year-name">نام سال تحصیلی</label><input id="year-name" name="name" required maxlength="40" placeholder="مثلاً ۱۴۰۵-۱۴۰۶"></div>
-                    <div><label for="year-start">تاریخ شروع (اختیاری)</label><input id="year-start" type="date" name="starts_on"></div>
-                    <div><label for="year-end">تاریخ پایان (اختیاری)</label><input id="year-end" type="date" name="ends_on"></div>
+                    <div><label for="year-start">تاریخ شروع (اختیاری)</label><input id="year-start" type="date" data-persian-date name="starts_on"></div>
+                    <div><label for="year-end">تاریخ پایان (اختیاری)</label><input id="year-end" type="date" data-persian-date name="ends_on"></div>
                     <div><button type="submit" class="button button-primary">ساخت و فعال‌سازی سال</button></div>
                 </form>
             </section>
@@ -232,6 +232,8 @@ foreach ($years as $year) {
         </div>
     </main>
 </div>
+<link rel="stylesheet" href="assets/css/persian-calendar.css">
+<script src="assets/js/persian-calendar.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>
