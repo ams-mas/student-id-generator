@@ -75,7 +75,7 @@ if (!$user || !password_verify($password, (string) $user['password_hash'])) {
                     locked_until = IF(
                         window_started_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 15 MINUTE),
                         NULL,
-                        IF(failed_attempts + 1 >= :threshold, DATE_ADD(UTC_TIMESTAMP(), INTERVAL ' . $lockMinutes . ' MINUTE), locked_until)
+                        IF(failed_attempts >= :threshold, DATE_ADD(UTC_TIMESTAMP(), INTERVAL ' . $lockMinutes . ' MINUTE), locked_until)
                     ),
                     window_started_at = IF(window_started_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 15 MINUTE), UTC_TIMESTAMP(), window_started_at)'
             );
