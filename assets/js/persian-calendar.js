@@ -115,5 +115,11 @@
     });
     document.addEventListener('click', event => { if(!wrapper.contains(event.target)&&event.target!==visible) wrapper.hidden=true; });
   }
+  document.querySelectorAll('[data-persian-display-date]').forEach(element => {
+    const date = fromIso(element.dataset.persianDisplayDate);
+    if (!date) { element.textContent = '—'; return; }
+    const p = partsOf(date);
+    element.textContent = faDigits(p.day) + ' ' + months[p.month - 1] + ' ' + faDigits(p.year);
+  });
   document.querySelectorAll('input[type="date"][data-persian-date]').forEach(attach);
 })();
