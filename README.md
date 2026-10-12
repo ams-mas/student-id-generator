@@ -41,7 +41,7 @@ student-id-generator/
    E:\xampp\php\php.exe scripts\create_admin.php
    ```
 
-   Choose a username and a strong password of at least 12 characters, then confirm the password. The CLI script creates a password hash; it does not store the plain-text password. The terminal may display typed password characters, so do this privately and do not share screenshots of the setup.
+   Choose a username and a password of at least 8 characters, then confirm the password. The CLI script creates a password hash; it does not store the plain-text password. The terminal may display typed password characters, so do this privately and do not share screenshots of the setup.
 5. Visit [http://localhost/student-id-generator/](http://localhost/student-id-generator/) and sign in with the account you created.
 6. Confirm the original generator appears at [http://localhost/student-id-generator/dashboard.php](http://localhost/student-id-generator/dashboard.php), then test the preview, photo preview, print, and sign-out buttons.
 
