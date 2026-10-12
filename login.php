@@ -24,22 +24,21 @@ if ($username === '' || strlen($username) > 80 || $password === '' || strlen($pa
 $pdo = database_connection();
 
 /*
- * Rate-limit by username+client IP and by client IP. REMOTE_ADDR is used
- * deliberately; do not trust forwarded headers unless a trusted proxy is configured.
- * A school LAN can share one IP, so the network-wide threshold is higher than
- * the per-username-and-IP threshold.
+ * Each real account is locked for 24 hours after five incorrect passwords
+ * within 15 minutes. A separate, higher IP-only limit helps slow attacks on
+ * unknown usernames without locking every school user after a few mistakes.
+ * Use REMOTE_ADDR; do not trust forwarded headers without a trusted proxy.
  */
 $clientIp = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-$pairKey = hash('sha256', "login-pair\0" . $username . "\0" . $clientIp);
 $ipKey = hash('sha256', "login-ip\0" . $clientIp);
 
 try {
     $limitStmt = $pdo->prepare(
         'SELECT bucket_key, failed_attempts, locked_until
          FROM login_rate_limits
-         WHERE bucket_key IN (:pair_key, :ip_key)'
+         WHERE bucket_key = :ip_key'
     );
-    $limitStmt->execute(['pair_key' => $pairKey, 'ip_key' => $ipKey]);
+    $limitStmt->execute(['ip_key' => $ipKey]);
     $limits = $limitStmt->fetchAll();
     $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
     foreach ($limits as $limit) {
@@ -57,6 +56,21 @@ try {
     );
     $statement->execute(['username' => $username]);
     $user = $statement->fetch();
+
+    if ($user) {
+        $accountLockStmt = $pdo->prepare(
+            'SELECT locked_until FROM user_login_lockouts WHERE user_id = :user_id LIMIT 1'
+        );
+        $accountLockStmt->execute(['user_id' => (int) $user['id']]);
+        $accountLock = $accountLockStmt->fetch();
+        if ($accountLock && !empty($accountLock['locked_until'])) {
+            $lockedUntil = new DateTimeImmutable((string) $accountLock['locked_until'], new DateTimeZone('UTC'));
+            if ($lockedUntil > new DateTimeImmutable('now', new DateTimeZone('UTC'))) {
+                header('Location: index.php?account_locked=1');
+                exit;
+            }
+        }
+    }
 } catch (PDOException $exception) {
     error_log('Student ID Generator login service error: ' . $exception->getMessage());
     header('Location: index.php?database=1');
@@ -81,10 +95,25 @@ if (!$user || !password_verify($password, (string) $user['password_hash'])) {
             );
             $statement->execute(['bucket_key' => $key, 'threshold' => $threshold]);
         };
-        $recordFailure($pdo, $pairKey, 5, 15);
+        if ($user) {
+            $accountFailure = $pdo->prepare(
+                'INSERT INTO user_login_lockouts (user_id, failed_attempts, window_started_at, locked_until)
+                 VALUES (:user_id, 1, UTC_TIMESTAMP(), NULL)
+                 ON DUPLICATE KEY UPDATE
+                    failed_attempts = IF(window_started_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 15 MINUTE), 1, failed_attempts + 1),
+                    locked_until = IF(
+                        window_started_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 15 MINUTE),
+                        NULL,
+                        IF(failed_attempts >= 5, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 1 DAY), locked_until)
+                    ),
+                    window_started_at = IF(window_started_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 15 MINUTE), UTC_TIMESTAMP(), window_started_at)'
+            );
+            $accountFailure->execute(['user_id' => (int) $user['id']]);
+        }
+
         $recordFailure($pdo, $ipKey, 40, 10);
 
-        // Keep the table small without deleting active lockouts.
+        // Keep the rate-limit table small without deleting active IP lockouts.
         $pdo->exec('DELETE FROM login_rate_limits WHERE updated_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 2 DAY) AND (locked_until IS NULL OR locked_until < UTC_TIMESTAMP())');
     } catch (PDOException $exception) {
         error_log('Student ID Generator login rate-limit update failed: ' . $exception->getMessage());
@@ -100,13 +129,13 @@ if ((int) $user['is_active'] !== 1) {
     exit;
 }
 
-// Clear this username+IP failure bucket after successful authentication.
-// Keep the IP-wide bucket to prevent successful logins from resetting network limits.
+// Clear this account's failed-password history after successful authentication.
+// Keep the IP-wide bucket so successful logins cannot reset the network limit.
 try {
-    $clearStmt = $pdo->prepare('DELETE FROM login_rate_limits WHERE bucket_key = :bucket_key');
-    $clearStmt->execute(['bucket_key' => $pairKey]);
+    $clearAccountStmt = $pdo->prepare('DELETE FROM user_login_lockouts WHERE user_id = :user_id');
+    $clearAccountStmt->execute(['user_id' => (int) $user['id']]);
 } catch (PDOException $exception) {
-    error_log('Student ID Generator login rate-limit cleanup failed: ' . $exception->getMessage());
+    error_log('Student ID Generator account lockout cleanup failed: ' . $exception->getMessage());
 }
 
 session_regenerate_id(true);
