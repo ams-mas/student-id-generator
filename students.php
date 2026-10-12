@@ -173,7 +173,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <label for="first_name">نام *</label><input id="first_name" name="first_name" required maxlength="100" value="<?= student_escape($editing['first_name'] ?? '') ?>">
 <label for="last_name">نام خانوادگی *</label><input id="last_name" name="last_name" required maxlength="100" value="<?= student_escape($editing['last_name'] ?? '') ?>">
 <label for="gender">جنسیت</label><select id="gender" name="gender"><option value="unspecified">ثبت نشده</option><option value="female" <?= (($editing['gender'] ?? '')==='female')?'selected':'' ?>>دختر</option><option value="male" <?= (($editing['gender'] ?? '')==='male')?'selected':'' ?>>پسر</option></select>
-<label for="date_of_birth">تاریخ تولد (میلادی)</label><input id="date_of_birth" name="date_of_birth" type="date" value="<?= student_escape($editing['date_of_birth'] ?? '') ?>">
+<label for="date_of_birth">تاریخ تولد (هجری شمسی)</label><input id="date_of_birth" name="date_of_birth" type="date" data-persian-date value="<?= student_escape($editing['date_of_birth'] ?? '') ?>">
 <label for="class_name">صنف / کلاس</label><input id="class_name" name="class_name" maxlength="100" value="<?= student_escape($editing['class_name'] ?? '') ?>">
 <label for="phone">شماره تماس دانش‌آموز</label><input id="phone" name="phone" maxlength="40" value="<?= student_escape($editing['phone'] ?? '') ?>">
 <label for="guardian_name">نام والد / سرپرست</label><input id="guardian_name" name="guardian_name" maxlength="200" value="<?= student_escape($editing['guardian_name'] ?? '') ?>">
@@ -194,4 +194,6 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <script>
 (function(){const sidebar=document.getElementById('admin-sidebar');const toggle=document.getElementById('sidebar-toggle');if(!sidebar||!toggle)return;toggle.addEventListener('click',function(){const open=sidebar.classList.toggle('is-open');toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'بستن منو':'باز کردن منو');const icon=toggle.querySelector('.sidebar-toggle-icon');if(icon)icon.textContent=open?'×':'☰';});document.addEventListener('keydown',function(event){if(event.key==='Escape'){sidebar.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','باز کردن منو');const icon=toggle.querySelector('.sidebar-toggle-icon');if(icon)icon.textContent='☰';}});})();
 </script>
+<link rel="stylesheet" href="assets/css/persian-calendar.css">
+<script src="assets/js/persian-calendar.js"></script>
 </body></html>
