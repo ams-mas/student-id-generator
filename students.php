@@ -165,9 +165,25 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 .filter-actions{display:flex;gap:8px;flex-wrap:wrap;grid-column:1/-1}
 .button-danger{background:#b42332;color:#fff;border:1px solid #b42332}
 
+.student-form-panel{max-width:1100px;margin-inline:auto}
+.student-form-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.student-form-heading h2{margin:0 0 6px}
+.student-form-heading p{margin:0}
+.student-form-section{padding:18px 0;border-bottom:1px solid var(--line)}
+.student-form-section:last-of-type{border-bottom:0}
+.student-form-section h3{font-size:16px;margin:0 0 14px;color:var(--ink)}
+.student-form-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px}
+.student-field{min-width:0}
+.student-field label{display:block;margin:0 0 7px;font-weight:700;font-size:14px}
+.student-field input,.student-field select,.student-field textarea{box-sizing:border-box;width:100%;min-height:44px;padding:10px 12px;border:1px solid #d5deeb;border-radius:10px;background:#fff;color:var(--ink);font:inherit}
+.student-field textarea{min-height:88px;resize:vertical}
+.student-field small{display:block;margin-top:6px;color:#64748b;font-size:12px;line-height:1.7}
+.student-number-note{display:flex;flex-direction:column;justify-content:center;min-height:70px;padding:10px 12px;border:1px dashed #cbd5e1;border-radius:10px;background:#f8fafc}
+.student-number-note span{font-weight:700;font-size:14px}
+.student-field-wide{grid-column:1/-1}
 .students-form label{display:block;margin:12px 0 6px;font-weight:700;font-size:14px}
-.students-form input,.students-form select,.students-form textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid #d5deeb;border-radius:10px;background:#fff;color:var(--ink);font:inherit}
-.students-form textarea{min-height:78px;resize:vertical}
+.students-form input,.students-form select,.students-form textarea{box-sizing:border-box;width:100%;min-height:44px;padding:10px 12px;border:1px solid #d5deeb;border-radius:10px;background:#fff;color:var(--ink);font:inherit}
+.students-form textarea{min-height:88px;resize:vertical}
 .students-form .form-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .students-form .button{font-size:14px}
 .students-table-wrap{overflow-x:auto;width:100%}
@@ -186,6 +202,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 .students-metric{padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
 .students-metric strong{display:block;font-size:20px}
 @media(max-width:1000px){.students-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.student-form-fields{grid-template-columns:1fr}.student-field-wide{grid-column:auto}.student-form-heading{align-items:flex-start;flex-direction:column}}
 @media(max-width:600px){.students-filters{grid-template-columns:1fr}.students-search input{max-width:none}.student-actions{flex-wrap:wrap}}
 </style>
 </head>
@@ -244,27 +261,32 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <?php if ($success !== ''): ?><div class="students-flash" role="status"><?= student_escape($success) ?></div><?php endif; ?>
 <?php if ($error !== ''): ?><div class="students-flash students-error" role="alert"><?= student_escape($error) ?></div><?php endif; ?>
 <div class="students-metrics"><div class="students-metric"><span>همه دانش‌آموزان</span><strong><?= $total ?></strong></div><div class="students-metric"><span>پرونده‌های فعال</span><strong><?= $active ?></strong></div></div>
-<div class="student-toolbar"><?php if ($canEdit): ?><a class="button button-primary" href="students.php?new=1">＋ ثبت دانش‌آموز</a><?php endif; ?><a class="button button-secondary" href="students.php">فهرست دانش‌آموزان</a></div>
+<?php $mode = (string)($_GET['mode'] ?? ''); ?>
+<?php if (!$showForm): ?><div class="student-toolbar"><?php if ($canEdit): ?><a class="button button-primary" href="students.php?new=1">＋ ثبت دانش‌آموز</a><?php endif; ?><a class="button button-secondary" href="students.php">فهرست دانش‌آموزان</a></div><?php endif; ?>
 <div class="students-grid">
 <?php if ($showForm): ?>
-<section class="panel"><h2><?= $editing ? 'ویرایش دانش‌آموز فعلی' : 'ثبت دانش‌آموز جدید' ?></h2>
+<section class="panel student-form-panel"><div class="student-form-heading"><div><p class="eyebrow"><?= $editing ? 'ویرایش پرونده' : 'ثبت نام' ?></p><h2><?= $editing ? 'ویرایش دانش‌آموز فعلی' : 'ثبت دانش‌آموز جدید' ?></h2><p class="muted">اطلاعات را در بخش‌های زیر وارد کنید.</p></div><a class="button button-secondary" href="students.php">بازگشت به فهرست</a></div>
 <form class="students-form" method="post" action="students.php">
 <input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="student_id" value="<?= student_escape($editing['id'] ?? '') ?>">
-<label for="register_book_number">شماره کتاب اساس (برای دانش‌آموزان قبلی)</label><input id="register_book_number" name="register_book_number" maxlength="100" value="<?= student_escape($editing['register_book_number'] ?? '') ?>" placeholder="شماره ثبت‌شده در کتاب اساس"><p class="help-text">اگر دانش‌آموز پیش از ایجاد این سامانه ثبت شده، شماره اصلی کتاب اساس را اینجا وارد کنید.</p>
-<?php if ($editing): ?><label for="student_number">شماره دانش‌آموزی داخلی</label><input id="student_number" name="student_number" required maxlength="40" value="<?= student_escape($editing['student_number'] ?? '') ?>"><?php else: ?><p class="help-text">شماره دانش‌آموزی داخلی هنگام ثبت به‌صورت خودکار ساخته می‌شود.</p><?php endif; ?>
-<label for="first_name">نام *</label><input id="first_name" name="first_name" required maxlength="100" value="<?= student_escape($editing['first_name'] ?? '') ?>">
-<label for="last_name">نام خانوادگی *</label><input id="last_name" name="last_name" required maxlength="100" value="<?= student_escape($editing['last_name'] ?? '') ?>">
-<label for="gender">جنسیت</label><select id="gender" name="gender"><option value="unspecified">ثبت نشده</option><option value="female" <?= (($editing['gender'] ?? '')==='female')?'selected':'' ?>>دختر</option><option value="male" <?= (($editing['gender'] ?? '')==='male')?'selected':'' ?>>پسر</option></select>
-<label for="date_of_birth">تاریخ تولد (هجری شمسی)</label><input id="date_of_birth" name="date_of_birth" type="date" data-persian-date value="<?= student_escape($editing['date_of_birth'] ?? '') ?>">
-<label for="class_name">صنف / کلاس</label><input id="class_name" name="class_name" maxlength="100" value="<?= student_escape($editing['class_name'] ?? '') ?>">
-<label for="phone">شماره تماس دانش‌آموز</label><input id="phone" name="phone" maxlength="40" value="<?= student_escape($editing['phone'] ?? '') ?>">
-<label for="guardian_name">نام والد / سرپرست</label><input id="guardian_name" name="guardian_name" maxlength="200" value="<?= student_escape($editing['guardian_name'] ?? '') ?>">
-<label for="guardian_phone">شماره تماس سرپرست</label><input id="guardian_phone" name="guardian_phone" maxlength="40" value="<?= student_escape($editing['guardian_phone'] ?? '') ?>">
-<label for="address">نشانی</label><textarea id="address" name="address" maxlength="500"><?= student_escape($editing['address'] ?? '') ?></textarea>
+<div class="student-form-section"><h3>مشخصات دانش‌آموز</h3><div class="student-form-fields">
+<div class="student-field"><label for="register_book_number">شماره کتاب اساس (برای دانش‌آموزان قبلی)</label><input id="register_book_number" name="register_book_number" maxlength="100" value="<?= student_escape($editing['register_book_number'] ?? '') ?>" placeholder="شماره ثبت‌شده در کتاب اساس"><small>برای دانش‌آموزانی که پیش از این سامانه ثبت شده‌اند.</small></div>
+<?php if ($editing): ?><div class="student-field"><label for="student_number">شماره دانش‌آموزی داخلی</label><input id="student_number" name="student_number" required maxlength="40" value="<?= student_escape($editing['student_number'] ?? '') ?>"></div><?php else: ?><div class="student-field student-number-note"><span>شماره داخلی</span><small>هنگام ثبت به‌صورت خودکار ساخته می‌شود.</small></div><?php endif; ?>
+<div class="student-field"><label for="first_name">نام *</label><input id="first_name" name="first_name" required maxlength="100" value="<?= student_escape($editing['first_name'] ?? '') ?>"></div>
+<div class="student-field"><label for="last_name">نام خانوادگی *</label><input id="last_name" name="last_name" required maxlength="100" value="<?= student_escape($editing['last_name'] ?? '') ?>"></div>
+<div class="student-field"><label for="gender">جنسیت</label><select id="gender" name="gender"><option value="unspecified">ثبت نشده</option><option value="female" <?= (($editing['gender'] ?? '')==='female')?'selected':'' ?>>دختر</option><option value="male" <?= (($editing['gender'] ?? '')==='male')?'selected':'' ?>>پسر</option></select></div>
+<div class="student-field"><label for="date_of_birth">تاریخ تولد (هجری شمسی)</label><input id="date_of_birth" name="date_of_birth" type="date" data-persian-date value="<?= student_escape($editing['date_of_birth'] ?? '') ?>"></div>
+<div class="student-field"><label for="class_name">صنف / کلاس</label><input id="class_name" name="class_name" maxlength="100" value="<?= student_escape($editing['class_name'] ?? '') ?>" placeholder="مثلاً ۱ الف"></div>
+</div></div>
+<div class="student-form-section"><h3>اطلاعات تماس و سرپرست</h3><div class="student-form-fields">
+<div class="student-field"><label for="phone">شماره تماس دانش‌آموز</label><input id="phone" name="phone" maxlength="40" value="<?= student_escape($editing['phone'] ?? '') ?>"></div>
+<div class="student-field"><label for="guardian_name">نام والد / سرپرست</label><input id="guardian_name" name="guardian_name" maxlength="200" value="<?= student_escape($editing['guardian_name'] ?? '') ?>"></div>
+<div class="student-field"><label for="guardian_phone">شماره تماس سرپرست</label><input id="guardian_phone" name="guardian_phone" maxlength="40" value="<?= student_escape($editing['guardian_phone'] ?? '') ?>"></div>
+<div class="student-field student-field-wide"><label for="address">نشانی</label><textarea id="address" name="address" maxlength="500"><?= student_escape($editing['address'] ?? '') ?></textarea></div>
+</div></div>
 <div class="form-actions"><button class="button button-primary" type="submit"><?= $editing ? 'ذخیره تغییرات' : 'ثبت دانش‌آموز' ?></button><a class="button button-secondary" href="students.php">بازگشت به فهرست</a></div>
 </form></section>
 <?php endif; ?>
-<section class="panel"><h2>فهرست دانش‌آموزان</h2>
+<?php if (!$showForm): ?><section class="panel"><h2>فهرست دانش‌آموزان</h2>
 <form class="students-search students-filters" method="get" action="students.php">
 <label>جست‌وجو<input type="search" name="q" value="<?= student_escape($search) ?>" placeholder="نام، شماره یا سرپرست"></label>
 <label>صنف / کلاس<select name="class_name"><option value="">همه صنف‌ها</option><?php foreach ($classOptions as $classOption): ?><option value="<?= student_escape($classOption) ?>" <?= $filterClass === $classOption ? 'selected' : '' ?>><?= student_escape($classOption) ?></option><?php endforeach; ?></select></label>
@@ -276,8 +298,8 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <?php if (!$students): ?><tr><td colspan="<?= $canEdit ? 8 : 7 ?>">هنوز دانش‌آموزی ثبت نشده است.</td></tr><?php endif; ?>
 <?php foreach ($students as $student): ?><tr class="<?= (int)$student['is_active']===1 ? '' : 'student-inactive' ?>"><td><?= (int)$student['id'] ?></td><td><?= student_escape($student['register_book_number'] ?: '—') ?></td><td><?= student_escape($student['student_number']) ?></td><td><?= student_escape($student['first_name'].' '.$student['last_name']) ?></td><td><?= student_escape($student['class_name'] ?: '—') ?></td><td><?= student_escape($student['guardian_name'] ?: '—') ?></td><td><?= (int)$student['is_active']===1 ? 'فعال' : 'غیرفعال' ?></td><?php if ($canEdit): ?><td><div class="student-actions"><?php if (($mode = (string)($_GET['mode'] ?? '')) !== 'delete'): ?><a class="button button-secondary" href="students.php?edit=<?= (int)$student['id'] ?>">ویرایش</a><?php endif; ?><form method="post" action="students.php" onsubmit="return confirm('آیا مطمئن هستید که می‌خواهید پرونده این دانش‌آموز را برای همیشه حذف کنید؟ این کار قابل بازگشت نیست.');"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-danger" type="submit">حذف</button></form><?php if (($_GET['mode'] ?? '') !== 'edit'): ?><form method="post" action="students.php"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-secondary" type="submit"><?= (int)$student['is_active']===1 ? 'غیرفعال‌سازی' : 'فعال‌سازی' ?></button></form><?php endif; ?></div></td><?php endif; ?></tr><?php endforeach; ?>
 </tbody></table></div>
-<p class="help-text">حداکثر ۵۰۰ پرونده در این فهرست نمایش داده می‌شود. از جست‌وجو برای پیدا کردن رکوردها استفاده کنید.</p>
-</section></div>
+<p class="help-text">حداکثر ۵۰۰ پرونده در این فهرست نمایش داده می‌شود. از فیلترها برای پیدا کردن رکوردها استفاده کنید.</p>
+</section><?php endif; ?></div>
 </main></div>
 <script>
 (function(){const sidebar=document.getElementById('admin-sidebar');const toggle=document.getElementById('sidebar-toggle');if(!sidebar||!toggle)return;toggle.addEventListener('click',function(){const open=sidebar.classList.toggle('is-open');toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'بستن منو':'باز کردن منو');const icon=toggle.querySelector('.sidebar-toggle-icon');if(icon)icon.textContent=open?'×':'☰';});document.addEventListener('keydown',function(event){if(event.key==='Escape'){sidebar.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','باز کردن منو');const icon=toggle.querySelector('.sidebar-toggle-icon');if(icon)icon.textContent='☰';}});})();
