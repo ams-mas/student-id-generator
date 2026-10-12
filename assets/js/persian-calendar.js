@@ -74,6 +74,11 @@
     wrapper.hidden = true;
     wrapper.innerHTML = '<div class="pc-head"><button type="button" data-step="-1" aria-label="ماه قبل">‹</button><div class="pc-selectors"><select class="pc-month-select" aria-label="ماه"></select><select class="pc-year-select" aria-label="سال"></select></div><button type="button" data-step="1" aria-label="ماه بعد">›</button></div><div class="pc-week"></div><div class="pc-days"></div><div class="pc-foot"><button type="button" class="pc-today">امروز</button><button type="button" class="pc-clear">پاک کردن</button><button type="button" class="pc-close">بستن</button></div>';
     visible.parentNode.insertBefore(wrapper, visible.nextSibling);
+    const calendarContainer = document.createElement('div');
+    calendarContainer.className = 'persian-calendar-container';
+    visible.parentNode.insertBefore(calendarContainer, visible);
+    calendarContainer.appendChild(visible);
+    calendarContainer.appendChild(wrapper);
     const monthSelect = wrapper.querySelector('.pc-month-select');
     const yearSelect = wrapper.querySelector('.pc-year-select');
     months.forEach((month, index) => { const option = document.createElement('option'); option.value = String(index + 1); option.textContent = month; monthSelect.appendChild(option); });
