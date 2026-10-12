@@ -176,7 +176,7 @@ try {
 <?php if (in_array(current_role(), ['super_admin','admin'], true)): ?>
 <div class="sidebar-group">
 <button type="button" class="sidebar-group-title <?= $currentPage === 'users.php' ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">⚙</span><span>مدیریت کاربران</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
-<div class="sidebar-submenu"><a class="sidebar-link <?= $currentPage === 'users.php' ? 'is-current' : '' ?>" href="users.php">فهرست و افزودن کاربران</a></div>
+<div class="sidebar-submenu"><a class="sidebar-link <?= $currentPage === 'users.php' ? 'is-current' : '' ?>" href="users.php">لیست کاربران</a></div>
 </div>
 <a class="sidebar-link <?= $currentPage === 'database_updates.php' ? 'is-current' : '' ?>" href="database_updates.php"><span class="sidebar-icon" aria-hidden="true">↻</span><span>به‌روزرسانی پایگاه داده</span></a>
 <?php endif; ?>
