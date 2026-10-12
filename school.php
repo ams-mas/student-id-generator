@@ -264,7 +264,7 @@ foreach ($years as $year) {
         </div>
     </main>
 </div>
-<link rel="stylesheet" href="assets/css/persian-calendar.css">
+<link rel="stylesheet" href="assets/css/persian-calendar.css?v=20261012-calendar-spacing">
 <script src="assets/js/persian-calendar.js"></script>
 <script src="assets/js/app.js"></script>
     <script src="assets/js/sidebar-submenus.js" defer></script>
