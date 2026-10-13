@@ -52,7 +52,7 @@ try {
     }
 
     $statement = $pdo->prepare(
-        'SELECT id, username, password_hash, role, is_active FROM users WHERE username = :username LIMIT 1'
+        'SELECT id, username, full_name, password_hash, role, is_active FROM users WHERE username = :username LIMIT 1'
     );
     $statement->execute(['username' => $username]);
     $user = $statement->fetch();
@@ -141,6 +141,7 @@ try {
 session_regenerate_id(true);
 $_SESSION['user_id'] = (int) $user['id'];
 $_SESSION['username'] = (string) $user['username'];
+$_SESSION['full_name'] = trim((string) ($user['full_name'] ?? '')) !== '' ? (string) $user['full_name'] : (string) $user['username'];
 $_SESSION['role'] = (string) $user['role'];
 unset($_SESSION['csrf_token']);
 
