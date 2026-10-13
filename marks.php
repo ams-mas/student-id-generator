@@ -23,7 +23,7 @@ $selectedSectionId = filter_var($_POST['section_id'] ?? $_GET['section_id'] ?? n
 $subject = trim((string)($_POST['subject_name'] ?? $_GET['subject'] ?? ''));
 $assessment = trim((string)($_POST['assessment_name'] ?? $_GET['assessment'] ?? ''));
 $maxScore = filter_var($_POST['max_score'] ?? 100, FILTER_VALIDATE_FLOAT);
-if ($maxScore === false || !is_finite((float)$maxScore) || $maxScore <= 0 || $maxScore > 100000) $maxScore = 100.0;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && ($maxScore === false || !is_finite((float)$maxScore) || $maxScore <= 0 || $maxScore > 100000)) $maxScore = 100.0;
 $success = '';
 $error = '';
 function marks_h(mixed $v): string { return htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
