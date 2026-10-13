@@ -236,7 +236,8 @@ $username = (string) $_SESSION['username'];
 <div class="admin-layout">
     
 
-    <main class="admin-main">
+    <?php require __DIR__ . '/includes/sidebar.php'; ?>
+        <main class="admin-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
         <header class="page-header dashboard-header">
             <div><p class="eyebrow">پنل مدیریت</p><h1>لیست کاربران</h1><p class="muted">تمام حساب‌های کاربری، ادمین‌ها و سوپر ادمین‌ها به ترتیب شناسه نمایش داده می‌شوند.</p></div>
