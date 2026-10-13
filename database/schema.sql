@@ -8,6 +8,7 @@ USE student_id_generator;
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     username VARCHAR(80) NOT NULL,
+    full_name VARCHAR(160) NOT NULL DEFAULT '',
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('super_admin', 'admin', 'user') NOT NULL DEFAULT 'user',
     is_active TINYINT(1) NOT NULL DEFAULT 1,
