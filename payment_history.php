@@ -76,7 +76,7 @@ try {
     $totalPages = max(1, (int)ceil($totalRows / $perPage));
     if ($page > $totalPages) { $page = $totalPages; $offset = ($page - 1) * $perPage; }
 
-    $sql = 'SELECT p.id,p.receipt_number,p.amount,p.payment_method,p.notes,p.received_at,c.period_name,y.name AS year_name,s.student_number,s.first_name,s.last_name,s.father_name,u.username AS received_by_username' . $fromSql . ' ORDER BY p.received_at DESC,p.id DESC LIMIT ? OFFSET ?';
+    $sql = 'SELECT p.id,p.receipt_number,p.amount,p.payment_method,p.notes,p.received_at,c.period_name,y.name AS year_name,s.student_number,s.first_name,s.last_name,s.father_name,u.full_name AS received_by_full_name,u.username AS received_by_username' . $fromSql . ' ORDER BY p.received_at DESC,p.id DESC LIMIT ? OFFSET ?';
     $stmt = $pdo->prepare($sql);
     foreach ($params as $i => $value) $stmt->bindValue($i + 1, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
     $stmt->bindValue(count($params) + 1, $perPage, PDO::PARAM_INT);
@@ -84,7 +84,7 @@ try {
     $stmt->execute();
     $rows = $stmt->fetchAll();
 
-    $receivers = $pdo->query('SELECT DISTINCT u.id,u.username FROM users u JOIN student_fee_payments p ON p.received_by=u.id ORDER BY u.username')->fetchAll();
+    $receivers = $pdo->query('SELECT DISTINCT u.id,u.username,u.full_name FROM users u JOIN student_fee_payments p ON p.received_by=u.id ORDER BY u.full_name,u.username')->fetchAll();
 } catch (Throwable $e) {
     if ($e instanceof RuntimeException) $error = $e->getMessage();
     else {
@@ -120,12 +120,12 @@ $pageUrl = static function (int $p): string {
 <label id="ph-from-field">از تاریخ<input type="date" name="date_from" value="<?=payment_history_h($dateFrom)?>"></label>
 <label id="ph-to-field">تا تاریخ<input type="date" name="date_to" value="<?=payment_history_h($dateTo)?>"></label>
 <label>شاگرد / شماره رسید<input type="search" name="q" value="<?=payment_history_h($search)?>" placeholder="شماره شاگرد، نام، نام پدر یا رسید"></label>
-<label>دریافت‌کنندهٔ وجه<select name="received_by"><option value="">همهٔ کاربران</option><?php foreach($receivers as $receiver):?><option value="<?=(int)$receiver['id']?>" <?=((string)$receivedBy===(string)$receiver['id'])?'selected':''?>><?=payment_history_h($receiver['username'])?></option><?php endforeach;?></select></label>
+<label>دریافت‌کنندهٔ وجه<select name="received_by"><option value="">همهٔ کاربران</option><?php foreach($receivers as $receiver):?><option value="<?=(int)$receiver['id']?>" <?=((string)$receivedBy===(string)$receiver['id'])?'selected':''?>><?=payment_history_h(trim((string)$receiver['full_name'])!==''?$receiver['full_name']:$receiver['username'])?></option><?php endforeach;?></select></label>
 <button class="button button-primary" type="submit">اعمال فیلتر</button><a class="button button-secondary" href="payment_history.php">پاک‌کردن فیلترها</a>
 </form>
 <div class="ph-stats"><div class="ph-stat"><span>تعداد پرداخت‌ها</span><strong><?=number_format($totalRows)?></strong></div><div class="ph-stat"><span>مجموع مبلغ مطابق فیلتر</span><strong><?=number_format($totalAmount,2)?></strong></div></div>
 <?php if(!$rows):?><p>پرداختی مطابق فیلترهای انتخاب‌شده پیدا نشد.</p><?php else:?><div class="ph-table-wrap"><table class="ph-table"><thead><tr><th>شماره رسید</th><th>شماره شاگرد</th><th>نام شاگرد</th><th>نام پدر</th><th>سال تعلیمی</th><th>دوره</th><th>مبلغ</th><th>روش پرداخت</th><th>دریافت‌کنندهٔ وجه</th><th>تاریخ و ساعت</th></tr></thead><tbody>
-<?php foreach($rows as $row):?><tr><td><a href="fee_receipt.php?receipt=<?=rawurlencode((string)$row['receipt_number'])?>" target="_blank" rel="noopener"><?=payment_history_h($row['receipt_number'])?></a></td><td><?=payment_history_h($row['student_number'])?></td><td><?=payment_history_h($row['first_name'].' '.$row['last_name'])?></td><td><?=payment_history_h($row['father_name']?:'—')?></td><td><?=payment_history_h($row['year_name'])?></td><td><?=payment_history_h($row['period_name'])?></td><td><?=number_format((float)$row['amount'],2)?></td><td><?=payment_history_h($methods[$row['payment_method']]??'دیگر')?></td><td><?=payment_history_h($row['received_by_username']?:'ثبت نشده (پرداخت قدیمی)')?></td><td><?=payment_history_h($row['received_at'])?></td></tr><?php endforeach;?></tbody></table></div>
+<?php foreach($rows as $row):?><tr><td><a href="fee_receipt.php?receipt=<?=rawurlencode((string)$row['receipt_number'])?>" target="_blank" rel="noopener"><?=payment_history_h($row['receipt_number'])?></a></td><td><?=payment_history_h($row['student_number'])?></td><td><?=payment_history_h($row['first_name'].' '.$row['last_name'])?></td><td><?=payment_history_h($row['father_name']?:'—')?></td><td><?=payment_history_h($row['year_name'])?></td><td><?=payment_history_h($row['period_name'])?></td><td><?=number_format((float)$row['amount'],2)?></td><td><?=payment_history_h($methods[$row['payment_method']]??'دیگر')?></td><td><?=payment_history_h($row['received_by_full_name']?:($row['received_by_username']?:'ثبت نشده (پرداخت قدیمی)'))?></td><td><?=payment_history_h($row['received_at'])?></td></tr><?php endforeach;?></tbody></table></div>
 <?php if($totalPages>1):?><nav class="ph-pagination" aria-label="صفحه‌های تاریخچه"><?php if($page>1):?><a href="<?=payment_history_h($pageUrl($page-1))?>">قبلی</a><?php endif;?><?php for($p=max(1,$page-2);$p<=min($totalPages,$page+2);$p++):?><?php if($p===$page):?><span class="current"><?=$p?></span><?php else:?><a href="<?=payment_history_h($pageUrl($p))?>"><?=$p?></a><?php endif;?><?php endfor;?><?php if($page<$totalPages):?><a href="<?=payment_history_h($pageUrl($page+1))?>">بعدی</a><?php endif;?></nav><?php endif;?>
 <?php endif;?>
 </section></div></main></div><script src="assets/js/sidebar-clock.js" defer></script><script src="assets/js/sidebar-submenus.js" defer></script>
