@@ -51,11 +51,22 @@ try {
         }
     }
 
-    $statement = $pdo->prepare(
-        'SELECT id, username, full_name, password_hash, role, is_active FROM users WHERE username = :username LIMIT 1'
-    );
-    $statement->execute(['username' => $username]);
-    $user = $statement->fetch();
+    try {
+        $statement = $pdo->prepare(
+            'SELECT id, username, full_name, password_hash, role, is_active FROM users WHERE username = :username LIMIT 1'
+        );
+        $statement->execute(['username' => $username]);
+        $user = $statement->fetch();
+    } catch (PDOException $nameColumnException) {
+        // Allow login to continue during deployment before the full_name migration runs.
+        if ((int) ($nameColumnException->errorInfo[1] ?? 0) !== 1054) throw $nameColumnException;
+        $statement = $pdo->prepare(
+            'SELECT id, username, password_hash, role, is_active FROM users WHERE username = :username LIMIT 1'
+        );
+        $statement->execute(['username' => $username]);
+        $user = $statement->fetch();
+        if ($user) $user['full_name'] = '';
+    }
 
     if ($user) {
         $accountLockStmt = $pdo->prepare(
