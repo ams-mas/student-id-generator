@@ -599,3 +599,113 @@ html[lang="fa"] .muted{
 @media (max-width: 420px) {
   .admin-topbar-user small { display: none; }
 }
+
+
+/* Final shared sidebar layout override: consistent on every admin page. */
+@media (min-width: 851px) {
+  .admin-layout { display: block !important; width: 100% !important; max-width: none !important; margin: 0 !important; }
+  .admin-sidebar,
+  .admin-sidebar:not(.is-open),
+  .admin-sidebar.is-open,
+  .admin-sidebar:hover,
+  .admin-sidebar:focus-within {
+    position: fixed !important;
+    display: flex !important;
+    flex-direction: column !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    width: 286px !important;
+    min-width: 286px !important;
+    max-width: 286px !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    padding: 24px 18px 18px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    transform: none !important;
+    transition: none !important;
+    z-index: 1000 !important;
+  }
+  .admin-sidebar .sidebar-toggle { display: none !important; }
+  .admin-sidebar::before, .admin-sidebar::after { display: none !important; content: none !important; }
+  .admin-main {
+    display: block !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 286px 0 0 !important;
+    padding: 36px clamp(18px, 3vw, 42px) 24px !important;
+    box-sizing: border-box !important;
+  }
+}
+@media (max-width: 850px) {
+  .admin-layout { display: block !important; width: 100% !important; margin: 0 !important; }
+  .admin-sidebar,
+  .admin-sidebar:not(.is-open),
+  .admin-sidebar:hover,
+  .admin-sidebar:focus-within {
+    position: fixed !important;
+    display: flex !important;
+    flex-direction: column !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    width: 286px !important;
+    min-width: 286px !important;
+    max-width: 286px !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    padding: 24px 18px 18px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    transform: translateX(calc(100% - 56px)) !important;
+    transition: transform .25s ease !important;
+    z-index: 1000 !important;
+  }
+  .admin-sidebar.is-open,
+  .admin-sidebar.is-open:hover,
+  .admin-sidebar.is-open:focus-within {
+    transform: translateX(0) !important;
+  }
+  .admin-sidebar .sidebar-toggle {
+    display: flex !important;
+    position: absolute !important;
+    top: 16px !important;
+    right: calc(100% - 56px) !important;
+    left: auto !important;
+    z-index: 1003 !important;
+    width: 82px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 0 8px !important;
+    border: 1px solid #d7e1f4 !important;
+    border-right: 0 !important;
+    border-radius: 12px 0 0 12px !important;
+    background: #2449a5 !important;
+    color: #fff !important;
+    box-shadow: -5px 5px 16px rgb(20 40 80 / 14%) !important;
+  }
+  .admin-sidebar.is-open .sidebar-toggle {
+    top: 12px !important;
+    right: 8px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 9px !important;
+    background: #edf1f7 !important;
+    color: var(--ink) !important;
+    box-shadow: none !important;
+  }
+  .admin-sidebar::before, .admin-sidebar::after { display: none !important; content: none !important; }
+  .admin-main { width: auto !important; max-width: none !important; margin: 0 !important; padding: 24px 16px !important; }
+}
