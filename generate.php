@@ -9,7 +9,7 @@ $studentId=filter_var($_GET['student_id']??null,FILTER_VALIDATE_INT)?:0;
 $students=$pdo->query("SELECT id,student_number,first_name,last_name,father_name FROM students WHERE is_active=1 ORDER BY last_name,first_name LIMIT 1000")->fetchAll();
 $student=null;
 if($studentId>0){
- $stmt=$pdo->prepare("SELECT s.id,s.student_number,s.first_name,s.last_name,s.father_name,s.grandfather_name,s.class_name,s.guardian_phone,cs.grade,cs.section_name,y.name AS year_name FROM students s LEFT JOIN student_enrollments e ON e.student_id=s.id AND e.is_current=1 LEFT JOIN class_sections cs ON cs.id=e.class_section_id LEFT JOIN school_years y ON y.id=e.school_year_id WHERE s.id=? LIMIT 1");
+ $stmt=$pdo->prepare("SELECT s.id,s.student_number,s.first_name,s.last_name,s.father_name,s.grandfather_name,s.class_name,s.guardian_phone,cs.grade,cs.section_name,y.name AS year_name FROM students s LEFT JOIN school_years y ON y.is_active=1 AND y.is_closed=0 LEFT JOIN student_enrollments e ON e.student_id=s.id AND e.school_year_id=y.id AND e.is_current=1 LEFT JOIN class_sections cs ON cs.id=e.class_section_id WHERE s.id=? LIMIT 1");
  $stmt->execute([$studentId]);$student=$stmt->fetch()?:null;
 }
 $school=$pdo->query("SELECT school_name,school_address,school_phone_1,logo_path FROM school_configuration WHERE id=1 LIMIT 1")->fetch()?:[];
