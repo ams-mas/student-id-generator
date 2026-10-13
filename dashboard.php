@@ -7,8 +7,8 @@ require_login();
 $username = (string) $_SESSION['username'];
 $userId = (int) $_SESSION['user_id'];
 $role = current_role();
-$roleLabels = ['super_admin' => 'سوپر ادمین', 'admin' => 'ادمین', 'user' => 'کاربر'];
-$canManageUsers = in_array($role, ['super_admin', 'admin'], true);
+$roleLabels = ['super_admin' => 'مدیر کل', 'head_teacher' => 'سرمعلم', 'finance_manager' => 'مدیر مالی', 'administrative_staff' => 'کارمند اداری', 'teacher' => 'معلم'];
+$canManageUsers = $role === 'super_admin';
 
 require_once __DIR__ . '/config/database.php';
 $pdo = database_connection();
