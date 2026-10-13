@@ -125,14 +125,6 @@ foreach ($years as $year) {
     <title>تنظیمات مدرسه | سال تحصیلی</title>
     <link rel="stylesheet" href="assets/css/style.css">
 <style>
-/* School identity in the top of the sidebar */
-.admin-sidebar .sidebar-brand{align-items:center;}
-.admin-sidebar .sidebar-school-logo{width:48px;height:48px;min-width:48px;object-fit:contain;border-radius:10px;background:#fff;padding:4px;box-sizing:border-box;}
-.admin-sidebar .sidebar-system-clock{display:flex;flex-direction:column;align-items:center;gap:4px;margin:12px 12px 18px;padding:10px 8px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:rgba(255,255,255,.07);text-align:center;direction:rtl;}
-.admin-sidebar .sidebar-clock-date{font-size:12px;line-height:1.7;color:#dbeafe;}
-.admin-sidebar .sidebar-clock-time{font-size:20px;font-weight:700;letter-spacing:1px;line-height:1.4;color:#fff;font-variant-numeric:tabular-nums;}
-</style>
-    <style>
         .year-settings-wrap{max-width:1050px;margin:28px auto;padding:0 18px}
         .year-settings-card{background:#fff;border:1px solid #e1e7f0;border-radius:14px;padding:22px;margin:18px 0}
         .year-settings-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;align-items:end}
@@ -155,6 +147,7 @@ foreach ($years as $year) {
     <?php require __DIR__ . '/includes/sidebar.php'; ?>
 
     <main class="admin-main">
+            <?php require __DIR__ . '/includes/topbar.php'; ?>
         <div class="year-settings-wrap">
             <header class="page-header">
                 <div>
