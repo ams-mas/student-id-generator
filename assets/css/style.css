@@ -641,3 +641,6 @@ html[dir="rtl"] input:focus-visible,html[dir="rtl"] select:focus-visible,html[di
 .form-actions{display:flex;justify-content:flex-start;gap:10px;padding-top:4px}
 .form-actions .button{min-width:150px}
 @media(max-width:700px){.student-form-fields{grid-template-columns:1fr}.student-form-section{padding:15px}.form-actions .button{width:100%}}
+
+.field-validation-message{display:block;margin:5px 0 0;color:#b42332;font-size:13px;line-height:1.7;font-weight:600}
+html[dir="rtl"] [aria-invalid="true"]{border-color:#b42332!important;box-shadow:0 0 0 3px rgb(180 35 50 / 10%)!important}
