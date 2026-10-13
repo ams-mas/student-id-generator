@@ -56,20 +56,13 @@ $femalePercent = $genderTotal > 0 ? 100 - $malePercent : 0;
     <meta name="description" content="داشبورد سامانه مدیریت دانش‌آموزان">
     <title>داشبورد | سامانه مدیریت دانش‌آموزان</title>
     <link rel="stylesheet" href="assets/css/style.css">
-<style>
-/* School identity in the top of the sidebar */
-.admin-sidebar .sidebar-brand{align-items:center;}
-.admin-sidebar .sidebar-school-logo{width:48px;height:48px;min-width:48px;object-fit:contain;border-radius:10px;background:#fff;padding:4px;box-sizing:border-box;}
-.admin-sidebar .sidebar-system-clock{display:flex;flex-direction:column;align-items:center;gap:4px;margin:12px 12px 18px;padding:10px 8px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:rgba(255,255,255,.07);text-align:center;direction:rtl;}
-.admin-sidebar .sidebar-clock-date{font-size:12px;line-height:1.7;color:#dbeafe;}
-.admin-sidebar .sidebar-clock-time{font-size:20px;font-weight:700;letter-spacing:1px;line-height:1.4;color:#fff;font-variant-numeric:tabular-nums;}
-</style>
 </head>
 <body class="profile-page">
     <div class="admin-layout">
         <?php require __DIR__ . '/includes/sidebar.php'; ?>
 
         <main class="admin-main dashboard-main">
+            <?php require __DIR__ . '/includes/topbar.php'; ?>
             <header class="dash-heading">
                 <div></div>
                 <div class="dash-year"><span>سال تحصیلی فعلی</span><strong><?= htmlspecialchars($activeYearName, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></strong></div>
