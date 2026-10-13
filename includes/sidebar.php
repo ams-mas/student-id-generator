@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 $sidebarUsername = (string) ($_SESSION['username'] ?? '');
+$sidebarFullName = (string) ($_SESSION['full_name'] ?? $sidebarUsername);
 $sidebarRole = current_role();
 $sidebarRoleLabels = ['super_admin' => 'سوپر ادمین', 'admin' => 'ادمین', 'user' => 'کاربر'];
 $sidebarCurrentPage = basename((string) ($_SERVER['PHP_SELF'] ?? ''));
@@ -94,8 +95,8 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
         <?php endif; ?>
     </nav>
     <div class="sidebar-bottom">
-        <span class="sidebar-user-avatar" aria-hidden="true"><?= $sidebarEsc(mb_substr($sidebarUsername, 0, 1)) ?></span>
-        <div class="sidebar-user-copy"><strong><?= $sidebarEsc($sidebarUsername) ?></strong><small><?= $sidebarEsc($sidebarRoleLabels[$sidebarRole] ?? $sidebarRole) ?></small></div>
+        <span class="sidebar-user-avatar" aria-hidden="true"><?= $sidebarEsc(mb_substr($sidebarFullName, 0, 1)) ?></span>
+        <div class="sidebar-user-copy"><strong><?= $sidebarEsc($sidebarFullName) ?></strong><small><?= $sidebarEsc($sidebarRoleLabels[$sidebarRole] ?? $sidebarRole) ?></small></div>
         <form action="logout.php" method="post"><input type="hidden" name="csrf_token" value="<?= $sidebarEsc(csrf_token()) ?>"><button class="sidebar-logout" type="submit" aria-label="خروج از حساب" title="خروج از حساب">↪</button></form>
     </div>
 </aside>
