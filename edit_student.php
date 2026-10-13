@@ -530,4 +530,4 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
  updateFeeOptions();
 })();
 </script>
-    </body></html>
+    <script src="assets/js/form-validation.js" defer></script></body></html>
