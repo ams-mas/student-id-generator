@@ -1,19 +1,6 @@
 <?php
 declare(strict_types=1);
 
-$topbarPage = basename((string) ($_SERVER['PHP_SELF'] ?? ''));
-$topbarTitles = [
-    'dashboard.php' => 'داشبورد',
-    'students.php' => 'مدیریت دانش‌آموزان',
-    'teachers.php' => 'مدیریت آموزگاران',
-    'classes.php' => 'مدیریت صنف‌ها',
-    'school.php' => 'سال تحصیلی',
-    'school_configuration.php' => 'مشخصات مدرسه',
-    'users.php' => 'مدیریت کاربران',
-    'add_user.php' => 'افزودن کاربر',
-    'database_updates.php' => 'به‌روزرسانی پایگاه داده',
-];
-$topbarTitle = $topbarTitles[$topbarPage] ?? 'سامانه مدیریت دانش‌آموزان';
 $topbarUsername = (string) ($_SESSION['username'] ?? '');
 $topbarRole = current_role();
 $topbarRoleLabels = ['super_admin' => 'سوپر ادمین', 'admin' => 'ادمین', 'user' => 'کاربر'];
