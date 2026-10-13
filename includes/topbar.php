@@ -25,3 +25,5 @@ $topbarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT_
         </div>
     </div>
 </header>
+
+<script src="assets/js/table-sort.js?v=20261013" defer></script>
