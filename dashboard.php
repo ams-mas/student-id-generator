@@ -61,6 +61,7 @@ $femalePercent = $genderTotal > 0 ? 100 - $malePercent : 0;
     <div class="admin-layout">
         
 
+        <?php require __DIR__ . '/includes/sidebar.php'; ?>
         <main class="admin-main dashboard-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
             <header class="dash-heading">
