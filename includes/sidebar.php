@@ -20,7 +20,6 @@ try {
 $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 ?>
 <aside class="admin-sidebar" id="admin-sidebar" aria-label="منوی اصلی">
-    <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-controls="admin-sidebar" aria-expanded="false" aria-label="باز کردن منو"><span class="sidebar-toggle-icon" aria-hidden="true">☰</span><span class="sidebar-toggle-label">منو</span></button>
     <a class="sidebar-brand" href="dashboard.php">
         <?php if ($sidebarSchoolLogo !== ''): ?>
             <img class="sidebar-school-logo" src="<?= $sidebarEsc($sidebarSchoolLogo) ?>" alt="لوگوی مدرسه">
@@ -92,31 +91,7 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
         <form action="logout.php" method="post"><input type="hidden" name="csrf_token" value="<?= $sidebarEsc(csrf_token()) ?>"><button class="sidebar-logout" type="submit" aria-label="خروج از حساب" title="خروج از حساب">↪</button></form>
     </div>
 </aside>
-<script>
-(function () {
-    var sidebar = document.getElementById('admin-sidebar');
-    var toggle = document.getElementById('sidebar-toggle');
-    if (!sidebar || !toggle || toggle.dataset.bound === '1') return;
-    toggle.dataset.bound = '1';
-    toggle.addEventListener('click', function () {
-        var isOpen = sidebar.classList.toggle('is-open');
-        toggle.setAttribute('aria-expanded', String(isOpen));
-        toggle.setAttribute('aria-label', isOpen ? 'بستن منو' : 'باز کردن منو');
-        var icon = toggle.querySelector('.sidebar-toggle-icon');
-        if (icon) icon.textContent = isOpen ? '×' : '☰';
-    });
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && sidebar.classList.contains('is-open')) {
-            sidebar.classList.remove('is-open');
-            toggle.setAttribute('aria-expanded', 'false');
-            toggle.setAttribute('aria-label', 'باز کردن منو');
-            var icon = toggle.querySelector('.sidebar-toggle-icon');
-            if (icon) icon.textContent = '☰';
-            toggle.focus();
-        }
-    });
-}());
-</script><style>
+<style>
 /* Keep the shared school logo and sidebar layout consistent on every page. */
 .admin-sidebar .sidebar-brand{display:flex;align-items:center;min-width:0;gap:12px}
 .admin-sidebar .sidebar-school-logo{display:block;flex:0 0 43px;width:43px!important;height:43px!important;min-width:43px;max-width:43px!important;min-height:43px;max-height:43px!important;object-fit:contain;box-sizing:border-box}
