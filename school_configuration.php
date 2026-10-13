@@ -122,7 +122,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 </head>
 <body class="profile-page">
 <div class="admin-layout">
-<?php require __DIR__ . '/includes/sidebar.php'; ?>
+
 <main class="admin-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
 <div class="school-config-wrap">
@@ -151,7 +151,5 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 </div>
 </main>
 </div>
-<script src="assets/js/sidebar-clock.js" defer></script>
-    <script src="assets/js/sidebar-submenus.js" defer></script>
 </body>
 </html>
