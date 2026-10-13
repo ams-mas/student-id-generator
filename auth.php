@@ -38,11 +38,24 @@ function require_login(): void
     // lose access and permission changes take effect without waiting for logout.
     require_once __DIR__ . '/config/database.php';
     try {
-        $statement = database_connection()->prepare(
-            'SELECT username, full_name, role, is_active FROM users WHERE id = :id LIMIT 1'
+        $pdo = database_connection();
+        $statement = $pdo->prepare(
+            'SELECT username, role, is_active FROM users WHERE id = :id LIMIT 1'
         );
         $statement->execute(['id' => (int) $_SESSION['user_id']]);
         $account = $statement->fetch();
+        if ($account) {
+            // Keep the database updater accessible immediately after code deployment,
+            // even before the full_name migration has been applied.
+            try {
+                $nameStatement = $pdo->prepare('SELECT full_name FROM users WHERE id = :id LIMIT 1');
+                $nameStatement->execute(['id' => (int) $_SESSION['user_id']]);
+                $account['full_name'] = (string) ($nameStatement->fetchColumn() ?: '');
+            } catch (PDOException $nameException) {
+                if ((int) ($nameException->errorInfo[1] ?? 0) !== 1054) throw $nameException;
+                $account['full_name'] = '';
+            }
+        }
     } catch (PDOException $exception) {
         error_log('Student ID Generator authorization lookup failed: ' . $exception->getMessage());
         http_response_code(503);
