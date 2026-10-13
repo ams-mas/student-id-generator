@@ -963,3 +963,36 @@ input:focus, select:focus, textarea:focus {
 .admin-sidebar .submenu-chevron { margin-right:auto; margin-left:3px; font-size:18px; line-height:1; transition:transform .18s ease; }
 .admin-sidebar .sidebar-group.is-expanded > [data-submenu-toggle] .submenu-chevron { transform:rotate(180deg); }
 .admin-sidebar .sidebar-group-title:focus-visible { outline:2px solid #93c5fd; outline-offset:2px; }
+
+/* Consistent compact headings across all school management forms and pages. */
+.admin-main h1 {
+  margin-top: 4px !important;
+  margin-bottom: 8px !important;
+  font-size: 1.5rem !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0 !important;
+}
+.admin-main .eyebrow,
+.admin-main .page-eyebrow {
+  margin-bottom: 5px !important;
+  font-size: .78rem !important;
+  line-height: 1.6 !important;
+  letter-spacing: 0 !important;
+  font-weight: 800 !important;
+}
+.admin-main h1 + p,
+.admin-main .eyebrow + h1 + p,
+.admin-main .page-eyebrow + h1 + p {
+  margin-top: 0 !important;
+  margin-bottom: 18px !important;
+  color: var(--muted);
+  font-size: .9rem !important;
+  line-height: 1.7 !important;
+}
+.admin-main h2 {
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+@media (max-width: 600px) {
+  .admin-main h1 { font-size: 1.3rem !important; }
+}
