@@ -15,13 +15,13 @@ $topbarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT_
         </div>
     </div>
     <div class="admin-topbar-actions">
-        <div class="admin-topbar-account">
-            <span class="admin-topbar-avatar" aria-hidden="true"><?= $topbarEsc(function_exists('mb_substr') ? mb_substr($topbarUsername, 0, 1) : substr($topbarUsername, 0, 1)) ?></span>
-            <span class="admin-topbar-user"><strong><?= $topbarEsc($topbarUsername) ?></strong><small><?= $topbarEsc($topbarRoleLabels[$topbarRole] ?? $topbarRole) ?></small></span>
-        </div>
         <form class="admin-topbar-logout-form" action="logout.php" method="post">
             <input type="hidden" name="csrf_token" value="<?= $topbarEsc(csrf_token()) ?>">
             <button class="admin-topbar-logout" type="submit"><span aria-hidden="true">↪</span> خروج</button>
         </form>
+        <div class="admin-topbar-account">
+            <span class="admin-topbar-avatar" aria-hidden="true"><?= $topbarEsc(function_exists('mb_substr') ? mb_substr($topbarUsername, 0, 1) : substr($topbarUsername, 0, 1)) ?></span>
+            <span class="admin-topbar-user"><strong><?= $topbarEsc($topbarUsername) ?></strong><small><?= $topbarEsc($topbarRoleLabels[$topbarRole] ?? $topbarRole) ?></small></span>
+        </div>
     </div>
 </header>
