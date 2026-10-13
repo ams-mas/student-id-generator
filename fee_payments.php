@@ -166,4 +166,4 @@ $remaining = max(0, $due - $paid);
 <?php endif;endif;?>
 </section>
 
-</div></main></div><script src="assets/js/sidebar-clock.js" defer></script><script src="assets/js/sidebar-submenus.js" defer></script></body></html>
+</div></main></div><script src="assets/js/sidebar-clock.js" defer></script><script src="assets/js/sidebar-submenus.js" defer></script><script src="assets/js/form-validation.js" defer></script></body></html>
