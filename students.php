@@ -129,6 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('نام پدر و نام پدرکلان نباید بیشتر از ۱۰۰ نویسه باشد.');
             }
             $params = ['number'=>$number,'book_number'=>$bookNumber !== '' ? $bookNumber : null,'first'=>$first,'last'=>$last,'father_name'=>$fatherName !== '' ? $fatherName : null,'grandfather_name'=>$grandfatherName !== '' ? $grandfatherName : null,'gender'=>$gender,'dob'=>$dob !== '' ? $dob : null,'class'=>$class,'phone'=>$phone,'guardian'=>$guardian,'guardian_phone'=>$guardianPhone,'address'=>$address];
+            $receiptNumber = '';
             $pdo->beginTransaction();
             if ($id) {
                 $params['id'] = $id;
@@ -217,7 +218,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $discountSaveStmt->execute(['student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId, 'discount_type' => $discountType, 'discount_value' => $discountValue]);
             }
             $pdo->commit();
-            $_SESSION['students_flash'] = ['success' => $id ? 'پرونده دانش‌آموز به‌روزرسانی شد.' : 'دانش‌آموز با موفقیت ثبت شد و فیس دوره‌ها ثبت گردید.'];
+            $successMessage = $id ? 'پرونده دانش‌آموز به‌روزرسانی شد.' : 'دانش‌آموز با موفقیت ثبت شد و فیس دوره‌ها ثبت گردید.';
+            if (!$id && $receiptNumber !== '') {
+                $successMessage .= ' شماره رسید پرداخت: ' . $receiptNumber . ' (برای چاپ به بخش دریافت فیس مراجعه کنید).';
+            }
+            $_SESSION['students_flash'] = ['success' => $successMessage];
             header('Location: students.php');
             exit;
         }
