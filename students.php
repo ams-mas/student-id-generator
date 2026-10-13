@@ -104,8 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $selectedFeeRule = null;
             $selectedFeeNet = 0.0;
             if (!$id) {
-                $feeRulesStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id AND grade_from <= :grade AND grade_to >= :grade ORDER BY id');
-                $feeRulesStmt->execute(['year_id' => $activeSchoolYearId, 'grade' => $selectedGrade]);
+                $feeRulesStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id AND grade_from <= :grade_min AND grade_to >= :grade_max ORDER BY id');
+                $feeRulesStmt->execute(['year_id' => $activeSchoolYearId, 'grade_min' => $selectedGrade, 'grade_max' => $selectedGrade]);
                 $matchingFeeRules = $feeRulesStmt->fetchAll();
                 if (!$matchingFeeRules) {
                     throw new RuntimeException('برای صنف انتخاب‌شده هنوز فیس دوره‌ای تعیین نشده است. ابتدا از بخش «تعیین فیس دوره‌ها» فیس را ثبت کنید.');
