@@ -59,7 +59,7 @@ $femalePercent = $genderTotal > 0 ? 100 - $malePercent : 0;
 </head>
 <body class="profile-page">
     <div class="admin-layout">
-        <?php require __DIR__ . '/includes/sidebar.php'; ?>
+        
 
         <main class="admin-main dashboard-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
@@ -98,7 +98,5 @@ $femalePercent = $genderTotal > 0 ? 100 - $malePercent : 0;
         </style>
     </div>
     
-    <script src="assets/js/sidebar-clock.js" defer></script>
-    <script src="assets/js/sidebar-submenus.js" defer></script>
-</body>
+    </body>
 </html>
