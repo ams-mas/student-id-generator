@@ -82,7 +82,10 @@ $historyOffset = ($historyPage - 1) * $historyPerPage;
 
 if ($year) {
     try {
-        $where = ['e.school_year_id = ?', 'e.is_current = 1'];
+        $where = [];
+        // Start from the students table so older student records are not hidden
+        // merely because they do not yet have a current-year enrollment row.
+        // The current school year is applied to fee charges in the LEFT JOIN below.
         $params = [(int)$year['id']];
         if ($search !== '') {
             $where[] = '(s.student_number LIKE ? OR s.first_name LIKE ? OR s.last_name LIKE ? OR CONCAT(s.first_name, " ", s.last_name) LIKE ? OR s.father_name LIKE ? OR s.register_book_number LIKE ?)';
@@ -95,7 +98,7 @@ if ($year) {
         elseif ($status === 'paid') $where[] = 'c.id IS NOT NULL AND ' . $paidExpr . ' >= c.amount_due';
         $whereSql = implode(' AND ', $where);
 
-        $countSql = 'SELECT COUNT(*) FROM student_enrollments e JOIN students s ON s.id=e.student_id LEFT JOIN student_fee_charges c ON c.student_id=s.id AND c.school_year_id=e.school_year_id WHERE ' . $whereSql;
+        $countSql = 'SELECT COUNT(*) FROM students s LEFT JOIN student_fee_charges c ON c.student_id=s.id AND c.school_year_id=? WHERE ' . $whereSql;
         $countStmt = $pdo->prepare($countSql);
         $countStmt->execute($params);
         $totalRows = (int)$countStmt->fetchColumn();
@@ -105,7 +108,7 @@ if ($year) {
             $offset = ($page - 1) * $perPage;
         }
 
-        $listSql = 'SELECT c.id AS charge_id,c.period_name,c.amount_due,c.discount_amount,s.id AS student_id,s.student_number,s.register_book_number,s.first_name,s.last_name,s.father_name,s.class_name,' . $paidExpr . ' AS paid FROM student_enrollments e JOIN students s ON s.id=e.student_id LEFT JOIN student_fee_charges c ON c.student_id=s.id AND c.school_year_id=e.school_year_id WHERE ' . $whereSql . ' ORDER BY s.last_name,s.first_name,c.id LIMIT ? OFFSET ?';
+        $listSql = 'SELECT c.id AS charge_id,c.period_name,c.amount_due,c.discount_amount,s.id AS student_id,s.student_number,s.register_book_number,s.first_name,s.last_name,s.father_name,s.class_name,' . $paidExpr . ' AS paid FROM students s LEFT JOIN student_fee_charges c ON c.student_id=s.id AND c.school_year_id=? WHERE ' . $whereSql . ' ORDER BY s.last_name,s.first_name,c.id LIMIT ? OFFSET ?';
         $listStmt = $pdo->prepare($listSql);
         $listParams = $params;
         $listParams[] = $perPage;
