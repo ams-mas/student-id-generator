@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if ($action === 'add') {
             $username = strtolower(trim((string) ($_POST['username'] ?? '')));
+            $fullName = trim((string) ($_POST['full_name'] ?? ''));
             $password = (string) ($_POST['password'] ?? '');
             $confirmation = (string) ($_POST['password_confirm'] ?? '');
             $requestedRole = (string) ($_POST['role'] ?? 'user');
@@ -42,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!preg_match('/^[a-z0-9_.-]{3,80}$/', $username)) {
                 throw new RuntimeException('نام کاربری باید ۳ تا ۸۰ حرف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.');
             }
+            if ($fullName === '' || mb_strlen($fullName) > 160) throw new RuntimeException('نام کامل الزامی است و نباید بیشتر از ۱۶۰ نویسه باشد.');
             if (!in_array($requestedRole, $allowedRoles, true)) {
                 throw new RuntimeException('شما اجازه ساخت این نوع حساب را ندارید.');
             }
@@ -53,10 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $statement = $pdo->prepare(
-                'INSERT INTO users (username, password_hash, role, is_active) VALUES (:username, :password_hash, :role, 1)'
+                'INSERT INTO users (username, full_name, password_hash, role, is_active) VALUES (:username, :full_name, :password_hash, :role, 1)'
             );
             $statement->execute([
                 'username' => $username,
+                'full_name' => $fullName,
                 'password_hash' => password_hash($password, PASSWORD_DEFAULT),
                 'role' => $requestedRole,
             ]);
@@ -64,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($action === 'update') {
             $targetId = filter_var($_POST['user_id'] ?? null, FILTER_VALIDATE_INT);
             $newUsername = strtolower(trim((string)($_POST['username'] ?? '')));
+            $newFullName = trim((string)($_POST['full_name'] ?? ''));
             $newRole = (string)($_POST['role'] ?? 'user');
             $newPassword = (string)($_POST['password'] ?? '');
             $confirmPassword = (string)($_POST['password_confirm'] ?? '');
@@ -71,7 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!preg_match('/^[a-z0-9_.-]{3,80}$/', $newUsername)) {
                 throw new RuntimeException('نام کاربری باید ۳ تا ۸۰ حرف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.');
             }
-            $targetStmt = $pdo->prepare('SELECT id, username, role, is_active FROM users WHERE id = :id LIMIT 1');
+            if ($newFullName === '' || mb_strlen($newFullName) > 160) throw new RuntimeException('نام کامل الزامی است و نباید بیشتر از ۱۶۰ نویسه باشد.');
+            $targetStmt = $pdo->prepare('SELECT id, username, full_name, role, is_active FROM users WHERE id = :id LIMIT 1');
             $targetStmt->execute(['id' => $targetId]);
             $target = $targetStmt->fetch();
             if (!$target) throw new RuntimeException('حساب کاربری پیدا نشد.');
@@ -100,14 +105,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('این نام کاربری قبلاً استفاده شده است.');
             }
             if ($newPassword !== '') {
-                $updateStmt = $pdo->prepare('UPDATE users SET username = :username, role = :role, password_hash = :password_hash WHERE id = :id');
-                $updateStmt->execute(['username' => $newUsername, 'role' => $newRole, 'password_hash' => password_hash($newPassword, PASSWORD_DEFAULT), 'id' => $targetId]);
+                $updateStmt = $pdo->prepare('UPDATE users SET username = :username, full_name = :full_name, role = :role, password_hash = :password_hash WHERE id = :id');
+                $updateStmt->execute(['username' => $newUsername, 'full_name' => $newFullName, 'role' => $newRole, 'password_hash' => password_hash($newPassword, PASSWORD_DEFAULT), 'id' => $targetId]);
             } else {
-                $updateStmt = $pdo->prepare('UPDATE users SET username = :username, role = :role WHERE id = :id');
-                $updateStmt->execute(['username' => $newUsername, 'role' => $newRole, 'id' => $targetId]);
+                $updateStmt = $pdo->prepare('UPDATE users SET username = :username, full_name = :full_name, role = :role WHERE id = :id');
+                $updateStmt->execute(['username' => $newUsername, 'full_name' => $newFullName, 'role' => $newRole, 'id' => $targetId]);
             }
             if ($targetId === $actorId) {
                 $_SESSION['username'] = $newUsername;
+                $_SESSION['full_name'] = $newFullName;
                 if ($newRole !== $actorRole) {
                     $_SESSION['users_flash'] = ['success' => 'حساب شما به‌روزرسانی شد. برای اعمال نقش جدید، دوباره وارد شوید.'];
                 } else {
@@ -202,7 +208,7 @@ $editUser = null;
 if (isset($_GET['edit'])) {
     $editUserId = filter_var($_GET['edit'], FILTER_VALIDATE_INT);
     if ($editUserId) {
-        $editStmt = $pdo->prepare('SELECT id, username, role, is_active FROM users WHERE id = :id LIMIT 1');
+        $editStmt = $pdo->prepare('SELECT id, username, full_name, role, is_active FROM users WHERE id = :id LIMIT 1');
         $editStmt->execute(['id' => $editUserId]);
         $editUser = $editStmt->fetch() ?: null;
         if ($editUser && !$isSuperAdmin && $editUser['role'] === 'super_admin') {
@@ -213,7 +219,7 @@ if (isset($_GET['edit'])) {
 }
 
 $usersQuery = $pdo->query(
-    'SELECT u.id, u.username, u.role, u.is_active, u.created_at,
+    'SELECT u.id, u.username, u.full_name, u.role, u.is_active, u.created_at,
             ul.locked_until,
             CASE WHEN ul.locked_until > UTC_TIMESTAMP() THEN 1 ELSE 0 END AS is_locked
      FROM users u
@@ -255,7 +261,9 @@ $username = (string) $_SESSION['username'];
                 <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="user_id" value="<?= (int)$editUser['id'] ?>">
-                <label for="edit-username">نام کاربری</label>
+                <label for="edit-full-name">نام کامل</label>
+                <input id="edit-full-name" name="full_name" required maxlength="160" autocomplete="name" value="<?= escape($editUser['full_name'] ?? $editUser['username']) ?>">
+                <label for="edit-username">نام کاربری (برای ورود)</label>
                 <input id="edit-username" name="username" required minlength="3" maxlength="80" pattern="[a-zA-Z0-9_.-]+" autocomplete="off" value="<?= escape($editUser['username']) ?>">
                 <label for="edit-role">نوع حساب</label>
                 <select id="edit-role" name="role" required>
@@ -276,12 +284,13 @@ $username = (string) $_SESSION['username'];
             <h2 id="users-list-title">تمام کاربران (<?= count($allUsers) ?>)</h2>
             <div class="user-table-wrap">
                 <table class="user-table">
-                    <thead><tr><th>شناسه</th><th>نام کاربری</th><th>قفل ورود</th><th>نوع حساب</th><th>وضعیت</th><th>تاریخ ایجاد</th><th>عملیات</th></tr></thead>
+                    <thead><tr><th>شناسه</th><th>نام کامل</th><th>نام کاربری</th><th>قفل ورود</th><th>نوع حساب</th><th>وضعیت</th><th>تاریخ ایجاد</th><th>عملیات</th></tr></thead>
                     <tbody>
-                    <?php if (!$allUsers): ?><tr><td colspan="7">هیچ حسابی ثبت نشده است.</td></tr><?php endif; ?>
+                    <?php if (!$allUsers): ?><tr><td colspan="8">هیچ حسابی ثبت نشده است.</td></tr><?php endif; ?>
                     <?php foreach ($allUsers as $listedUser): ?>
                         <tr>
                             <td><?= (int)$listedUser['id'] ?></td>
+                            <td><?= escape(trim((string)($listedUser['full_name'] ?? '')) !== '' ? $listedUser['full_name'] : $listedUser['username']) ?></td>
                             <td><?= escape($listedUser['username']) ?></td>
                             <td>
                                 <?php if ((int)$listedUser['is_locked'] === 1): ?>
