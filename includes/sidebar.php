@@ -82,6 +82,7 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
         </div>
         <a class="sidebar-link" href="#" aria-disabled="true" title="بخش گزارشات بعداً اضافه می‌شود"><span class="sidebar-icon" aria-hidden="true">▤</span><span>گزارشات</span></a>
         <a class="sidebar-link" href="#" aria-disabled="true" title="بخش مالی بعداً اضافه می‌شود"><span class="sidebar-icon" aria-hidden="true">◈</span><span>بخش مالی</span></a>
+        <a class="sidebar-link <?= $sidebarCurrentPage === 'dashboard_configuration.php' ? 'is-current' : '' ?>" href="dashboard_configuration.php"><span class="sidebar-icon" aria-hidden="true">▦</span><span>تنظیمات داشبورد</span></a>
         <a class="sidebar-link <?= $sidebarCurrentPage === 'database_updates.php' ? 'is-current' : '' ?>" href="database_updates.php"><span class="sidebar-icon" aria-hidden="true">↻</span><span>به‌روزرسانی پایگاه داده</span></a>
         <?php endif; ?>
     </nav>
