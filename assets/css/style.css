@@ -511,3 +511,79 @@ html body .dashboard-main {
     padding: 24px 16px !important;
   }
 }
+
+
+/* School management sidebar — fixed navy panel, reference-inspired design. */
+.admin-layout{display:block!important;min-height:100vh;direction:rtl}
+.admin-sidebar{
+ position:fixed!important;inset:12px 12px 12px auto!important;width:270px!important;
+ height:calc(100vh - 24px)!important;max-height:calc(100vh - 24px)!important;
+ overflow-y:auto!important;overflow-x:hidden!important;z-index:1000!important;
+ display:flex!important;flex-direction:column!important;gap:0!important;
+ padding:22px 14px 14px!important;border:1px solid rgb(255 255 255 / 8%)!important;
+ border-radius:15px!important;background:linear-gradient(165deg,#142940 0%,#0d2034 100%)!important;
+ color:#f8fbff!important;box-shadow:0 18px 45px rgb(13 32 52 / 22%)!important;
+ scrollbar-width:thin;scrollbar-color:#38516c transparent;
+}
+.admin-sidebar *{box-sizing:border-box}
+.admin-sidebar .sidebar-brand{display:flex!important;align-items:center!important;gap:13px!important;
+ min-width:0;padding:3px 5px 20px!important;color:#fff!important;text-decoration:none!important}
+.admin-sidebar .sidebar-school-logo,.admin-sidebar .sidebar-brand-mark{
+ display:grid;place-items:center;flex:0 0 48px!important;width:48px!important;height:48px!important;
+ min-width:48px!important;max-width:48px!important;min-height:48px!important;max-height:48px!important;
+ object-fit:contain;border-radius:12px;background:rgb(255 255 255 / 7%);color:#fff;font-size:1.25rem;font-weight:900}
+.admin-sidebar .sidebar-brand>span:last-child{display:flex;flex-direction:column;min-width:0;gap:2px}
+.admin-sidebar .sidebar-brand strong{font-size:1.05rem;line-height:1.55;color:#fff;white-space:normal}
+.admin-sidebar .sidebar-brand small{font-size:.73rem;line-height:1.5;color:#d1dced}
+.admin-sidebar .sidebar-system-clock{display:none!important}
+.admin-sidebar .sidebar-section-label{margin:0 8px 10px!important;color:#8296ad!important;font-size:.72rem!important;font-weight:800;letter-spacing:0}
+.admin-sidebar .sidebar-nav{display:flex!important;flex-direction:column!important;gap:5px!important;flex:1 0 auto!important}
+.admin-sidebar .sidebar-link,.admin-sidebar .sidebar-group-title{
+ position:relative;display:flex!important;align-items:center!important;gap:12px!important;width:100%!important;
+ min-height:49px!important;padding:10px 12px!important;border:0!important;border-radius:9px!important;
+ background:transparent!important;color:#edf3fb!important;text-align:right!important;text-decoration:none!important;
+ font:inherit!important;font-size:.9rem!important;line-height:1.55!important;cursor:pointer!important;
+ transition:background-color .16s ease,color .16s ease!important
+}
+.admin-sidebar .sidebar-link:hover,.admin-sidebar .sidebar-group-title:hover{background:#203b57!important;color:#fff!important}
+.admin-sidebar .sidebar-link.is-current,.admin-sidebar .sidebar-group-title.is-current,
+.admin-sidebar .sidebar-group:has(.sidebar-submenu .is-current)>.sidebar-group-title{
+ background:linear-gradient(110deg,#1678f2,#2368df)!important;color:#fff!important;
+ box-shadow:0 5px 13px rgb(0 92 220 / 22%)!important
+}
+.admin-sidebar .sidebar-icon{display:inline-grid!important;place-items:center!important;flex:0 0 30px!important;
+ width:30px!important;height:30px!important;font-size:1.35rem!important;line-height:1!important;color:#38d9a0!important}
+.admin-sidebar .sidebar-group:nth-of-type(2) .sidebar-icon{color:#b88cff!important}
+.admin-sidebar .sidebar-group:nth-of-type(3) .sidebar-icon{color:#ff9b35!important}
+.admin-sidebar .sidebar-group:nth-of-type(4) .sidebar-icon{color:#b88cff!important}
+.admin-sidebar .submenu-chevron{margin-right:auto!important;font-size:1.2rem!important;transition:transform .16s ease}
+.admin-sidebar .sidebar-group.is-open>.sidebar-group-title .submenu-chevron{transform:rotate(180deg)}
+.admin-sidebar .sidebar-submenu{display:none!important;margin:0 0 4px 0!important;padding:5px 8px 8px 5px!important;
+ border-radius:0 0 9px 9px!important;background:linear-gradient(180deg,#203b57,#1b334d)!important}
+.admin-sidebar .sidebar-group.is-open>.sidebar-submenu{display:flex!important;flex-direction:column!important;gap:2px!important}
+.admin-sidebar .sidebar-submenu .sidebar-link{min-height:36px!important;padding:7px 13px 7px 8px!important;
+ border-radius:6px!important;background:transparent!important;color:#dce7f5!important;font-size:.79rem!important}
+.admin-sidebar .sidebar-submenu .sidebar-link:before{content:"•";margin-left:8px;color:#9aacc1;font-size:1.1rem}
+.admin-sidebar .sidebar-submenu .sidebar-link:hover,.admin-sidebar .sidebar-submenu .sidebar-link.is-current{background:#2a4a6b!important;color:#fff!important}
+.admin-sidebar .sidebar-link-disabled{opacity:.6;cursor:not-allowed!important}
+.admin-sidebar .sidebar-link-disabled small{margin-right:auto;font-size:.65rem;color:#a9bbce}
+.admin-sidebar .sidebar-bottom{display:flex!important;align-items:center!important;gap:10px!important;
+ margin-top:16px!important;padding:14px 5px 2px!important;border-top:1px solid rgb(255 255 255 / 10%)!important}
+.admin-sidebar .sidebar-user-avatar{display:grid!important;place-items:center!important;flex:0 0 40px!important;width:40px!important;height:40px!important;
+ border-radius:50%!important;background:linear-gradient(140deg,#718aa7,#3e5877)!important;color:#fff!important;font-size:1.1rem!important}
+.admin-sidebar .sidebar-user-copy{display:flex!important;flex:1;flex-direction:column;min-width:0;gap:3px}
+.admin-sidebar .sidebar-user-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem;color:#fff}
+.admin-sidebar .sidebar-user-copy small{font-size:.72rem;color:#b7c7d9}
+.admin-sidebar .sidebar-bottom form{margin:0}
+.admin-sidebar .sidebar-logout{display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:#ff6877;font-size:1.35rem;cursor:pointer}
+.admin-sidebar .sidebar-logout:hover{background:#293e55}
+html body .admin-main,html body .dashboard-main{
+ width:auto!important;max-width:none!important;min-width:0!important;
+ margin:0 294px 0 0!important;padding:28px clamp(16px,2.5vw,34px)!important;box-sizing:border-box!important
+}
+@media(max-width:760px){
+ .admin-sidebar{inset:8px 8px 8px auto!important;width:250px!important;height:calc(100vh - 16px)!important;max-height:calc(100vh - 16px)!important;padding:17px 10px 10px!important}
+ html body .admin-main,html body .dashboard-main{margin:0 266px 0 0!important;padding:20px 12px!important}
+ .admin-sidebar .sidebar-brand strong{font-size:.95rem}
+ .admin-sidebar .sidebar-link,.admin-sidebar .sidebar-group-title{font-size:.82rem!important}
+}
