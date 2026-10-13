@@ -324,6 +324,10 @@ $filterClass = trim((string)($_GET['class_name'] ?? ''));
 $filterAge = trim((string)($_GET['age'] ?? ''));
 $where = [];
 $params = [];
+if ($role === 'teacher') {
+    $where[] = 'id IN (SELECT e.student_id FROM student_enrollments e JOIN class_sections cs ON cs.id = e.class_section_id JOIN teachers t ON t.id = cs.teacher_id WHERE t.user_id = :teacher_user_id AND e.is_current = 1)';
+    $params['teacher_user_id'] = (int)$_SESSION['user_id'];
+}
 if ($search !== '') {
     $where[] = "(student_number LIKE :q1 OR CONCAT('R', LPAD(id, 8, '0')) LIKE :q7 OR first_name LIKE :q2 OR last_name LIKE :q3 OR father_name LIKE :q8 OR grandfather_name LIKE :q9 OR class_name LIKE :q4 OR guardian_name LIKE :q5 OR register_book_number LIKE :q6)";
     $term = '%'.$search.'%';
