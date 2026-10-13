@@ -25,8 +25,8 @@ try {
     if (!in_array('role', $columnNames, true)) {
         $pdo->exec(
             "ALTER TABLE users
-             ADD COLUMN role ENUM('super_admin', 'admin', 'user')
-             NOT NULL DEFAULT 'admin' AFTER password_hash"
+             ADD COLUMN role ENUM('super_admin', 'head_teacher', 'finance_manager', 'administrative_staff', 'teacher')
+             NOT NULL DEFAULT 'administrative_staff' AFTER password_hash"
         );
         echo "Added users.role.\n";
     } else {
@@ -58,6 +58,12 @@ try {
         $pdo->exec('ALTER TABLE users ADD KEY idx_users_active (is_active)');
         echo "Added index idx_users_active.\n";
     }
+
+    // Upgrade any legacy role enum and map old roles to least-privilege replacements.
+    $pdo->exec("ALTER TABLE users MODIFY COLUMN role ENUM('super_admin','admin','user','head_teacher','finance_manager','administrative_staff','teacher') NOT NULL DEFAULT 'administrative_staff'");
+    $pdo->exec("UPDATE users SET role = 'head_teacher' WHERE role = 'admin'");
+    $pdo->exec("UPDATE users SET role = 'administrative_staff' WHERE role = 'user'");
+    $pdo->exec("ALTER TABLE users MODIFY COLUMN role ENUM('super_admin','head_teacher','finance_manager','administrative_staff','teacher') NOT NULL DEFAULT 'administrative_staff'");
 
     $superAdminCount = (int) $pdo->query(
         "SELECT COUNT(*) FROM users WHERE role = 'super_admin'"
