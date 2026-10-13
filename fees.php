@@ -70,6 +70,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$yearId, $period, $gradeFrom, $gradeTo, $amount, $dueDate !== '' ? $dueDate : null, $notes]);
                 $success = 'فیس دوره برای تمام سال تعلیمی انتخاب‌شده ثبت شد.';
             }
+        } elseif ($action === 'toggle_rule') {
+            $ruleId = filter_var($_POST['rule_id'] ?? null, FILTER_VALIDATE_INT) ?: 0;
+            $newStatus = filter_var($_POST['is_active'] ?? null, FILTER_VALIDATE_INT);
+            if ($ruleId < 1 || !in_array($newStatus, [0, 1], true)) throw new RuntimeException('وضعیت فیس معتبر نیست.');
+            $ruleStmt = $pdo->prepare('SELECT id, school_year_id FROM tuition_fee_rules WHERE id = ? LIMIT 1');
+            $ruleStmt->execute([$ruleId]);
+            $rule = $ruleStmt->fetch();
+            if (!$rule) throw new RuntimeException('فیس موردنظر پیدا نشد.');
+            if ($newStatus === 1) {
+                $yearStmt = $pdo->prepare('SELECT is_closed FROM school_years WHERE id = ?');
+                $yearStmt->execute([(int)$rule['school_year_id']]);
+                if ((int)$yearStmt->fetchColumn() === 1) throw new RuntimeException('فیس سال تعلیمی بسته‌شده را نمی‌توان فعال کرد.');
+            }
+            $toggleStmt = $pdo->prepare('UPDATE tuition_fee_rules SET is_active = ? WHERE id = ?');
+            $toggleStmt->execute([$newStatus, $ruleId]);
+            $success = $newStatus === 1
+                ? 'فیس فعال شد و برای ثبت‌نام‌های جدید قابل انتخاب است.'
+                : 'فیس غیرفعال شد. سوابق، بدهی‌ها و رسیدهای قبلی محفوظ هستند.';
         } elseif ($action === 'delete_rule') {
             $ruleId = filter_var($_POST['rule_id'] ?? null, FILTER_VALIDATE_INT) ?: 0;
             if ($ruleId < 1) throw new RuntimeException('رکورد فیس معتبر نیست.');
@@ -99,7 +117,7 @@ if ($editId > 0) {
 $years = $pdo->query('SELECT id, name, is_active, is_closed FROM school_years ORDER BY id DESC')->fetchAll();
 $rules = [];
 try {
-    $rules = $pdo->query('SELECT r.*, y.name AS year_name FROM tuition_fee_rules r JOIN school_years y ON y.id=r.school_year_id ORDER BY y.id DESC, r.period_name, r.grade_from')->fetchAll();
+    $rules = $pdo->query('SELECT r.*, y.name AS year_name FROM tuition_fee_rules r JOIN school_years y ON y.id=r.school_year_id ORDER BY y.id DESC, r.is_active DESC, r.period_name, r.grade_from')->fetchAll();
 } catch (PDOException $e) { $error = $error ?: 'ابتدا فایل به‌روزرسانی tuition_fees_and_payments را از بخش «به‌روزرسانی پایگاه داده» اجرا کنید.'; }
 $activeYearId = 0;
 foreach ($years as $year) if ((int)$year['is_active'] === 1 && (int)$year['is_closed'] === 0) { $activeYearId = (int)$year['id']; break; }
@@ -120,5 +138,5 @@ foreach ($years as $year) if ((int)$year['is_active'] === 1 && (int)$year['is_cl
 <div class="fees-field fees-field-wide"><label for="notes">یادداشت (اختیاری)</label><textarea id="notes" name="notes" maxlength="500" rows="2" placeholder="توضیحات دوره یا شرایط پرداخت"><?=fees_h($editingRule['notes'] ?? '')?></textarea></div>
 <div class="fees-actions"><button class="button button-primary" type="submit"><?=$editingRule ? 'ذخیره تغییرات فیس' : 'ذخیره فیس دوره'?></button><?php if($editingRule):?><a class="button button-secondary" href="fees.php">لغو ویرایش</a><?php endif;?></div>
 </div></form></section>
-<section class="fees-panel"><h2>فیس‌های ثبت‌شده</h2><div class="fees-table-wrap"><table class="fees-table"><thead><tr><th>سال تعلیمی</th><th>دوره</th><th>بازه صنف</th><th>مبلغ</th><th>سررسید</th><th>یادداشت</th><th>عملیات</th></tr></thead><tbody><?php if(!$rules):?><tr><td colspan="7">هنوز فیس دوره‌ای ثبت نشده است.</td></tr><?php else: foreach($rules as $r):?><tr><td><?=fees_h($r['year_name'])?></td><td><?=fees_h($r['period_name'])?></td><td><?= (int)$r['grade_from']?> تا <?= (int)$r['grade_to']?></td><td><?=number_format((float)$r['amount'],2)?></td><td><?php if($r['due_date']):?><span data-persian-display-date="<?=fees_h($r['due_date'])?>"></span><?php else:?>—<?php endif;?></td><td><?=fees_h($r['notes'] ?: '—')?></td><td><a class="button button-secondary" href="fees.php?edit=<?=(int)$r['id']?>">ویرایش</a> <form style="display:inline" method="post" onsubmit="return confirm('این فیس حذف شود؟');"><input type="hidden" name="csrf_token" value="<?=fees_h(csrf_token())?>"><input type="hidden" name="action" value="delete_rule"><input type="hidden" name="rule_id" value="<?=(int)$r['id']?>"><button class="button button-secondary" type="submit">حذف</button></form></td></tr><?php endforeach; endif;?></tbody></table></div></section>
+<section class="fees-panel"><h2>فیس‌های ثبت‌شده</h2><div class="fees-table-wrap"><table class="fees-table"><thead><tr><th>سال تعلیمی</th><th>دوره</th><th>بازه صنف</th><th>مبلغ</th><th>سررسید</th><th>یادداشت</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody><?php if(!$rules):?><tr><td colspan="8">هنوز فیس دوره‌ای ثبت نشده است.</td></tr><?php else: foreach($rules as $r):?><tr><td><?=fees_h($r['year_name'])?></td><td><?=fees_h($r['period_name'])?></td><td><?= (int)$r['grade_from']?> تا <?= (int)$r['grade_to']?></td><td><?=number_format((float)$r['amount'],2)?></td><td><?php if($r['due_date']):?><span data-persian-display-date="<?=fees_h($r['due_date'])?>"></span><?php else:?>—<?php endif;?></td><td><?=fees_h($r['notes'] ?: '—')?></td><td><?= (int)$r['is_active'] === 1 ? 'فعال' : 'غیرفعال' ?></td><td><a class="button button-secondary" href="fees.php?edit=<?=(int)$r['id']?>">ویرایش</a> <form style="display:inline" method="post"><input type="hidden" name="csrf_token" value="<?=fees_h(csrf_token())?>"><input type="hidden" name="action" value="toggle_rule"><input type="hidden" name="rule_id" value="<?=(int)$r['id']?>"><input type="hidden" name="is_active" value="<?=(int)$r['is_active'] === 1 ? 0 : 1?>"><button class="button button-secondary" type="submit" onclick="return confirm('<?= (int)$r['is_active'] === 1 ? 'این فیس غیرفعال شود؟ سوابق قبلی حفظ می‌شوند.' : 'این فیس دوباره فعال شود؟' ?>');"><?= (int)$r['is_active'] === 1 ? 'غیرفعال‌کردن' : 'فعال‌کردن' ?></button></form> <?php if ((int)$r['is_active'] === 1): ?><form style="display:inline" method="post" onsubmit="return confirm('این فیس حذف شود؟');"><input type="hidden" name="csrf_token" value="<?=fees_h(csrf_token())?>"><input type="hidden" name="action" value="delete_rule"><input type="hidden" name="rule_id" value="<?=(int)$r['id']?>"><button class="button button-secondary" type="submit">حذف</button></form><?php endif; ?></td></tr><?php endforeach; endif;?></tbody></table></div></section>
 </div></main></div><link rel="stylesheet" href="assets/css/persian-calendar.css"><script src="assets/js/persian-calendar.js"></script><script src="assets/js/sidebar-clock.js" defer></script><script src="assets/js/sidebar-submenus.js" defer></script></body></html>
