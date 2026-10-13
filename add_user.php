@@ -143,7 +143,8 @@ $username = (string) $_SESSION['username'];
 <div class="admin-layout">
     
 
-    <main class="admin-main">
+    <?php require __DIR__ . '/includes/sidebar.php'; ?>
+        <main class="admin-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
         <header class="page-header dashboard-header">
             <div><p class="eyebrow">پنل مدیریت</p><h1>افزودن کاربر</h1><p class="muted">ساخت حساب جدید و تعیین سطح دسترسی.</p></div>
