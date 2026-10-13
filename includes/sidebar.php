@@ -35,13 +35,15 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
         <a class="sidebar-link <?= $sidebarCurrentPage === 'dashboard.php' ? 'is-current' : '' ?>" href="dashboard.php"><span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span></a>
         <?php if (in_array($sidebarRole, ['super_admin', 'head_teacher', 'administrative_staff', 'teacher'], true)): ?>
         <div class="sidebar-group">
-            <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['students.php', 'generate.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
+            <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['students.php', 'generate.php', 'attendance.php', 'marks.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
             <div class="sidebar-submenu">
                 <?php if (in_array($sidebarRole, ['super_admin', 'head_teacher', 'administrative_staff'], true)): ?><a class="sidebar-link" href="students.php?new=1">۱. افزودن دانش‌آموز جدید</a><?php endif; ?>
                 <a class="sidebar-link" href="students.php">۲. مشاهده همه دانش‌آموزان</a>
                 <?php if (in_array($sidebarRole, ['super_admin', 'head_teacher', 'administrative_staff'], true)): ?><a class="sidebar-link" href="students.php">۳. ویرایش اطلاعات دانش‌آموز</a><?php endif; ?>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۴. پروفایل دانش‌آموز <small>به‌زودی</small></span>
                 <a class="sidebar-link" href="students.php">۵. جست‌وجوی دانش‌آموزان</a>
+                <a class="sidebar-link <?= $sidebarCurrentPage === 'attendance.php' ? 'is-current' : '' ?>" href="attendance.php">مدیریت حاضری شاگردان</a>
+                <?php if (in_array($sidebarRole, ['super_admin', 'head_teacher', 'teacher'], true)): ?><a class="sidebar-link <?= $sidebarCurrentPage === 'marks.php' ? 'is-current' : '' ?>" href="marks.php">ثبت نمرات و امتحانات</a><?php endif; ?>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۶. ارتقای دانش‌آموزان به صنف بالاتر <small>به‌زودی</small></span>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۷. انتقال دانش‌آموزان <small>به‌زودی</small></span>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۸. مدیریت ثبت‌نام دانش‌آموزان <small>به‌زودی</small></span>
