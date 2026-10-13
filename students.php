@@ -33,7 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         if ($action === 'save') {
             $id = filter_var($_POST['student_id'] ?? null, FILTER_VALIDATE_INT);
-            $number = trim((string)($_POST['student_number'] ?? ''));
+            $number = '';
+            if ($id) {
+                // A student's permanent ID must never be changed by editing a form.
+                $existingNumberStmt = $pdo->prepare('SELECT student_number FROM students WHERE id = :id LIMIT 1');
+                $existingNumberStmt->execute(['id' => $id]);
+                $existingNumber = $existingNumberStmt->fetchColumn();
+                if ($existingNumber === false) {
+                    throw new RuntimeException('پرونده شاگرد پیدا نشد.');
+                }
+                $number = (string)$existingNumber;
+            } else {
+                // Temporary unique value; replaced with ST-<student id> after INSERT.
+                $number = 'TMP-' . strtoupper(bin2hex(random_bytes(8)));
+            }
             $bookNumber = trim((string)($_POST['register_book_number'] ?? ''));
             $first = trim((string)($_POST['first_name'] ?? ''));
             $last = trim((string)($_POST['last_name'] ?? ''));
@@ -64,9 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             if ($id && !preg_match('/^[A-Za-z0-9._\\/-]{1,40}$/', $number)) {
                 throw new RuntimeException('شماره مسلسل معتبر نیست.');
-            }
-            if (!$id) {
-                $number = 'ST-' . strtoupper(bin2hex(random_bytes(6)));
             }
             if (mb_strlen($bookNumber) > 100) {
                 throw new RuntimeException('شماره کتاب اساس نباید بیشتر از ۱۰۰ نویسه باشد.');
@@ -162,6 +172,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare('INSERT INTO students (student_number, register_book_number, first_name, last_name, father_name, grandfather_name, gender, date_of_birth, class_name, phone, guardian_name, guardian_phone, address) VALUES (:number,:book_number,:first,:last,:father_name,:grandfather_name,:gender,:dob,:class,:phone,:guardian,:guardian_phone,:address)');
                 $stmt->execute($params);
                 $newStudentId = (int)$pdo->lastInsertId();
+                $number = 'ST-' . sprintf('%04d', $newStudentId);
+                $studentNumberUpdate = $pdo->prepare('UPDATE students SET student_number = :number WHERE id = :id');
+                $studentNumberUpdate->execute(['number' => $number, 'id' => $newStudentId]);
 
                 // Save the book number separately for new records as well. Persian/Arabic
                 // letters and digits are valid UTF-8 text and must be stored unchanged.
@@ -434,7 +447,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <form class="students-form" method="post" action="students.php">
 <input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="student_id" value="<?= student_escape($editing['id'] ?? '') ?>"><input type="hidden" name="student_number" value="<?= student_escape($editing['student_number'] ?? '') ?>">
 <div class="student-form-section"><h3>مشخصات دانش‌آموز</h3><div class="student-form-fields">
-<div class="student-field"><label>شماره مسلسل</label><input type="text" value="<?= 'R' . sprintf('%08d', (int)($editing['id'] ?? (isset($_GET['new']) ? $nextStudentId : 1))) ?>" readonly aria-readonly="true"><small>شماره مسلسل بعدی به‌صورت خودکار و به‌ترتیب اختصاص داده می‌شود.</small></div>
+<div class="student-field"><label>شماره دائمی شاگرد</label><input type="text" value="<?= student_escape($editing['student_number'] ?? ('ST-' . sprintf('%04d', (int)($nextStudentId ?: 1)))) ?>" readonly aria-readonly="true"><small>شماره اصلی شاگرد ثابت می‌ماند و در سال‌های تعلیمی بعدی نیز استفاده می‌شود.</small></div>
 <div class="student-field"><label for="register_book_number">شماره کتاب اساس (برای دانش‌آموزان قبلی)</label><input id="register_book_number" name="register_book_number" maxlength="100" value="<?= student_escape($editing['register_book_number'] ?? '') ?>" placeholder="شماره ثبت‌شده در کتاب اساس"><small>برای دانش‌آموزانی که پیش از این سامانه ثبت شده‌اند.</small></div>
 
 <div class="student-field"><label for="first_name">نام *</label><input id="first_name" name="first_name" required maxlength="100" value="<?= student_escape($editing['first_name'] ?? '') ?>"></div>
@@ -473,9 +486,9 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <label>سن<select name="age"><option value="">همه سنین</option><?php for($a=4;$a<=30;$a++): ?><option value="<?= $a ?>" <?= $filterAge===(string)$a?'selected':'' ?>><?= $a ?> سال</option><?php endfor; ?></select></label>
 <div class="filter-actions"><button class="button button-primary" type="submit">اعمال فیلتر</button><a class="button button-secondary" href="students.php">پاک کردن فیلتر</a></div>
 </form>
-<div class="students-table-wrap"><table class="students-table"><thead><tr><th>S/N دائمی</th><th>شماره کتاب اساس</th><th>شماره مسلسل</th><th>نام کامل</th><th>نام پدر</th><th>نام پدرکلان</th><th>صنف / کلاس</th><th>سرپرست</th><th>وضعیت</th><?php if ($canEdit): ?><th>عملیات</th><?php endif; ?></tr></thead><tbody>
-<?php if (!$students): ?><tr><td colspan="<?= $canEdit ? 10 : 9 ?>">هنوز دانش‌آموزی ثبت نشده است.</td></tr><?php endif; ?>
-<?php foreach ($students as $student): ?><tr class="<?= (int)$student['is_active']===1 ? '' : 'student-inactive' ?>"><td><?= (int)$student['id'] ?></td><td><?= student_escape($student['register_book_number'] ?: '—') ?></td><td><?= 'R' . sprintf('%08d', (int)$student['id']) ?></td><td><?= student_escape($student['first_name'].' '.$student['last_name']) ?></td><td><?= student_escape($student['father_name'] ?: '—') ?></td><td><?= student_escape($student['grandfather_name'] ?: '—') ?></td><td><?= student_escape($student['class_name'] ?: '—') ?></td><td><?= student_escape($student['guardian_name'] ?: '—') ?></td><td><?= (int)$student['is_active']===1 ? 'فعال' : 'غیرفعال' ?></td><?php if ($canEdit): ?><td><div class="student-actions"><?php if (($mode = (string)($_GET['mode'] ?? '')) !== 'delete'): ?><a class="button button-secondary" href="students.php?edit=<?= (int)$student['id'] ?>">ویرایش</a><?php endif; ?><form method="post" action="students.php" onsubmit="return confirm('آیا مطمئن هستید که می‌خواهید پرونده این دانش‌آموز را برای همیشه حذف کنید؟ این کار قابل بازگشت نیست.');"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-danger" type="submit">حذف</button></form><?php if (($_GET['mode'] ?? '') !== 'edit'): ?><form method="post" action="students.php"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-secondary" type="submit"><?= (int)$student['is_active']===1 ? 'غیرفعال‌سازی' : 'فعال‌سازی' ?></button></form><?php endif; ?></div></td><?php endif; ?></tr><?php endforeach; ?>
+<div class="students-table-wrap"><table class="students-table"><thead><tr><th>شماره دائمی شاگرد</th><th>شماره کتاب اساس</th><th>نام کامل</th><th>نام پدر</th><th>نام پدرکلان</th><th>صنف / کلاس</th><th>سرپرست</th><th>وضعیت</th><?php if ($canEdit): ?><th>عملیات</th><?php endif; ?></tr></thead><tbody>
+<?php if (!$students): ?><tr><td colspan="<?= $canEdit ? 9 : 8 ?>">هنوز دانش‌آموزی ثبت نشده است.</td></tr><?php endif; ?>
+<?php foreach ($students as $student): ?><tr class="<?= (int)$student['is_active']===1 ? '' : 'student-inactive' ?>"><td dir="ltr"><?= student_escape($student['student_number']) ?></td><td><?= student_escape($student['register_book_number'] ?: '—') ?></td><td><?= student_escape($student['first_name'].' '.$student['last_name']) ?></td><td><?= student_escape($student['father_name'] ?: '—') ?></td><td><?= student_escape($student['grandfather_name'] ?: '—') ?></td><td><?= student_escape($student['class_name'] ?: '—') ?></td><td><?= student_escape($student['guardian_name'] ?: '—') ?></td><td><?= (int)$student['is_active']===1 ? 'فعال' : 'غیرفعال' ?></td><?php if ($canEdit): ?><td><div class="student-actions"><?php if (($mode = (string)($_GET['mode'] ?? '')) !== 'delete'): ?><a class="button button-secondary" href="students.php?edit=<?= (int)$student['id'] ?>">ویرایش</a><?php endif; ?><form method="post" action="students.php" onsubmit="return confirm('آیا مطمئن هستید که می‌خواهید پرونده این دانش‌آموز را برای همیشه حذف کنید؟ این کار قابل بازگشت نیست.');"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-danger" type="submit">حذف</button></form><?php if (($_GET['mode'] ?? '') !== 'edit'): ?><form method="post" action="students.php"><input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="toggle"><input type="hidden" name="student_id" value="<?= (int)$student['id'] ?>"><button class="button button-secondary" type="submit"><?= (int)$student['is_active']===1 ? 'غیرفعال‌سازی' : 'فعال‌سازی' ?></button></form><?php endif; ?></div></td><?php endif; ?></tr><?php endforeach; ?>
 </tbody></table></div>
 <p class="help-text">حداکثر ۵۰۰ پرونده در این فهرست نمایش داده می‌شود. از فیلترها برای پیدا کردن رکوردها استفاده کنید.</p>
 </section><?php endif; ?></div>
