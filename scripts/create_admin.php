@@ -34,7 +34,7 @@ if (!hash_equals($password, $confirmation)) {
 try {
     $pdo = database_connection();
     $count = (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
-    $role = $count === 0 ? 'super_admin' : 'admin';
+    $role = $count === 0 ? 'super_admin' : 'administrative_staff';
     $statement = $pdo->prepare(
         'INSERT INTO users (username, password_hash, role, is_active) VALUES (:username, :password_hash, :role, 1)'
     );
