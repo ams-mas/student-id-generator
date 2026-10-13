@@ -82,10 +82,11 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
         </div>
         <a class="sidebar-link <?= $sidebarCurrentPage === 'financial_reports.php' ? 'is-current' : '' ?>" href="financial_reports.php"><span class="sidebar-icon" aria-hidden="true">▤</span><span>گزارش مالی شاگردان</span></a>
         <div class="sidebar-group">
-            <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['fees.php', 'fee_payments.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">◈</span><span>امور مالی</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
+            <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['fees.php', 'fee_payments.php', 'payment_history.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">◈</span><span>امور مالی</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
             <div class="sidebar-submenu">
                 <a class="sidebar-link <?= $sidebarCurrentPage === 'fees.php' ? 'is-current' : '' ?>" href="fees.php">تعیین فیس دوره‌ها</a>
                 <a class="sidebar-link <?= $sidebarCurrentPage === 'fee_payments.php' ? 'is-current' : '' ?>" href="fee_payments.php">دریافت فیس شاگردان</a>
+                <a class="sidebar-link <?= $sidebarCurrentPage === 'payment_history.php' ? 'is-current' : '' ?>" href="payment_history.php">تاریخچه پرداخت‌ها و رسیدها</a>
             </div>
         </div>
         <a class="sidebar-link <?= $sidebarCurrentPage === 'dashboard_configuration.php' ? 'is-current' : '' ?>" href="dashboard_configuration.php"><span class="sidebar-icon" aria-hidden="true">▦</span><span>تنظیمات داشبورد</span></a>
