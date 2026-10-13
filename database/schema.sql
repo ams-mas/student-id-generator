@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(80) NOT NULL,
     full_name VARCHAR(160) NOT NULL DEFAULT '',
     password_hash VARCHAR(255) NOT NULL,
-    role ENUM('super_admin', 'admin', 'user') NOT NULL DEFAULT 'user',
+    role ENUM('super_admin', 'head_teacher', 'finance_manager', 'administrative_staff', 'teacher') NOT NULL DEFAULT 'administrative_staff',
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
