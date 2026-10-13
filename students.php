@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $selectedFeeRule = null;
             $selectedFeeNet = 0.0;
             if (!$id) {
-                $feeRulesStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id AND grade_from <= :grade_min AND grade_to >= :grade_max ORDER BY id');
+                $feeRulesStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id AND is_active = 1 AND grade_from <= :grade_min AND grade_to >= :grade_max ORDER BY id');
                 $feeRulesStmt->execute(['year_id' => $activeSchoolYearId, 'grade_min' => $selectedGrade, 'grade_max' => $selectedGrade]);
                 $matchingFeeRules = $feeRulesStmt->fetchAll();
                 if (!$matchingFeeRules) {
@@ -361,7 +361,7 @@ if ($activeSchoolYear) {
 $feeRulesForForm = [];
 if ($activeSchoolYear) {
     try {
-        $feeRulesFormStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id ORDER BY period_name, grade_from');
+        $feeRulesFormStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id AND is_active = 1 ORDER BY period_name, grade_from');
         $feeRulesFormStmt->execute(['year_id' => (int)$activeSchoolYear['id']]);
         $feeRulesForForm = $feeRulesFormStmt->fetchAll();
     } catch (PDOException $e) {
