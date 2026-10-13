@@ -72,4 +72,4 @@ $statusLabels = ['present'=>'حاضر','absent'=>'غایب','late'=>'ناوقت'
 <?php if (!$students): ?><tr><td colspan="3">برای این صنف ثبت‌نام فعال پیدا نشد.</td></tr><?php endif; ?>
 <?php foreach($students as $student): $sid=(int)$student['id']; $current=$attendanceMap[$sid]??'present'; ?><tr><td dir="ltr"><?=attendance_h($student['student_number'])?></td><td><?=attendance_h($student['first_name'].' '.$student['last_name'])?></td><td><select name="attendance[<?=$sid?>]"><?php foreach($statusLabels as $value=>$label): ?><option value="<?=attendance_h($value)?>" <?=$current===$value?'selected':''?>><?=attendance_h($label)?></option><?php endforeach; ?></select></td></tr><?php endforeach; ?>
 </tbody></table></div><div style="margin-top:16px"><button class="button button-primary" type="submit">ذخیره حاضری</button></div></form>
-<?php endif; ?></section><footer class="page-footer">سامانه مدیریت دانش‌آموزان · حاضری</footer></main></div></body></html>
+<?php endif; ?></section><footer class="page-footer">سامانه مدیریت دانش‌آموزان · حاضری</footer></main></div><script src="assets/js/form-validation.js" defer></script></body></html>
