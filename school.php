@@ -144,7 +144,7 @@ foreach ($years as $year) {
 </head>
 <body class="profile-page">
 <div class="admin-layout">
-    <?php require __DIR__ . '/includes/sidebar.php'; ?>
+    
 
     <main class="admin-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
@@ -221,7 +221,5 @@ foreach ($years as $year) {
 <link rel="stylesheet" href="assets/css/persian-calendar.css?v=20261012-calendar-spacing">
 <script src="assets/js/persian-calendar.js"></script>
 <script src="assets/js/app.js"></script>
-    <script src="assets/js/sidebar-clock.js" defer></script>
-    <script src="assets/js/sidebar-submenus.js" defer></script>
-</body>
+    </body>
 </html>
