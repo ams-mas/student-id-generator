@@ -21,8 +21,8 @@ $topbarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT_
 ?>
 <header class="admin-topbar">
     <div class="admin-topbar-title">
-        <span class="admin-topbar-caption">سامانه مدیریت دانش‌آموزان</span>
-        <h1><?= $topbarEsc($topbarTitle) ?></h1>
+        <span class="admin-topbar-caption">پنل مدیریت مدرسه</span>
+        <h1>سامانه مدیریت دانش‌آموزان</h1>
     </div>
     <div class="admin-topbar-account">
         <span class="admin-topbar-avatar" aria-hidden="true"><?= $topbarEsc(function_exists('mb_substr') ? mb_substr($topbarUsername, 0, 1) : substr($topbarUsername, 0, 1)) ?></span>
