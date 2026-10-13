@@ -123,7 +123,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 <body class="profile-page">
 <div class="admin-layout">
 
-<main class="admin-main">
+<?php require __DIR__ . '/includes/sidebar.php'; ?>
+        <main class="admin-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
 <div class="school-config-wrap">
 <a href="dashboard.php" class="button button-secondary">بازگشت به داشبورد</a>
