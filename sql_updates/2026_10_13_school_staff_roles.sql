@@ -7,5 +7,5 @@ ALTER TABLE users MODIFY COLUMN role ENUM('super_admin','head_teacher','finance_
 
 -- Keep the system administrable if a legacy database had no super admin account.
 SET @active_super_admin_count = (SELECT COUNT(*) FROM users WHERE role = 'super_admin' AND is_active = 1);
-SET @first_user_id = (SELECT id FROM users ORDER BY id ASC LIMIT 1);
+SET @first_user_id = (SELECT id FROM users WHERE is_active = 1 ORDER BY id ASC LIMIT 1);
 UPDATE users SET role = 'super_admin' WHERE id = @first_user_id AND @active_super_admin_count = 0;
