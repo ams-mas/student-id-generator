@@ -117,14 +117,6 @@ foreach ($availableFiles as $filePath) {
     <title>به‌روزرسانی پایگاه داده</title>
     <link rel="stylesheet" href="assets/css/style.css">
 <style>
-/* School identity in the top of the sidebar */
-.admin-sidebar .sidebar-brand{align-items:center;}
-.admin-sidebar .sidebar-school-logo{width:48px;height:48px;min-width:48px;object-fit:contain;border-radius:10px;background:#fff;padding:4px;box-sizing:border-box;}
-.admin-sidebar .sidebar-system-clock{display:flex;flex-direction:column;align-items:center;gap:4px;margin:12px 12px 18px;padding:10px 8px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:rgba(255,255,255,.07);text-align:center;direction:rtl;}
-.admin-sidebar .sidebar-clock-date{font-size:12px;line-height:1.7;color:#dbeafe;}
-.admin-sidebar .sidebar-clock-time{font-size:20px;font-weight:700;letter-spacing:1px;line-height:1.4;color:#fff;font-variant-numeric:tabular-nums;}
-</style>
-    <style>
         .migration-wrap{max-width:1000px;margin:32px auto;padding:0 18px}
         .migration-panel{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin:18px 0;box-shadow:0 6px 24px rgba(15,23,42,.05)}
         .migration-list{display:grid;gap:12px}
@@ -145,6 +137,7 @@ foreach ($availableFiles as $filePath) {
 <div class="admin-layout">
     <?php require __DIR__ . '/includes/sidebar.php'; ?>
     <main class="admin-main">
+            <?php require __DIR__ . '/includes/topbar.php'; ?>
       <div class="migration-wrap">
     <a class="migration-back" href="dashboard.php">بازگشت به داشبورد</a>
     <section class="migration-panel">
