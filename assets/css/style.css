@@ -782,3 +782,49 @@ html[lang="fa"] .muted{
     padding: 24px 16px !important;
   }
 }
+
+
+/* Final anti-flicker fix: the sidebar and its controls never shift on hover. */
+html body .admin-sidebar,
+html body .admin-sidebar:hover,
+html body .admin-sidebar:focus,
+html body .admin-sidebar:focus-within,
+html body .admin-sidebar.is-open,
+html body .admin-sidebar:not(.is-open) {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: auto !important;
+  width: 286px !important;
+  min-width: 286px !important;
+  max-width: 286px !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+html body .admin-sidebar *,
+html body .admin-sidebar *:hover,
+html body .admin-sidebar *:focus {
+  animation: none !important;
+  transform: none !important;
+}
+html body .admin-sidebar .sidebar-toggle,
+html body .admin-sidebar::before,
+html body .admin-sidebar::after {
+  display: none !important;
+  content: none !important;
+}
+html body .admin-sidebar .sidebar-link,
+html body .admin-sidebar .sidebar-group-title {
+  transition: none !important;
+  transform: none !important;
+}
+html body .admin-sidebar .sidebar-link:hover,
+html body .admin-sidebar .sidebar-group-title:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
