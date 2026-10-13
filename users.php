@@ -234,7 +234,7 @@ $username = (string) $_SESSION['username'];
 </head>
 <body class="profile-page">
 <div class="admin-layout">
-    <?php require __DIR__ . '/includes/sidebar.php'; ?>
+    
 
     <main class="admin-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
@@ -325,7 +325,5 @@ $username = (string) $_SESSION['username'];
     </main>
 </div>
 
-    <script src="assets/js/sidebar-clock.js" defer></script>
-    <script src="assets/js/sidebar-submenus.js" defer></script>
-</body>
+    </body>
 </html>
