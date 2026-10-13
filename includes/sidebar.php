@@ -33,12 +33,13 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
     <p class="sidebar-section-label">منوی اصلی</p>
     <nav class="sidebar-nav">
         <a class="sidebar-link <?= $sidebarCurrentPage === 'dashboard.php' ? 'is-current' : '' ?>" href="dashboard.php"><span class="sidebar-icon" aria-hidden="true">⌂</span><span>داشبورد</span></a>
+        <?php if (in_array($sidebarRole, ['super_admin', 'head_teacher', 'administrative_staff', 'teacher'], true)): ?>
         <div class="sidebar-group">
             <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['students.php', 'generate.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">♙</span><span>مدیریت دانش‌آموزان</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
             <div class="sidebar-submenu">
-                <a class="sidebar-link" href="students.php?new=1">۱. افزودن دانش‌آموز جدید</a>
+                <?php if (in_array($sidebarRole, ['super_admin', 'head_teacher', 'administrative_staff'], true)): ?><a class="sidebar-link" href="students.php?new=1">۱. افزودن دانش‌آموز جدید</a><?php endif; ?>
                 <a class="sidebar-link" href="students.php">۲. مشاهده همه دانش‌آموزان</a>
-                <a class="sidebar-link" href="students.php">۳. ویرایش اطلاعات دانش‌آموز</a>
+                <?php if (in_array($sidebarRole, ['super_admin', 'head_teacher', 'administrative_staff'], true)): ?><a class="sidebar-link" href="students.php">۳. ویرایش اطلاعات دانش‌آموز</a><?php endif; ?>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۴. پروفایل دانش‌آموز <small>به‌زودی</small></span>
                 <a class="sidebar-link" href="students.php">۵. جست‌وجوی دانش‌آموزان</a>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۶. ارتقای دانش‌آموزان به صنف بالاتر <small>به‌زودی</small></span>
@@ -46,7 +47,7 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۸. مدیریت ثبت‌نام دانش‌آموزان <small>به‌زودی</small></span>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۹. مدیریت حاضری دانش‌آموزان <small>به‌زودی</small></span>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۱۰. مدیریت اسناد دانش‌آموزان <small>به‌زودی</small></span>
-                <a class="sidebar-link <?= $sidebarCurrentPage === 'generate.php' ? 'is-current' : '' ?>" href="generate.php">۱۱. کارت هویت دانش‌آموز</a>
+                <?php if (in_array($sidebarRole, ['super_admin', 'head_teacher', 'administrative_staff'], true)): ?><a class="sidebar-link <?= $sidebarCurrentPage === 'generate.php' ? 'is-current' : '' ?>" href="generate.php">۱۱. کارت هویت دانش‌آموز</a><?php endif; ?>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۱۲. سوابق تحصیلی دانش‌آموز <small>به‌زودی</small></span>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۱۳. مدیریت اولیا و سرپرستان <small>به‌زودی</small></span>
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۱۴. تعلیق یا انصراف دانش‌آموز <small>به‌زودی</small></span>
@@ -56,6 +57,8 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
                 <span class="sidebar-link sidebar-link-disabled" aria-disabled="true">۱۸. دانش‌آموزان حذف‌شده / بایگانی‌شده <small>به‌زودی</small></span>
             </div>
         </div>
+        <?php endif; ?>
+        <?php if (in_array($sidebarRole, ['super_admin', 'head_teacher'], true)): ?>
         <div class="sidebar-group">
             <button type="button" class="sidebar-group-title <?= $sidebarCurrentPage === 'teachers.php' ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">♟</span><span>مدیریت آموزگاران</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
             <div class="sidebar-submenu">
@@ -72,15 +75,20 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
                 <a class="sidebar-link <?= $sidebarCurrentPage === 'classes.php' && ($_GET['mode'] ?? '') === 'delete' ? 'is-current' : '' ?>" href="classes.php?mode=delete">حذف صنف</a>
             </div>
         </div>
+        <?php endif; ?>
+        <?php if ($sidebarRole === 'super_admin'): ?>
         <div class="sidebar-group">
             <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['school.php', 'school_configuration.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">🏫</span><span>تنظیمات مدرسه</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
             <div class="sidebar-submenu"><a class="sidebar-link <?= $sidebarCurrentPage === 'school_configuration.php' ? 'is-current' : '' ?>" href="school_configuration.php">مشخصات مدرسه</a><a class="sidebar-link <?= $sidebarCurrentPage === 'school.php' ? 'is-current' : '' ?>" href="school.php">سال تحصیلی</a></div>
         </div>
-        <?php if (in_array($sidebarRole, ['super_admin', 'admin'], true)): ?>
+        <?php endif; ?>
+        <?php if ($sidebarRole === 'super_admin'): ?>
         <div class="sidebar-group">
             <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['users.php', 'add_user.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">⚙</span><span>مدیریت کاربران</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
             <div class="sidebar-submenu"><a class="sidebar-link <?= $sidebarCurrentPage === 'users.php' ? 'is-current' : '' ?>" href="users.php">لیست کاربران</a><a class="sidebar-link <?= $sidebarCurrentPage === 'add_user.php' ? 'is-current' : '' ?>" href="add_user.php">افزودن کاربر</a></div>
         </div>
+        <?php endif; ?>
+        <?php if (in_array($sidebarRole, ['super_admin', 'finance_manager'], true)): ?>
         <a class="sidebar-link <?= $sidebarCurrentPage === 'financial_reports.php' ? 'is-current' : '' ?>" href="financial_reports.php"><span class="sidebar-icon" aria-hidden="true">▤</span><span>گزارش مالی شاگردان</span></a>
         <div class="sidebar-group">
             <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['fees.php', 'fee_payments.php', 'payment_history.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">◈</span><span>امور مالی</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
@@ -90,6 +98,8 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
                 <a class="sidebar-link <?= $sidebarCurrentPage === 'payment_history.php' ? 'is-current' : '' ?>" href="payment_history.php">تاریخچه پرداخت‌ها و رسیدها</a>
             </div>
         </div>
+        <?php endif; ?>
+        <?php if ($sidebarRole === 'super_admin'): ?>
         <a class="sidebar-link <?= $sidebarCurrentPage === 'dashboard_configuration.php' ? 'is-current' : '' ?>" href="dashboard_configuration.php"><span class="sidebar-icon" aria-hidden="true">▦</span><span>تنظیمات داشبورد</span></a>
         <a class="sidebar-link <?= $sidebarCurrentPage === 'database_updates.php' ? 'is-current' : '' ?>" href="database_updates.php"><span class="sidebar-icon" aria-hidden="true">↻</span><span>به‌روزرسانی پایگاه داده</span></a>
         <?php endif; ?>
