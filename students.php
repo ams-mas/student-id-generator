@@ -2,13 +2,15 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/auth.php';
-require_login();
+require_roles(['super_admin', 'head_teacher', 'administrative_staff', 'teacher']);
 require_once __DIR__ . '/config/database.php';
 
 $pdo = database_connection();
 $role = current_role();
-$canEdit = in_array($role, ['super_admin', 'admin'], true);
-$roleLabels = ['super_admin' => 'سوپر ادمین', 'admin' => 'ادمین', 'user' => 'کاربر'];
+$canEdit = in_array($role, ['super_admin', 'head_teacher', 'administrative_staff'], true);
+$canManageFees = $role === 'super_admin';
+$canManageStudentRecords = in_array($role, ['super_admin', 'head_teacher'], true);
+$roleLabels = ['super_admin' => 'مدیر کل', 'head_teacher' => 'سرمعلم', 'finance_manager' => 'مدیر مالی', 'administrative_staff' => 'کارمند اداری', 'teacher' => 'معلم'];
 $error = '';
 $success = '';
 $successReceipt = '';
@@ -60,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $guardian = trim((string)($_POST['guardian_name'] ?? ''));
             $guardianPhone = trim((string)($_POST['guardian_phone'] ?? ''));
             $address = trim((string)($_POST['address'] ?? ''));
-            $discountType = (string)($_POST['discount_type'] ?? 'none');
-            $discountRaw = trim((string)($_POST['discount_value'] ?? ''));
+            $discountType = $canManageFees ? (string)($_POST['discount_type'] ?? 'none') : 'none';
+            $discountRaw = $canManageFees ? trim((string)($_POST['discount_value'] ?? '')) : '0';
             $discountValue = $discountRaw === '' ? 0.0 : filter_var($discountRaw, FILTER_VALIDATE_FLOAT);
             if (!in_array($discountType, ['none', 'percent', 'amount'], true)) {
                 throw new RuntimeException('نوع تخفیف معتبر نیست.');
@@ -104,8 +106,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('هیچ سال تحصیلی فعالی وجود ندارد. ابتدا سال تحصیلی را تنظیم کنید.');
             }
             $selectedGrade = (int)$selectedSection['grade'];
-            $feeRuleId = filter_var($_POST['fee_rule_id'] ?? null, FILTER_VALIDATE_INT) ?: 0;
-            $initialPaymentRaw = trim((string)($_POST['initial_payment'] ?? ''));
+            $feeRuleId = $canManageFees ? (filter_var($_POST['fee_rule_id'] ?? null, FILTER_VALIDATE_INT) ?: 0) : 0;
+            $initialPaymentRaw = $canManageFees ? trim((string)($_POST['initial_payment'] ?? '')) : '0';
             $initialPayment = $initialPaymentRaw === '' ? 0.0 : filter_var($initialPaymentRaw, FILTER_VALIDATE_FLOAT);
             if ($initialPayment === false || !is_finite((float)$initialPayment) || $initialPayment < 0) {
                 throw new RuntimeException('مبلغ پرداخت اولیه معتبر نیست.');
@@ -117,22 +119,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $feeRulesStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id AND is_active = 1 AND grade_from <= :grade_min AND grade_to >= :grade_max ORDER BY id');
                 $feeRulesStmt->execute(['year_id' => $activeSchoolYearId, 'grade_min' => $selectedGrade, 'grade_max' => $selectedGrade]);
                 $matchingFeeRules = $feeRulesStmt->fetchAll();
-                if (!$matchingFeeRules) {
-                    throw new RuntimeException('برای صنف انتخاب‌شده هنوز فیس دوره‌ای تعیین نشده است. ابتدا از بخش «تعیین فیس دوره‌ها» فیس را ثبت کنید.');
-                }
-                foreach ($matchingFeeRules as $feeRule) {
-                    if ((int)$feeRule['id'] === $feeRuleId) { $selectedFeeRule = $feeRule; break; }
-                }
-                if (!$selectedFeeRule) {
-                    throw new RuntimeException('لطفاً یکی از دوره‌های فیس مربوط به صنف انتخاب‌شده را انتخاب کنید.');
-                }
-                $selectedFeeBase = (float)$selectedFeeRule['amount'];
-                $selectedDiscountAmount = $discountType === 'percent'
-                    ? round($selectedFeeBase * (float)$discountValue / 100, 2)
-                    : ($discountType === 'amount' ? min($selectedFeeBase, (float)$discountValue) : 0.0);
-                $selectedFeeNet = max(0, round($selectedFeeBase - $selectedDiscountAmount, 2));
-                if ((float)$initialPayment > $selectedFeeNet) {
-                    throw new RuntimeException('پرداخت اولیه نمی‌تواند بیشتر از فیس دوره پس از تخفیف باشد.');
+                if ($canManageFees) {
+                    if (!$matchingFeeRules) {
+                        throw new RuntimeException('برای صنف انتخاب‌شده هنوز فیس دوره‌ای تعیین نشده است. ابتدا از بخش «تعیین فیس دوره‌ها» فیس را ثبت کنید.');
+                    }
+                    foreach ($matchingFeeRules as $feeRule) {
+                        if ((int)$feeRule['id'] === $feeRuleId) { $selectedFeeRule = $feeRule; break; }
+                    }
+                    if (!$selectedFeeRule) {
+                        throw new RuntimeException('لطفاً یکی از دوره‌های فیس مربوط به صنف انتخاب‌شده را انتخاب کنید.');
+                    }
+                    $selectedFeeBase = (float)$selectedFeeRule['amount'];
+                    $selectedDiscountAmount = $discountType === 'percent'
+                        ? round($selectedFeeBase * (float)$discountValue / 100, 2)
+                        : ($discountType === 'amount' ? min($selectedFeeBase, (float)$discountValue) : 0.0);
+                    $selectedFeeNet = max(0, round($selectedFeeBase - $selectedDiscountAmount, 2));
+                    if ((float)$initialPayment > $selectedFeeNet) {
+                        throw new RuntimeException('پرداخت اولیه نمی‌تواند بیشتر از فیس دوره پس از تخفیف باشد.');
+                    }
+                } else {
+                    // Educational staff can register students without seeing fees or recording payments.
+                    $initialPayment = 0.0;
                 }
             } else {
                 $initialPayment = 0.0;
@@ -232,6 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
             }
+            if ($canManageFees) {
             if ($activeSchoolYearId < 1) {
                 throw new RuntimeException('برای ثبت تخفیف، سال تحصیلی فعلی باید فعال باشد.');
             }
@@ -242,8 +250,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $discountSaveStmt = $pdo->prepare('INSERT INTO student_year_discounts (student_id, school_year_id, discount_type, discount_value) VALUES (:student_id, :year_id, :discount_type, :discount_value) ON DUPLICATE KEY UPDATE discount_type = VALUES(discount_type), discount_value = VALUES(discount_value)');
                 $discountSaveStmt->execute(['student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId, 'discount_type' => $discountType, 'discount_value' => $discountValue]);
             }
+            }
             $pdo->commit();
-            $successMessage = $id ? 'پرونده دانش‌آموز به‌روزرسانی شد.' : 'دانش‌آموز با موفقیت ثبت شد و فیس دوره‌ها ثبت گردید.';
+            $successMessage = $id ? 'پرونده دانش‌آموز به‌روزرسانی شد.' : ($canManageFees ? 'دانش‌آموز با موفقیت ثبت شد و فیس دوره‌ها ثبت گردید.' : 'دانش‌آموز با موفقیت ثبت شد.');
             if (!$id && $receiptNumber !== '') {
                 $successMessage .= ' شماره رسید پرداخت: ' . $receiptNumber . ' (برای چاپ به بخش دریافت فیس مراجعه کنید).';
             }
@@ -252,6 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         if ($action === 'delete') {
+            if (!$canManageStudentRecords) throw new RuntimeException('فقط مدیر کل یا سرمعلم می‌تواند پرونده شاگرد را حذف کند.');
             $id = filter_var($_POST['student_id'] ?? null, FILTER_VALIDATE_INT);
             if (!$id) throw new RuntimeException('شناسه پرونده معتبر نیست.');
             $stmt = $pdo->prepare('DELETE FROM students WHERE id=:id');
@@ -262,6 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         if ($action === 'toggle') {
+            if (!$canManageStudentRecords) throw new RuntimeException('فقط مدیر کل یا سرمعلم می‌تواند وضعیت پرونده شاگرد را تغییر دهد.');
             $id = filter_var($_POST['student_id'] ?? null, FILTER_VALIDATE_INT);
             if (!$id) throw new RuntimeException('شناسه پرونده معتبر نیست.');
             $stmt = $pdo->prepare('UPDATE students SET is_active = CASE WHEN is_active=1 THEN 0 ELSE 1 END WHERE id=:id');
@@ -340,7 +351,7 @@ $total = (int)$pdo->query('SELECT COUNT(*) FROM students')->fetchColumn();
 $active = (int)$pdo->query('SELECT COUNT(*) FROM students WHERE is_active=1')->fetchColumn();
 $activeSchoolYear = $pdo->query('SELECT id, name FROM school_years WHERE is_active = 1 AND is_closed = 0 ORDER BY id DESC LIMIT 1')->fetch() ?: null;
 $currentDiscount = ['discount_type' => 'none', 'discount_value' => ''];
-if ($editing && $activeSchoolYear) {
+if ($canManageFees && $editing && $activeSchoolYear) {
     try {
         $discountReadStmt = $pdo->prepare('SELECT discount_type, discount_value FROM student_year_discounts WHERE student_id = :student_id AND school_year_id = :year_id LIMIT 1');
         $discountReadStmt->execute(['student_id' => (int)$editing['id'], 'year_id' => (int)$activeSchoolYear['id']]);
@@ -359,7 +370,7 @@ if ($activeSchoolYear) {
     $classOptions = $sectionOptionsStmt->fetchAll();
 }
 $feeRulesForForm = [];
-if ($activeSchoolYear) {
+if ($canManageFees && $activeSchoolYear) {
     try {
         $feeRulesFormStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id AND is_active = 1 ORDER BY period_name, grade_from');
         $feeRulesFormStmt->execute(['year_id' => (int)$activeSchoolYear['id']]);
@@ -462,12 +473,12 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <div class="student-field"><label for="date_of_birth">تاریخ تولد (هجری شمسی)</label><input id="date_of_birth" name="date_of_birth" type="date" data-persian-date value="<?= student_escape($editing['date_of_birth'] ?? '') ?>"></div>
 <div class="student-field"><label for="class_section_id">صنف / کلاس سال تحصیلی فعلی *</label><select id="class_section_id" name="class_section_id" required><option value="">انتخاب صنف</option><?php foreach ($classOptions as $classOption): ?><option data-grade="<?= (int)$classOption['grade'] ?>" value="<?= (int)$classOption['id'] ?>" <?= ((int)($editing['class_section_id'] ?? 0) === (int)$classOption['id'] || (($editing['class_name'] ?? '') === ((string)$classOption['grade'].' '.(string)$classOption['section_name']))) ? 'selected' : '' ?>><?= student_escape((string)$classOption['grade'].' '.(string)$classOption['section_name']) ?></option><?php endforeach; ?></select><?php if (!$activeSchoolYear): ?><small>ابتدا سال تحصیلی فعلی را فعال کنید.</small><?php elseif (!$classOptions): ?><small>برای سال تحصیلی <?= student_escape($activeSchoolYear['name']) ?> هنوز صنفی تعریف نشده است. ابتدا در تنظیمات مدرسه صنف‌ها را ایجاد کنید.</small><?php else: ?><small>فقط صنف‌های فعال سال تحصیلی <?= student_escape($activeSchoolYear['name']) ?> نمایش داده می‌شوند.</small><?php endif; ?></div>
 </div></div>
-<div class="student-form-section"><h3>تخفیف شهریه سال تحصیلی <?= student_escape($activeSchoolYear['name'] ?? '') ?></h3><div class="student-form-fields">
+<?php if ($canManageFees): ?><div class="student-form-section"><h3>تخفیف شهریه سال تحصیلی <?= student_escape($activeSchoolYear['name'] ?? '') ?></h3><div class="student-form-fields">
 <div class="student-field"><label for="discount_type">نوع تخفیف</label><select id="discount_type" name="discount_type"><option value="none" <?= ($currentDiscount['discount_type'] ?? 'none') === 'none' ? 'selected' : '' ?>>بدون تخفیف</option><option value="percent" <?= ($currentDiscount['discount_type'] ?? '') === 'percent' ? 'selected' : '' ?>>درصدی (%)</option><option value="amount" <?= ($currentDiscount['discount_type'] ?? '') === 'amount' ? 'selected' : '' ?>>مبلغ ثابت</option></select><small>این تخفیف فقط برای سال تحصیلی فعلی ذخیره می‌شود.</small></div>
 <div class="student-field"><label for="discount_value">مقدار تخفیف</label><input id="discount_value" name="discount_value" type="number" min="0" step="0.01" value="<?= student_escape($currentDiscount['discount_value'] ?? '') ?>" placeholder="مثلاً ۱۰ یا ۵۰۰"><small>برای تخفیف درصدی از ۱ تا ۱۰۰ وارد کنید؛ برای مبلغ ثابت، مبلغ تخفیف را وارد کنید.</small></div>
-</div></div>
+</div></div><?php endif; ?>
 
-<?php if (!$editing): ?><div class="student-form-section"><h3>فیس و پرداخت دوره</h3><div class="student-form-fields">
+<?php if ($canManageFees && !$editing): ?><div class="student-form-section"><h3>فیس و پرداخت دوره</h3><div class="student-form-fields">
 <div class="student-field"><label for="fee_rule_id">دورهٔ فیس *</label><select id="fee_rule_id" name="fee_rule_id" required><option value="">انتخاب دوره</option><?php foreach ($feeRulesForForm as $feeRule): ?><option value="<?= (int)$feeRule['id'] ?>" data-grade-from="<?= (int)$feeRule['grade_from'] ?>" data-grade-to="<?= (int)$feeRule['grade_to'] ?>" data-amount="<?= student_escape($feeRule['amount']) ?>"><?= student_escape($feeRule['period_name'].' — صنف '.$feeRule['grade_from'].' تا '.$feeRule['grade_to'].' — '.number_format((float)$feeRule['amount'],2)) ?></option><?php endforeach; ?></select><small>فیس هر دوره از تنظیمات مالی گرفته می‌شود.</small></div>
 <div class="student-field"><label for="initial_payment">پرداخت فعلی (اختیاری)</label><input id="initial_payment" name="initial_payment" type="number" min="0" step="0.01" value="0" <?= $editing ? 'disabled' : '' ?>><small>۰ یعنی فعلاً پرداخت نشده؛ مبلغ باقی‌مانده بعداً از بخش دریافت فیس قابل پرداخت است.</small></div>
 <div class="student-field"><label for="initial_payment_method">روش پرداخت</label><select id="initial_payment_method" name="initial_payment_method" <?= $editing ? 'disabled' : '' ?>><option value="cash">نقدی</option><option value="bank">بانکی</option><option value="other">دیگر</option></select></div>
