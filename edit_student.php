@@ -252,16 +252,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (in_array($action, ['delete', 'toggle'], true)) {
             throw new RuntimeException('در صفحه ویرایش فقط اطلاعات پرونده قابل تغییر است.');
         }
-        if ($action === 'toggle') {
-            if (!$canManageStudentRecords) throw new RuntimeException('فقط مدیر کل یا سرمعلم می‌تواند وضعیت پرونده شاگرد را تغییر دهد.');
-            $id = filter_var($_POST['student_id'] ?? null, FILTER_VALIDATE_INT);
-            if (!$id) throw new RuntimeException('شناسه پرونده معتبر نیست.');
-            $stmt = $pdo->prepare('UPDATE students SET is_active = CASE WHEN is_active=1 THEN 0 ELSE 1 END WHERE id=:id');
-            $stmt->execute(['id'=>$id]);
-            $_SESSION['students_flash'] = ['success' => 'وضعیت پرونده تغییر کرد.'];
-            header('Location: edit_student.php');
-            exit;
-        }
         throw new RuntimeException('درخواست نامعتبر است.');
     } catch (RuntimeException $e) {
         if ($pdo->inTransaction()) { $pdo->rollBack(); }
@@ -297,6 +287,9 @@ if ($canEdit && isset($_GET['edit'])) {
         $stmt = $pdo->prepare('SELECT * FROM students WHERE id=:id LIMIT 1');
         $stmt->execute(['id'=>$editId]);
         $editing = $stmt->fetch() ?: null;
+        if (!$editing) $error = 'پرونده دانش‌آموز پیدا نشد. از فهرست یک دانش‌آموز معتبر انتخاب کنید.';
+    } else {
+        $error = 'شماره پرونده معتبر نیست. از فهرست یک دانش‌آموز انتخاب کنید.';
     }
 }
 $search = trim((string)($_GET['q'] ?? ''));
