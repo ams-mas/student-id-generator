@@ -46,8 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new RuntimeException('مبلغ پرداخت از باقی‌داری بیشتر است. باقی‌داری فعلی: ' . number_format($remaining, 2));
         }
         $receipt = 'RC-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
-        $insert = $pdo->prepare('INSERT INTO student_fee_payments (charge_id,amount,receipt_number,payment_method,notes) VALUES (?,?,?,?,?)');
-        $insert->execute([$chargeId, $amount, $receipt, $method, $notes]);
+        // Store the authenticated account that actually received this payment.
+        $receivedBy = (int)($_SESSION['user_id'] ?? 0);
+        if ($receivedBy < 1) throw new RuntimeException('کاربر واردشده شناسایی نشد. دوباره وارد سیستم شوید.');
+        $insert = $pdo->prepare('INSERT INTO student_fee_payments (charge_id,amount,receipt_number,payment_method,notes,received_by) VALUES (?,?,?,?,?,?)');
+        $insert->execute([$chargeId, $amount, $receipt, $method, $notes, $receivedBy]);
         $receiptNumber = $receipt;
         $pdo->commit();
         $success = 'پرداخت ثبت شد. شماره رسید: ' . $receipt . ' — ' . $charge['first_name'] . ' ' . $charge['last_name'] . '، ' . $charge['period_name'] . '، مبلغ ' . number_format((float)$amount, 2);
