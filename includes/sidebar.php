@@ -81,7 +81,13 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
             <div class="sidebar-submenu"><a class="sidebar-link <?= $sidebarCurrentPage === 'users.php' ? 'is-current' : '' ?>" href="users.php">لیست کاربران</a><a class="sidebar-link <?= $sidebarCurrentPage === 'add_user.php' ? 'is-current' : '' ?>" href="add_user.php">افزودن کاربر</a></div>
         </div>
         <a class="sidebar-link" href="#" aria-disabled="true" title="بخش گزارشات بعداً اضافه می‌شود"><span class="sidebar-icon" aria-hidden="true">▤</span><span>گزارشات</span></a>
-        <a class="sidebar-link" href="#" aria-disabled="true" title="بخش مالی بعداً اضافه می‌شود"><span class="sidebar-icon" aria-hidden="true">◈</span><span>بخش مالی</span></a>
+        <div class="sidebar-group">
+            <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['fees.php', 'fee_payments.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">◈</span><span>امور مالی</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
+            <div class="sidebar-submenu">
+                <a class="sidebar-link <?= $sidebarCurrentPage === 'fees.php' ? 'is-current' : '' ?>" href="fees.php">تعیین فیس دوره‌ها</a>
+                <a class="sidebar-link <?= $sidebarCurrentPage === 'fee_payments.php' ? 'is-current' : '' ?>" href="fee_payments.php">دریافت فیس شاگردان</a>
+            </div>
+        </div>
         <a class="sidebar-link <?= $sidebarCurrentPage === 'dashboard_configuration.php' ? 'is-current' : '' ?>" href="dashboard_configuration.php"><span class="sidebar-icon" aria-hidden="true">▦</span><span>تنظیمات داشبورد</span></a>
         <a class="sidebar-link <?= $sidebarCurrentPage === 'database_updates.php' ? 'is-current' : '' ?>" href="database_updates.php"><span class="sidebar-icon" aria-hidden="true">↻</span><span>به‌روزرسانی پایگاه داده</span></a>
         <?php endif; ?>
