@@ -1357,3 +1357,30 @@ html body .admin-sidebar *::after {
     padding: 24px 16px !important;
   }
 }
+
+
+/* Sidebar temporarily removed from the visible layout; its menu markup is preserved in includes/sidebar.php. */
+html body .admin-sidebar {
+  display: none !important;
+}
+html body .admin-layout {
+  display: block !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+html body .admin-main,
+html body .dashboard-main {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+@media (max-width: 850px) {
+  html body .admin-main,
+  html body .dashboard-main {
+    margin: 0 !important;
+  }
+}
