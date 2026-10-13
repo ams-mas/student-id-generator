@@ -996,3 +996,134 @@ input:focus, select:focus, textarea:focus {
 @media (max-width: 600px) {
   .admin-main h1 { font-size: 1.3rem !important; }
 }
+
+/* Shared top header: identical height, spacing, and typography on every admin page. */
+.admin-main > .admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 78px;
+  margin: -36px calc(-1 * clamp(18px, 3vw, 42px)) 28px;
+  padding: 13px clamp(18px, 3vw, 42px);
+  border-bottom: 1px solid #dbe3ef;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 4px 18px rgb(23 37 84 / 5%);
+  backdrop-filter: blur(12px);
+}
+.admin-topbar-title { min-width: 0; }
+.admin-topbar-caption {
+  display: block;
+  margin-bottom: 2px;
+  color: #64748b;
+  font-size: .72rem;
+  line-height: 1.5;
+}
+.admin-topbar-title h1 {
+  margin: 0 !important;
+  color: #172554;
+  font-size: 1.12rem !important;
+  font-weight: 800;
+  line-height: 1.5 !important;
+  letter-spacing: 0 !important;
+}
+.admin-topbar-account {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 10px;
+  padding: 7px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+.admin-topbar-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 1rem;
+  font-weight: 800;
+}
+.admin-topbar-user { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.admin-topbar-user strong {
+  max-width: 150px;
+  overflow: hidden;
+  color: #1e293b;
+  font-size: .8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-topbar-user small { color: #64748b; font-size: .7rem; }
+.admin-main > .admin-topbar + .page-header { margin-top: 0; }
+.admin-main > .admin-topbar + .dashboard-header { margin-top: 0; }
+.admin-main > .admin-topbar + .migration-wrap { margin-top: 0; }
+.admin-main > .admin-topbar + .school-config-wrap { margin-top: 0; }
+
+/* One fixed sidebar size and one logo/clock treatment on all admin pages. */
+.admin-layout > .admin-sidebar {
+  width: 286px !important;
+  padding: 22px 16px 18px !important;
+  gap: 0;
+}
+.admin-layout > .admin-sidebar .sidebar-brand {
+  min-height: 68px;
+  padding: 4px 8px 18px !important;
+  gap: 12px !important;
+}
+.admin-layout > .admin-sidebar .sidebar-school-logo,
+.admin-layout > .admin-sidebar .sidebar-brand-mark {
+  flex: 0 0 43px !important;
+  width: 43px !important;
+  height: 43px !important;
+  min-width: 43px !important;
+  min-height: 43px !important;
+  max-width: 43px !important;
+  max-height: 43px !important;
+  padding: 0 !important;
+  object-fit: contain !important;
+}
+.admin-layout > .admin-sidebar .sidebar-system-clock {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin: 12px 8px 16px !important;
+  padding: 9px 8px !important;
+  border: 1px solid rgb(255 255 255 / 13%) !important;
+  border-radius: 10px !important;
+  background: rgb(255 255 255 / 6%) !important;
+  text-align: center !important;
+}
+.admin-layout > .admin-sidebar .sidebar-clock-date { font-size: 12px !important; line-height: 1.6 !important; }
+.admin-layout > .admin-sidebar .sidebar-clock-time { font-size: 19px !important; line-height: 1.4 !important; }
+.admin-layout > .admin-sidebar .sidebar-nav { gap: 7px !important; }
+@media (min-width: 851px) {
+  .admin-main > .admin-topbar {
+    margin-top: -36px;
+  }
+}
+@media (max-width: 850px) {
+  .admin-main > .admin-topbar {
+    position: relative;
+    top: auto;
+    min-height: 68px;
+    margin: -24px -16px 22px;
+    padding: 12px 16px;
+  }
+  .admin-topbar-title h1 { font-size: 1rem !important; }
+  .admin-topbar-account { gap: 7px; padding: 5px 7px; }
+  .admin-topbar-avatar { width: 32px; height: 32px; }
+  .admin-topbar-user strong { max-width: 105px; }
+}
+@media (max-width: 420px) {
+  .admin-topbar-caption { font-size: .65rem; }
+  .admin-topbar-account { padding: 4px; }
+  .admin-topbar-user small { display: none; }
+}
