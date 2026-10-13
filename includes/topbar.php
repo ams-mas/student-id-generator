@@ -7,12 +7,21 @@ $topbarRoleLabels = ['super_admin' => 'سوپر ادمین', 'admin' => 'ادم�
 $topbarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 ?>
 <header class="admin-topbar">
-    <div class="admin-topbar-title">
-        <span class="admin-topbar-caption">پنل مدیریت مدرسه</span>
-        <h1>سامانه مدیریت دانش‌آموزان</h1>
+    <div class="admin-topbar-brand">
+        <span class="admin-topbar-mark" aria-hidden="true">م‌د</span>
+        <div class="admin-topbar-title">
+            <span class="admin-topbar-caption">پنل مدیریت مدرسه</span>
+            <h1>سامانه مدیریت دانش‌آموزان</h1>
+        </div>
     </div>
-    <div class="admin-topbar-account">
-        <span class="admin-topbar-avatar" aria-hidden="true"><?= $topbarEsc(function_exists('mb_substr') ? mb_substr($topbarUsername, 0, 1) : substr($topbarUsername, 0, 1)) ?></span>
-        <span class="admin-topbar-user"><strong><?= $topbarEsc($topbarUsername) ?></strong><small><?= $topbarEsc($topbarRoleLabels[$topbarRole] ?? $topbarRole) ?></small></span>
+    <div class="admin-topbar-actions">
+        <div class="admin-topbar-account">
+            <span class="admin-topbar-avatar" aria-hidden="true"><?= $topbarEsc(function_exists('mb_substr') ? mb_substr($topbarUsername, 0, 1) : substr($topbarUsername, 0, 1)) ?></span>
+            <span class="admin-topbar-user"><strong><?= $topbarEsc($topbarUsername) ?></strong><small><?= $topbarEsc($topbarRoleLabels[$topbarRole] ?? $topbarRole) ?></small></span>
+        </div>
+        <form class="admin-topbar-logout-form" action="logout.php" method="post">
+            <input type="hidden" name="csrf_token" value="<?= $topbarEsc(csrf_token()) ?>">
+            <button class="admin-topbar-logout" type="submit"><span aria-hidden="true">↪</span> خروج</button>
+        </form>
     </div>
 </header>
