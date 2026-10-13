@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/auth.php';
-require_login();
+require_roles(['super_admin', 'head_teacher', 'administrative_staff']);
 require_once __DIR__ . '/config/database.php';
 $pdo=database_connection();
 function student_card_h(mixed $value): string { return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
