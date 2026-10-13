@@ -620,3 +620,24 @@ table.table-sortable thead th.table-sort-header[data-sort-direction="desc"]::aft
     color: #2449a5;
     font-weight: 800;
 }
+
+/* Consistent school-management form and table patterns */
+html[dir="rtl"] body{font-size:16px;line-height:1.8}
+html[dir="rtl"] .admin-main{min-width:0}
+html[dir="rtl"] .panel,html[dir="rtl"] .pay-panel,html[dir="rtl"] .fr-panel{border-radius:16px}
+html[dir="rtl"] input,html[dir="rtl"] select,html[dir="rtl"] textarea{min-height:48px;padding:10px 13px;font-size:16px;line-height:1.6}
+html[dir="rtl"] textarea{min-height:110px;resize:vertical}
+html[dir="rtl"] button,html[dir="rtl"] .button{min-height:44px;font-size:15px;line-height:1.6}
+html[dir="rtl"] label{line-height:1.7}
+html[dir="rtl"] input:user-invalid,html[dir="rtl"] select:user-invalid,html[dir="rtl"] textarea:user-invalid{border-color:#c2413b;box-shadow:0 0 0 3px rgb(194 65 59 / 10%)}
+html[dir="rtl"] input:focus-visible,html[dir="rtl"] select:focus-visible,html[dir="rtl"] textarea:focus-visible,html[dir="rtl"] button:focus-visible,html[dir="rtl"] a:focus-visible{outline:3px solid rgb(36 73 165 / 24%);outline-offset:2px}
+.student-form-section{padding:20px;margin:0 0 18px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.student-form-section>h3{margin:0 0 15px;padding-bottom:10px;border-bottom:1px solid var(--line);font-size:1.05rem}
+.student-form-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 18px}
+.student-field{min-width:0}
+.student-field label{display:block;margin:0 0 7px;font-size:15px}
+.student-field input,.student-field select,.student-field textarea,.students-form input,.students-form select,.students-form textarea{min-height:48px;font-size:16px}
+.student-field small{display:block;margin-top:5px;line-height:1.7;color:var(--muted)}
+.form-actions{display:flex;justify-content:flex-start;gap:10px;padding-top:4px}
+.form-actions .button{min-width:150px}
+@media(max-width:700px){.student-form-fields{grid-template-columns:1fr}.student-form-section{padding:15px}.form-actions .button{width:100%}}
