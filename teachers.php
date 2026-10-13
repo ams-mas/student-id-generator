@@ -61,7 +61,8 @@ $teachers = $pdo->query('SELECT t.id, t.full_name, t.phone, t.email, t.is_active
 <style>
 .teacher-grid{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(320px,1.2fr);gap:20px;align-items:start}.teacher-form{display:grid;gap:14px}.teacher-form label{display:grid;gap:7px;font-weight:700}.teacher-form input{box-sizing:border-box;width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit}.teacher-table-wrap{overflow-x:auto}.teacher-table{width:100%;border-collapse:collapse}.teacher-table th,.teacher-table td{padding:11px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}.teacher-table th{background:#e8eef8}.teacher-actions{display:flex;gap:6px;align-items:center}.teacher-actions form{margin:0}.notice{padding:12px 14px;border-radius:9px;margin-bottom:16px}.notice.ok{background:#dcfce7;color:#166534}.notice.bad{background:#fee2e2;color:#991b1b}.button-danger{background:#b42332;color:white;border:0}@media(max-width:850px){.teacher-grid{grid-template-columns:1fr}}
 </style></head><body class="profile-page"><div class="admin-layout">
-<main class="admin-main">
+<?php require __DIR__ . '/includes/sidebar.php'; ?>
+        <main class="admin-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?><header class="page-header"><p class="eyebrow">مدیریت مدرسه</p><h1>مدیریت آموزگاران</h1><p class="muted">ثبت، ویرایش و حذف آموزگاران مدرسه.</p></header>
 <?php if ($success !== ''): ?><div class="notice ok"><?= teachers_h($success) ?></div><?php endif; ?><?php if ($error !== ''): ?><div class="notice bad"><?= teachers_h($error) ?></div><?php endif; ?>
 <div class="teacher-grid">
