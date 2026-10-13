@@ -274,14 +274,6 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <title>مدیریت دانش‌آموزان | سامانه مدیریت دانش‌آموزان</title>
 <link rel="stylesheet" href="assets/css/style.css">
 <style>
-/* School identity in the top of the sidebar */
-.admin-sidebar .sidebar-brand{align-items:center;}
-.admin-sidebar .sidebar-school-logo{width:48px;height:48px;min-width:48px;object-fit:contain;border-radius:10px;background:#fff;padding:4px;box-sizing:border-box;}
-.admin-sidebar .sidebar-system-clock{display:flex;flex-direction:column;align-items:center;gap:4px;margin:12px 12px 18px;padding:10px 8px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:rgba(255,255,255,.07);text-align:center;direction:rtl;}
-.admin-sidebar .sidebar-clock-date{font-size:12px;line-height:1.7;color:#dbeafe;}
-.admin-sidebar .sidebar-clock-time{font-size:20px;font-weight:700;letter-spacing:1px;line-height:1.4;color:#fff;font-variant-numeric:tabular-nums;}
-</style>
-<style>
 .students-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
 .student-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
 .students-filters{display:grid;grid-template-columns:minmax(200px,2fr) repeat(3,minmax(130px,1fr));gap:12px;align-items:end}
@@ -336,6 +328,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <div class="admin-layout">
 <?php require __DIR__ . '/includes/sidebar.php'; ?>
 <main class="admin-main">
+            <?php require __DIR__ . '/includes/topbar.php'; ?>
 <header class="page-header dashboard-header"><div><p class="eyebrow">پرونده‌ها</p><h1>مدیریت دانش‌آموزان</h1><p class="muted">ثبت، جست‌وجو و به‌روزرسانی پرونده‌های دانش‌آموزان.</p></div><div class="account-actions"><span class="signed-in-as">نقش شما: <strong><?= student_escape($roleLabels[$role] ?? $role) ?></strong></span></div></header>
 <?php if ($success !== ''): ?><div class="students-flash" role="status"><?= student_escape($success) ?></div><?php endif; ?>
 <?php if ($error !== ''): ?><div class="students-flash students-error" role="alert"><?= student_escape($error) ?></div><?php endif; ?>
