@@ -113,8 +113,9 @@ if ($year) {
         $listStmt->execute();
         $students = $listStmt->fetchAll();
 
-        $historyWhere = ['c.school_year_id = ?'];
-        $historyParams = [(int)$year['id']];
+        // Receipt history is global across school years so a student's past payments remain searchable.
+        $historyWhere = ['1=1'];
+        $historyParams = [];
         if ($search !== '') {
             $historyWhere[] = '(s.student_number LIKE ? OR s.first_name LIKE ? OR s.last_name LIKE ? OR CONCAT(s.first_name, " ", s.last_name) LIKE ? OR s.father_name LIKE ? OR s.register_book_number LIKE ? OR p.receipt_number LIKE ?)';
             $like = '%' . $search . '%';
@@ -129,7 +130,7 @@ if ($year) {
             $historyPage = $historyPages;
             $historyOffset = ($historyPage - 1) * $historyPerPage;
         }
-        $hs = $pdo->prepare('SELECT p.receipt_number,p.amount,p.payment_method,p.received_at,c.period_name,s.student_number,s.first_name,s.last_name FROM student_fee_payments p JOIN student_fee_charges c ON c.id=p.charge_id JOIN students s ON s.id=c.student_id WHERE ' . $historyWhereSql . ' ORDER BY p.received_at DESC,p.id DESC LIMIT ? OFFSET ?');
+        $hs = $pdo->prepare('SELECT p.receipt_number,p.amount,p.payment_method,p.received_at,c.period_name,y.name AS year_name,s.student_number,s.first_name,s.last_name FROM student_fee_payments p JOIN student_fee_charges c ON c.id=p.charge_id JOIN school_years y ON y.id=c.school_year_id JOIN students s ON s.id=c.student_id WHERE ' . $historyWhereSql . ' ORDER BY p.received_at DESC,p.id DESC LIMIT ? OFFSET ?');
         foreach ($historyParams as $i => $value) $hs->bindValue($i + 1, $value, PDO::PARAM_STR);
         $hs->bindValue(count($historyParams) + 1, $historyPerPage, PDO::PARAM_INT);
         $hs->bindValue(count($historyParams) + 2, $historyOffset, PDO::PARAM_INT);
@@ -188,7 +189,7 @@ $remaining = max(0, $due - $paid);
 <?php endif;endif;?>
 </section>
 <section class="pay-panel"><h2 class="pay-history-title">تاریخچه پرداخت‌ها و رسیدها</h2><p class="pay-muted">هر بار پرداخت یک رکورد مستقل و شماره رسید جداگانه دارد. برای چاپ دوباره رسید، روی شماره آن کلیک کنید.</p>
-<?php if(!$year):?><p>سال تعلیمی فعال نیست.</p><?php elseif(!$history):?><p>برای این سال پرداختی ثبت نشده است.</p><?php else:?><div class="pay-table-wrap"><table class="pay-table"><thead><tr><th>شماره رسید</th><th>شماره شاگرد</th><th>نام شاگرد</th><th>دوره</th><th>مبلغ پرداخت</th><th>روش</th><th>تاریخ و ساعت</th></tr></thead><tbody><?php foreach($history as $h):?><tr><td><a href="fee_receipt.php?receipt=<?=rawurlencode((string)$h['receipt_number'])?>" target="_blank" rel="noopener"><?=fee_pay_h($h['receipt_number'])?></a></td><td><?=fee_pay_h($h['student_number'])?></td><td><?=fee_pay_h($h['first_name'].' '.$h['last_name'])?></td><td><?=fee_pay_h($h['period_name'])?></td><td><?=number_format((float)$h['amount'],2)?></td><td><?=fee_pay_h($methods[$h['payment_method']]??'دیگر')?></td><td><?=fee_pay_h($h['received_at'])?></td></tr><?php endforeach;?></tbody></table></div>
+<?php if(!$year):?><p>سال تعلیمی فعال نیست.</p><?php elseif(!$history):?><p>برای این سال پرداختی ثبت نشده است.</p><?php else:?><div class="pay-table-wrap"><table class="pay-table"><thead><tr><th>شماره رسید</th><th>شماره شاگرد</th><th>نام شاگرد</th><th>سال تعلیمی</th><th>دوره</th><th>مبلغ پرداخت</th><th>روش</th><th>تاریخ و ساعت</th></tr></thead><tbody><?php foreach($history as $h):?><tr><td><a href="fee_receipt.php?receipt=<?=rawurlencode((string)$h['receipt_number'])?>" target="_blank" rel="noopener"><?=fee_pay_h($h['receipt_number'])?></a></td><td><?=fee_pay_h($h['student_number'])?></td><td><?=fee_pay_h($h['first_name'].' '.$h['last_name'])?></td><td><?=fee_pay_h($h['year_name'])?></td><td><?=fee_pay_h($h['period_name'])?></td><td><?=number_format((float)$h['amount'],2)?></td><td><?=fee_pay_h($methods[$h['payment_method']]??'دیگر')?></td><td><?=fee_pay_h($h['received_at'])?></td></tr><?php endforeach;?></tbody></table></div>
 <?php if($historyPages>1):?><nav class="pay-pagination" aria-label="صفحه‌های تاریخچه"><?php if($historyPage>1):?><a href="<?=fee_pay_h($makePageUrl($historyPage-1,'history_page'))?>">قبلی</a><?php endif;?><?php for($p=max(1,$historyPage-2);$p<=min($historyPages,$historyPage+2);$p++):?><?php if($p===$historyPage):?><span class="current"><?=$p?></span><?php else:?><a href="<?=fee_pay_h($makePageUrl($p,'history_page'))?>"><?=$p?></a><?php endif;?><?php endfor;?><?php if($historyPage<$historyPages):?><a href="<?=fee_pay_h($makePageUrl($historyPage+1,'history_page'))?>">بعدی</a><?php endif;?></nav><?php endif;?>
 <?php endif;?>
 </section>
