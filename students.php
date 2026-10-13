@@ -351,8 +351,17 @@ $sql .= ' ORDER BY is_active DESC, last_name ASC, first_name ASC LIMIT 500';
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $students = $stmt->fetchAll();
-$total = (int)$pdo->query('SELECT COUNT(*) FROM students')->fetchColumn();
-$active = (int)$pdo->query('SELECT COUNT(*) FROM students WHERE is_active=1')->fetchColumn();
+if ($role === 'teacher') {
+    $teacherCountStmt = $pdo->prepare('SELECT COUNT(*) FROM students s WHERE s.id IN (SELECT e.student_id FROM student_enrollments e JOIN class_sections cs ON cs.id=e.class_section_id JOIN teachers t ON t.id=cs.teacher_id WHERE t.user_id=? AND e.is_current=1)');
+    $teacherCountStmt->execute([(int)$_SESSION['user_id']]);
+    $total = (int)$teacherCountStmt->fetchColumn();
+    $teacherActiveStmt = $pdo->prepare('SELECT COUNT(*) FROM students s WHERE s.is_active=1 AND s.id IN (SELECT e.student_id FROM student_enrollments e JOIN class_sections cs ON cs.id=e.class_section_id JOIN teachers t ON t.id=cs.teacher_id WHERE t.user_id=? AND e.is_current=1)');
+    $teacherActiveStmt->execute([(int)$_SESSION['user_id']]);
+    $active = (int)$teacherActiveStmt->fetchColumn();
+} else {
+    $total = (int)$pdo->query('SELECT COUNT(*) FROM students')->fetchColumn();
+    $active = (int)$pdo->query('SELECT COUNT(*) FROM students WHERE is_active=1')->fetchColumn();
+}
 $activeSchoolYear = $pdo->query('SELECT id, name FROM school_years WHERE is_active = 1 AND is_closed = 0 ORDER BY id DESC LIMIT 1')->fetch() ?: null;
 $currentDiscount = ['discount_type' => 'none', 'discount_value' => ''];
 if ($canManageFees && $editing && $activeSchoolYear) {
