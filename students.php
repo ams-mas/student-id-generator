@@ -11,10 +11,12 @@ $canEdit = in_array($role, ['super_admin', 'admin'], true);
 $roleLabels = ['super_admin' => 'سوپر ادمین', 'admin' => 'ادمین', 'user' => 'کاربر'];
 $error = '';
 $success = '';
+$successReceipt = '';
 $editing = null;
 
 if (isset($_SESSION['students_flash']) && is_array($_SESSION['students_flash'])) {
     $success = (string) ($_SESSION['students_flash']['success'] ?? '');
+    $successReceipt = (string) ($_SESSION['students_flash']['receipt'] ?? '');
     $error = (string) ($_SESSION['students_flash']['error'] ?? '');
     unset($_SESSION['students_flash']);
 }
@@ -222,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$id && $receiptNumber !== '') {
                 $successMessage .= ' شماره رسید پرداخت: ' . $receiptNumber . ' (برای چاپ به بخش دریافت فیس مراجعه کنید).';
             }
-            $_SESSION['students_flash'] = ['success' => $successMessage];
+            $_SESSION['students_flash'] = ['success' => $successMessage, 'receipt' => (!$id ? $receiptNumber : '')];
             header('Location: students.php');
             exit;
         }
@@ -415,7 +417,7 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
         <main class="admin-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
 <header class="page-header dashboard-header"><div><p class="eyebrow">پرونده‌ها</p><h1>مدیریت دانش‌آموزان</h1><p class="muted">ثبت، جست‌وجو و به‌روزرسانی پرونده‌های دانش‌آموزان.</p></div><div class="account-actions"><span class="signed-in-as">نقش شما: <strong><?= student_escape($roleLabels[$role] ?? $role) ?></strong></span></div></header>
-<?php if ($success !== ''): ?><div class="students-flash" role="status"><?= student_escape($success) ?></div><?php endif; ?>
+<?php if ($success !== ''): ?><div class="students-flash" role="status"><?= student_escape($success) ?><?php if ($successReceipt !== ''): ?> — <a href="fee_receipt.php?receipt=<?= rawurlencode($successReceipt) ?>" target="_blank" rel="noopener">چاپ رسید پرداخت</a><?php endif; ?></div><?php endif; ?>
 <?php if ($error !== ''): ?><div class="students-flash students-error" role="alert"><?= student_escape($error) ?></div><?php endif; ?>
 <?php if (!$showForm): ?><div class="students-metrics"><div class="students-metric"><span>همه دانش‌آموزان</span><strong><?= $total ?></strong></div><div class="students-metric"><span>پرونده‌های فعال</span><strong><?= $active ?></strong></div></div><?php endif; ?>
 <?php $mode = (string)($_GET['mode'] ?? ''); ?>
