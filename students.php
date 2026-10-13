@@ -191,6 +191,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $savedStudentId = $newStudentId;
             }
+            // Close the previous year's current enrollment while preserving its record and history.
+            $closePriorEnrollmentsStmt = $pdo->prepare('UPDATE student_enrollments SET is_current = 0, ended_at = COALESCE(ended_at, CURRENT_TIMESTAMP) WHERE student_id = :student_id AND school_year_id <> :year_id AND is_current = 1');
+            $closePriorEnrollmentsStmt->execute(['student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId]);
+
             // Keep a year-specific enrollment record instead of storing class placement only as text.
             $currentEnrollmentStmt = $pdo->prepare('SELECT id, class_section_id FROM student_enrollments WHERE student_id = :student_id AND school_year_id = :year_id AND is_current = 1 ORDER BY id DESC LIMIT 1 FOR UPDATE');
             $currentEnrollmentStmt->execute(['student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId]);
