@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/auth.php';
-require_roles(['super_admin', 'admin']);
+require_roles(['super_admin']);
 require_once __DIR__ . '/config/database.php';
 
 $pdo = database_connection();
@@ -11,9 +11,11 @@ $actorRole = current_role();
 $isSuperAdmin = $actorRole === 'super_admin';
 
 $roleLabels = [
-    'super_admin' => 'سوپر ادمین',
-    'admin' => 'ادمین',
-    'user' => 'کاربر',
+    'super_admin' => 'مدیر کل',
+    'head_teacher' => 'سرمعلم',
+    'finance_manager' => 'مدیر مالی',
+    'administrative_staff' => 'کارمند اداری',
+    'teacher' => 'معلم',
 ];
 $error = '';
 $success = '';
@@ -37,8 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fullName = trim((string) ($_POST['full_name'] ?? ''));
             $password = (string) ($_POST['password'] ?? '');
             $confirmation = (string) ($_POST['password_confirm'] ?? '');
-            $requestedRole = (string) ($_POST['role'] ?? 'user');
-            $allowedRoles = $isSuperAdmin ? ['super_admin', 'admin', 'user'] : ['admin', 'user'];
+            $requestedRole = (string) ($_POST['role'] ?? 'administrative_staff');
+            $allowedRoles = array_keys($roleLabels);
 
             if (!preg_match('/^[a-z0-9_.-]{3,80}$/', $username)) {
                 throw new RuntimeException('نام کاربری باید ۳ تا ۸۰ حرف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.');
@@ -169,11 +171,11 @@ $username = (string) $_SESSION['username'];
                 <input id="new-username" name="username" required minlength="3" maxlength="80" pattern="[a-zA-Z0-9_.-]+" autocomplete="off" placeholder="مثال: school.user">
                 <label for="new-role">نوع حساب</label>
                 <select id="new-role" name="role" required>
-                    <option value="user">کاربر</option>
-                    <option value="admin">ادمین</option>
-                    <?php if ($isSuperAdmin): ?><option value="super_admin">سوپر ادمین</option><?php endif; ?>
+                    <?php foreach ($roleLabels as $roleValue => $roleLabel): ?>
+                    <option value="<?= escape($roleValue) ?>" <?= $roleValue === 'administrative_staff' ? 'selected' : '' ?>><?= escape($roleLabel) ?></option>
+                    <?php endforeach; ?>
                 </select>
-                <p class="help-text"><?= $isSuperAdmin ? 'شما می‌توانید هر سه نوع حساب را ایجاد کنید.' : 'شما می‌توانید کاربر یا ادمین ایجاد کنید؛ ساخت سوپر ادمین فقط برای سوپر ادمین مجاز است.' ?></p>
+                <p class="help-text"><?= $isSuperAdmin ? 'شما می‌توانید هر پنج نوع حساب را ایجاد کنید.' : 'تنها مدیر کل می‌تواند حساب کاربری ایجاد کند.' ?></p>
                 <label for="new-password">رمز عبور (حداقل ۸ کاراکتر)</label>
                 <input id="new-password" name="password" type="password" required minlength="8" maxlength="4096" autocomplete="new-password">
                 <label for="new-password-confirm">تکرار رمز عبور</label>
