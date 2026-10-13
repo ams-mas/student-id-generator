@@ -91,6 +91,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 throw new RuntimeException('هیچ سال تحصیلی فعالی وجود ندارد. ابتدا سال تحصیلی را تنظیم کنید.');
             }
+            $selectedGrade = (int)$selectedSection['grade'];
+            $feeRuleId = filter_var($_POST['fee_rule_id'] ?? null, FILTER_VALIDATE_INT) ?: 0;
+            $initialPaymentRaw = trim((string)($_POST['initial_payment'] ?? ''));
+            $initialPayment = $initialPaymentRaw === '' ? 0.0 : filter_var($initialPaymentRaw, FILTER_VALIDATE_FLOAT);
+            if ($initialPayment === false || !is_finite((float)$initialPayment) || $initialPayment < 0) {
+                throw new RuntimeException('مبلغ پرداخت اولیه معتبر نیست.');
+            }
+            $feeRulesStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id AND grade_from <= :grade AND grade_to >= :grade ORDER BY id');
+            $feeRulesStmt->execute(['year_id' => $activeSchoolYearId, 'grade' => $selectedGrade]);
+            $matchingFeeRules = $feeRulesStmt->fetchAll();
+            if (!$matchingFeeRules) {
+                throw new RuntimeException('برای صنف انتخاب‌شده هنوز فیس دوره‌ای تعیین نشده است. ابتدا از بخش «تعیین فیس دوره‌ها» فیس را ثبت کنید.');
+            }
+            $selectedFeeRule = null;
+            foreach ($matchingFeeRules as $feeRule) {
+                if ((int)$feeRule['id'] === $feeRuleId) { $selectedFeeRule = $feeRule; break; }
+            }
+            if (!$selectedFeeRule) {
+                throw new RuntimeException('لطفاً یکی از دوره‌های فیس مربوط به صنف انتخاب‌شده را انتخاب کنید.');
+            }
+            $selectedFeeBase = (float)$selectedFeeRule['amount'];
+            $selectedDiscountAmount = $discountType === 'percent'
+                ? round($selectedFeeBase * (float)$discountValue / 100, 2)
+                : ($discountType === 'amount' ? min($selectedFeeBase, (float)$discountValue) : 0.0);
+            $selectedFeeNet = max(0, round($selectedFeeBase - $selectedDiscountAmount, 2));
+            if (!$id && (float)$initialPayment > $selectedFeeNet) {
+                throw new RuntimeException('پرداخت اولیه نمی‌تواند بیشتر از فیس دوره پس از تخفیف باشد.');
+            }
             if (!in_array($gender, ['female','male','unspecified'], true)) {
                 throw new RuntimeException('جنسیت انتخاب‌شده معتبر نیست.');
             }
@@ -101,6 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('نام پدر و نام پدرکلان نباید بیشتر از ۱۰۰ نویسه باشد.');
             }
             $params = ['number'=>$number,'book_number'=>$bookNumber !== '' ? $bookNumber : null,'first'=>$first,'last'=>$last,'father_name'=>$fatherName !== '' ? $fatherName : null,'grandfather_name'=>$grandfatherName !== '' ? $grandfatherName : null,'gender'=>$gender,'dob'=>$dob !== '' ? $dob : null,'class'=>$class,'phone'=>$phone,'guardian'=>$guardian,'guardian_phone'=>$guardianPhone,'address'=>$address];
+            $pdo->beginTransaction();
             if ($id) {
                 $params['id'] = $id;
                 $stmt = $pdo->prepare('UPDATE students SET student_number=:number, register_book_number=:book_number, first_name=:first, last_name=:last, father_name=:father_name, grandfather_name=:grandfather_name, gender=:gender, date_of_birth=:dob, class_name=:class, phone=:phone, guardian_name=:guardian, guardian_phone=:guardian_phone, address=:address WHERE id=:id');
@@ -140,6 +169,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $savedStudentId = $newStudentId;
             }
+            // Keep a year-specific enrollment record instead of storing class placement only as text.
+            $currentEnrollmentStmt = $pdo->prepare('SELECT id, class_section_id FROM student_enrollments WHERE student_id = :student_id AND school_year_id = :year_id AND is_current = 1 ORDER BY id DESC LIMIT 1 FOR UPDATE');
+            $currentEnrollmentStmt->execute(['student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId]);
+            $currentEnrollment = $currentEnrollmentStmt->fetch();
+            if (!$currentEnrollment) {
+                $enrollmentInsert = $pdo->prepare("INSERT INTO student_enrollments (student_id, school_year_id, class_section_id, status, is_current, notes) VALUES (:student_id, :year_id, :section_id, 'enrolled', 1, '')");
+                $enrollmentInsert->execute(['student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId, 'section_id' => $classSectionId]);
+                $enrollmentId = (int)$pdo->lastInsertId();
+                $historyInsert = $pdo->prepare("INSERT INTO student_enrollment_history (enrollment_id, student_id, school_year_id, from_section_id, to_section_id, changed_by, change_type, notes) VALUES (:enrollment_id, :student_id, :year_id, NULL, :to_section, NULL, 'assigned', 'ثبت‌نام در سال تعلیمی')");
+                $historyInsert->execute(['enrollment_id' => $enrollmentId, 'student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId, 'to_section' => $classSectionId]);
+            } else {
+                $enrollmentId = (int)$currentEnrollment['id'];
+                $previousSectionId = (int)$currentEnrollment['class_section_id'];
+                if ($previousSectionId !== $classSectionId) {
+                    $enrollmentUpdate = $pdo->prepare('UPDATE student_enrollments SET class_section_id = :section_id WHERE id = :id');
+                    $enrollmentUpdate->execute(['section_id' => $classSectionId, 'id' => $enrollmentId]);
+                    $historyInsert = $pdo->prepare("INSERT INTO student_enrollment_history (enrollment_id, student_id, school_year_id, from_section_id, to_section_id, changed_by, change_type, notes) VALUES (:enrollment_id, :student_id, :year_id, :from_section, :to_section, NULL, 'transferred', 'تغییر صنف از صفحه ویرایش شاگرد')");
+                    $historyInsert->execute(['enrollment_id' => $enrollmentId, 'student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId, 'from_section' => $previousSectionId, 'to_section' => $classSectionId]);
+                }
+            }
+            if (!$id) {
+                foreach ($matchingFeeRules as $feeRule) {
+                    $base = (float)$feeRule['amount'];
+                    $discountAmountForRule = $discountType === 'percent'
+                        ? round($base * (float)$discountValue / 100, 2)
+                        : ($discountType === 'amount' ? min($base, (float)$discountValue) : 0.0);
+                    $netAmount = max(0, round($base - $discountAmountForRule, 2));
+                    $chargeInsert = $pdo->prepare('INSERT INTO student_fee_charges (student_id, school_year_id, fee_rule_id, period_name, amount_due, discount_amount) VALUES (:student_id, :year_id, :rule_id, :period_name, :amount_due, :discount_amount)');
+                    $chargeInsert->execute(['student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId, 'rule_id' => (int)$feeRule['id'], 'period_name' => (string)$feeRule['period_name'], 'amount_due' => $netAmount, 'discount_amount' => $discountAmountForRule]);
+                    $chargeId = (int)$pdo->lastInsertId();
+                    if ((int)$feeRule['id'] === $feeRuleId && (float)$initialPayment > 0) {
+                        $receiptNumber = 'RC-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
+                        $paymentInsert = $pdo->prepare("INSERT INTO student_fee_payments (charge_id, amount, receipt_number, payment_method, notes) VALUES (:charge_id, :amount, :receipt, :method, :notes)");
+                        $paymentInsert->execute(['charge_id' => $chargeId, 'amount' => $initialPayment, 'receipt' => $receiptNumber, 'method' => in_array((string)($_POST['initial_payment_method'] ?? 'cash'), ['cash','bank','other'], true) ? (string)($_POST['initial_payment_method'] ?? 'cash') : 'cash', 'notes' => 'پرداخت هنگام ثبت‌نام']);
+                    }
+                }
+            }
             if ($activeSchoolYearId < 1) {
                 throw new RuntimeException('برای ثبت تخفیف، سال تحصیلی فعلی باید فعال باشد.');
             }
@@ -150,7 +216,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $discountSaveStmt = $pdo->prepare('INSERT INTO student_year_discounts (student_id, school_year_id, discount_type, discount_value) VALUES (:student_id, :year_id, :discount_type, :discount_value) ON DUPLICATE KEY UPDATE discount_type = VALUES(discount_type), discount_value = VALUES(discount_value)');
                 $discountSaveStmt->execute(['student_id' => $savedStudentId, 'year_id' => $activeSchoolYearId, 'discount_type' => $discountType, 'discount_value' => $discountValue]);
             }
-            $_SESSION['students_flash'] = ['success' => $id ? 'پرونده دانش‌آموز به‌روزرسانی شد.' : 'دانش‌آموز با موفقیت ثبت شد.'];
+            $pdo->commit();
+            $_SESSION['students_flash'] = ['success' => $id ? 'پرونده دانش‌آموز به‌روزرسانی شد.' : 'دانش‌آموز با موفقیت ثبت شد و فیس دوره‌ها ثبت گردید.'];
             header('Location: students.php');
             exit;
         }
@@ -175,6 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         throw new RuntimeException('درخواست نامعتبر است.');
     } catch (RuntimeException $e) {
+        if ($pdo->inTransaction()) { $pdo->rollBack(); }
         $error = $e->getMessage();
         // Keep the edit form visible after validation errors instead of silently
         // returning to the list when the POST request has no ?edit=... query.
@@ -185,6 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $editing = $reloadEditingStmt->fetch() ?: null;
         }
     } catch (PDOException $e) {
+        if ($pdo->inTransaction()) { $pdo->rollBack(); }
         if ($e->getCode() === '23000') {
             $error = 'این شماره دانش‌آموزی قبلاً ثبت شده است.';
         } else {
@@ -258,6 +327,16 @@ if ($activeSchoolYear) {
     $sectionOptionsStmt = $pdo->prepare('SELECT id, grade, section_name FROM class_sections WHERE school_year_id = :year_id AND is_active = 1 ORDER BY grade ASC, section_name ASC');
     $sectionOptionsStmt->execute(['year_id' => (int)$activeSchoolYear['id']]);
     $classOptions = $sectionOptionsStmt->fetchAll();
+}
+$feeRulesForForm = [];
+if ($activeSchoolYear) {
+    try {
+        $feeRulesFormStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id ORDER BY period_name, grade_from');
+        $feeRulesFormStmt->execute(['year_id' => (int)$activeSchoolYear['id']]);
+        $feeRulesForForm = $feeRulesFormStmt->fetchAll();
+    } catch (PDOException $e) {
+        $feeRulesForForm = [];
+    }
 }
 $showForm = $canEdit && (isset($_GET['new']) || $editing !== null);
 $nextStudentId = (int)($pdo->query("SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'students'")->fetchColumn() ?: 0);
@@ -351,11 +430,18 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <div class="student-field"><label for="grandfather_name">نام پدرکلان</label><input id="grandfather_name" name="grandfather_name" maxlength="100" value="<?= student_escape($editing['grandfather_name'] ?? '') ?>"></div>
 <div class="student-field"><label for="gender">جنسیت</label><select id="gender" name="gender"><option value="unspecified">ثبت نشده</option><option value="female" <?= (($editing['gender'] ?? '')==='female')?'selected':'' ?>>دختر</option><option value="male" <?= (($editing['gender'] ?? '')==='male')?'selected':'' ?>>پسر</option></select></div>
 <div class="student-field"><label for="date_of_birth">تاریخ تولد (هجری شمسی)</label><input id="date_of_birth" name="date_of_birth" type="date" data-persian-date value="<?= student_escape($editing['date_of_birth'] ?? '') ?>"></div>
-<div class="student-field"><label for="class_section_id">صنف / کلاس سال تحصیلی فعلی *</label><select id="class_section_id" name="class_section_id" required><option value="">انتخاب صنف</option><?php foreach ($classOptions as $classOption): ?><option value="<?= (int)$classOption['id'] ?>" <?= ((int)($editing['class_section_id'] ?? 0) === (int)$classOption['id'] || (($editing['class_name'] ?? '') === ((string)$classOption['grade'].' '.(string)$classOption['section_name']))) ? 'selected' : '' ?>><?= student_escape((string)$classOption['grade'].' '.(string)$classOption['section_name']) ?></option><?php endforeach; ?></select><?php if (!$activeSchoolYear): ?><small>ابتدا سال تحصیلی فعلی را فعال کنید.</small><?php elseif (!$classOptions): ?><small>برای سال تحصیلی <?= student_escape($activeSchoolYear['name']) ?> هنوز صنفی تعریف نشده است. ابتدا در تنظیمات مدرسه صنف‌ها را ایجاد کنید.</small><?php else: ?><small>فقط صنف‌های فعال سال تحصیلی <?= student_escape($activeSchoolYear['name']) ?> نمایش داده می‌شوند.</small><?php endif; ?></div>
+<div class="student-field"><label for="class_section_id">صنف / کلاس سال تحصیلی فعلی *</label><select id="class_section_id" name="class_section_id" required><option value="">انتخاب صنف</option><?php foreach ($classOptions as $classOption): ?><option data-grade="<?= (int)$classOption['grade'] ?>" value="<?= (int)$classOption['id'] ?>" <?= ((int)($editing['class_section_id'] ?? 0) === (int)$classOption['id'] || (($editing['class_name'] ?? '') === ((string)$classOption['grade'].' '.(string)$classOption['section_name']))) ? 'selected' : '' ?>><?= student_escape((string)$classOption['grade'].' '.(string)$classOption['section_name']) ?></option><?php endforeach; ?></select><?php if (!$activeSchoolYear): ?><small>ابتدا سال تحصیلی فعلی را فعال کنید.</small><?php elseif (!$classOptions): ?><small>برای سال تحصیلی <?= student_escape($activeSchoolYear['name']) ?> هنوز صنفی تعریف نشده است. ابتدا در تنظیمات مدرسه صنف‌ها را ایجاد کنید.</small><?php else: ?><small>فقط صنف‌های فعال سال تحصیلی <?= student_escape($activeSchoolYear['name']) ?> نمایش داده می‌شوند.</small><?php endif; ?></div>
 </div></div>
 <div class="student-form-section"><h3>تخفیف شهریه سال تحصیلی <?= student_escape($activeSchoolYear['name'] ?? '') ?></h3><div class="student-form-fields">
 <div class="student-field"><label for="discount_type">نوع تخفیف</label><select id="discount_type" name="discount_type"><option value="none" <?= ($currentDiscount['discount_type'] ?? 'none') === 'none' ? 'selected' : '' ?>>بدون تخفیف</option><option value="percent" <?= ($currentDiscount['discount_type'] ?? '') === 'percent' ? 'selected' : '' ?>>درصدی (%)</option><option value="amount" <?= ($currentDiscount['discount_type'] ?? '') === 'amount' ? 'selected' : '' ?>>مبلغ ثابت</option></select><small>این تخفیف فقط برای سال تحصیلی فعلی ذخیره می‌شود.</small></div>
 <div class="student-field"><label for="discount_value">مقدار تخفیف</label><input id="discount_value" name="discount_value" type="number" min="0" step="0.01" value="<?= student_escape($currentDiscount['discount_value'] ?? '') ?>" placeholder="مثلاً ۱۰ یا ۵۰۰"><small>برای تخفیف درصدی از ۱ تا ۱۰۰ وارد کنید؛ برای مبلغ ثابت، مبلغ تخفیف را وارد کنید.</small></div>
+</div></div>
+
+<div class="student-form-section"><h3>فیس و پرداخت دوره</h3><div class="student-form-fields">
+<div class="student-field"><label for="fee_rule_id">دورهٔ فیس *</label><select id="fee_rule_id" name="fee_rule_id" required><option value="">انتخاب دوره</option><?php foreach ($feeRulesForForm as $feeRule): ?><option value="<?= (int)$feeRule['id'] ?>" data-grade-from="<?= (int)$feeRule['grade_from'] ?>" data-grade-to="<?= (int)$feeRule['grade_to'] ?>" data-amount="<?= student_escape($feeRule['amount']) ?>"><?= student_escape($feeRule['period_name'].' — صنف '.$feeRule['grade_from'].' تا '.$feeRule['grade_to'].' — '.number_format((float)$feeRule['amount'],2)) ?></option><?php endforeach; ?></select><small>فیس هر دوره از تنظیمات مالی گرفته می‌شود.</small></div>
+<div class="student-field"><label for="initial_payment">پرداخت فعلی (اختیاری)</label><input id="initial_payment" name="initial_payment" type="number" min="0" step="0.01" value="0" <?= $editing ? 'disabled' : '' ?>><small>۰ یعنی فعلاً پرداخت نشده؛ مبلغ باقی‌مانده بعداً از بخش دریافت فیس قابل پرداخت است.</small></div>
+<div class="student-field"><label for="initial_payment_method">روش پرداخت</label><select id="initial_payment_method" name="initial_payment_method" <?= $editing ? 'disabled' : '' ?>><option value="cash">نقدی</option><option value="bank">بانکی</option><option value="other">دیگر</option></select></div>
+<div class="student-field"><label>مبلغ پس از تخفیف</label><div class="student-number-note"><span id="fee-net-preview">—</span><small id="fee-preview-note">ابتدا صنف و دوره را انتخاب کنید.</small></div></div>
 </div></div>
 <div class="student-form-section"><h3>اطلاعات تماس و سرپرست</h3><div class="student-form-fields">
 <div class="student-field"><label for="phone">شماره تماس دانش‌آموز</label><input id="phone" name="phone" maxlength="40" value="<?= student_escape($editing['phone'] ?? '') ?>"></div>
@@ -384,4 +470,45 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 
 <link rel="stylesheet" href="assets/css/persian-calendar.css?v=20261012-calendar-spacing">
 <script src="assets/js/persian-calendar.js"></script>
+<script>
+(function(){
+ const classSelect=document.getElementById('class_section_id');
+ const feeSelect=document.getElementById('fee_rule_id');
+ const discountType=document.getElementById('discount_type');
+ const discountValue=document.getElementById('discount_value');
+ const paymentInput=document.getElementById('initial_payment');
+ const preview=document.getElementById('fee-net-preview');
+ const note=document.getElementById('fee-preview-note');
+ if(!classSelect||!feeSelect||!preview)return;
+ function updateFeeOptions(){
+   const classOption=classSelect.options[classSelect.selectedIndex];
+   const grade=classOption?Number(classOption.dataset.grade||0):0;
+   let selectedStillValid=false;
+   Array.from(feeSelect.options).forEach(function(option){
+     if(!option.value)return;
+     const from=Number(option.dataset.gradeFrom||0),to=Number(option.dataset.gradeTo||0);
+     const allowed=grade>=from&&grade<=to;
+     option.hidden=!allowed; option.disabled=!allowed;
+     if(allowed&&option.selected)selectedStillValid=true;
+   });
+   if(!selectedStillValid)feeSelect.value='';
+   updatePreview();
+ }
+ function updatePreview(){
+   const option=feeSelect.options[feeSelect.selectedIndex];
+   if(!option||!option.value){preview.textContent='—';note.textContent='ابتدا صنف و دوره را انتخاب کنید.';if(paymentInput)paymentInput.removeAttribute('max');return;}
+   const base=Number(option.dataset.amount||0);
+   const type=discountType?discountType.value:'none';
+   const raw=discountValue?Number(discountValue.value||0):0;
+   const discount=type==='percent'?base*Math.min(100,Math.max(0,raw))/100:(type==='amount'?Math.min(base,Math.max(0,raw)):0);
+   const net=Math.max(0,base-discount);
+   preview.textContent=net.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+   note.textContent='فیس اصلی: '+base.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'؛ تخفیف: '+discount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+   if(paymentInput&&!paymentInput.disabled)paymentInput.max=net.toFixed(2);
+ }
+ classSelect.addEventListener('change',updateFeeOptions);feeSelect.addEventListener('change',updatePreview);
+ if(discountType)discountType.addEventListener('change',updatePreview);if(discountValue)discountValue.addEventListener('input',updatePreview);
+ updateFeeOptions();
+})();
+</script>
     </body></html>
