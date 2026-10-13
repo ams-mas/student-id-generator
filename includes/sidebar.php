@@ -80,7 +80,7 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
             <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['users.php', 'add_user.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">⚙</span><span>مدیریت کاربران</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
             <div class="sidebar-submenu"><a class="sidebar-link <?= $sidebarCurrentPage === 'users.php' ? 'is-current' : '' ?>" href="users.php">لیست کاربران</a><a class="sidebar-link <?= $sidebarCurrentPage === 'add_user.php' ? 'is-current' : '' ?>" href="add_user.php">افزودن کاربر</a></div>
         </div>
-        <a class="sidebar-link" href="#" aria-disabled="true" title="بخش گزارشات بعداً اضافه می‌شود"><span class="sidebar-icon" aria-hidden="true">▤</span><span>گزارشات</span></a>
+        <a class="sidebar-link <?= $sidebarCurrentPage === 'financial_reports.php' ? 'is-current' : '' ?>" href="financial_reports.php"><span class="sidebar-icon" aria-hidden="true">▤</span><span>گزارش مالی شاگردان</span></a>
         <div class="sidebar-group">
             <button type="button" class="sidebar-group-title <?= in_array($sidebarCurrentPage, ['fees.php', 'fee_payments.php'], true) ? 'is-current' : '' ?>" data-submenu-toggle aria-expanded="false"><span class="sidebar-icon" aria-hidden="true">◈</span><span>امور مالی</span><span class="submenu-chevron" aria-hidden="true">⌄</span></button>
             <div class="sidebar-submenu">
