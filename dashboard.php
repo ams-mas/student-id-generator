@@ -12,6 +12,16 @@ $canManageUsers = in_array($role, ['super_admin', 'admin'], true);
 
 require_once __DIR__ . '/config/database.php';
 $pdo = database_connection();
+
+$dashboardWidgetDefaults = ['stat_students'=>1,'stat_teachers'=>1,'stat_classes'=>1,'stat_users'=>1,'chart_gender'=>1,'chart_class_counts'=>1,'recent_students'=>1,'academic_year'=>1,'financial_summary'=>0,'attendance_summary'=>0,'exam_summary'=>0,'notices'=>0,'upcoming_tasks'=>0];
+$dashboardWidgets = $dashboardWidgetDefaults;
+try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS dashboard_widget_settings (widget_key VARCHAR(64) NOT NULL PRIMARY KEY, is_enabled TINYINT(1) NOT NULL DEFAULT 1, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    foreach ($pdo->query('SELECT widget_key, is_enabled FROM dashboard_widget_settings')->fetchAll(PDO::FETCH_ASSOC) as $widgetRow) {
+        if (array_key_exists((string)$widgetRow['widget_key'], $dashboardWidgets)) $dashboardWidgets[(string)$widgetRow['widget_key']] = (int)$widgetRow['is_enabled'];
+    }
+} catch (Throwable $widgetSettingsError) { error_log('Dashboard widget preferences could not be loaded: ' . $widgetSettingsError->getMessage()); }
+
 $dashboardStats = ['students' => 0, 'teachers' => 0, 'classes' => 0, 'users' => 0, 'male' => 0, 'female' => 0];
 $recentStudents = [];
 $classSummary = [];
@@ -66,26 +76,26 @@ $femalePercent = $genderTotal > 0 ? 100 - $malePercent : 0;
             <?php require __DIR__ . '/includes/topbar.php'; ?>
             <header class="dash-heading">
                 <div></div>
-                <div class="dash-year"><span>سال تحصیلی فعلی</span><strong><?= htmlspecialchars($activeYearName, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></strong></div>
+                <?php if ($dashboardWidgets['academic_year']): ?><div class="dash-year"><span>سال تحصیلی فعلی</span><strong><?= htmlspecialchars($activeYearName, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></strong></div><?php endif; ?>
             </header>
             <section class="dash-stat-grid" aria-label="آمار کلی">
-                <article class="dash-stat dash-blue"><span class="dash-stat-icon">♙</span><div><span>دانش‌آموزان فعال</span><strong><?= number_format($dashboardStats['students']) ?></strong><small>مجموع پرونده‌های فعال</small></div></article>
-                <article class="dash-stat dash-green"><span class="dash-stat-icon">♟</span><div><span>آموزگاران فعال</span><strong><?= number_format($dashboardStats['teachers']) ?></strong><small>ثبت‌شده در سامانه</small></div></article>
-                <article class="dash-stat dash-violet"><span class="dash-stat-icon">▦</span><div><span>صنف‌های فعال</span><strong><?= number_format($dashboardStats['classes']) ?></strong><small>در سال تحصیلی فعلی</small></div></article>
-                <article class="dash-stat dash-orange"><span class="dash-stat-icon">⚙</span><div><span>حساب‌های فعال</span><strong><?= number_format($dashboardStats['users']) ?></strong><small>کاربران سامانه</small></div></article>
+                <?php if ($dashboardWidgets['stat_students']): ?><article class="dash-stat dash-blue"><span class="dash-stat-icon">♙</span><div><span>دانش‌آموزان فعال</span><strong><?= number_format($dashboardStats['students']) ?></strong><small>مجموع پرونده‌های فعال</small></div></article><?php endif; ?>
+                <?php if ($dashboardWidgets['stat_teachers']): ?><article class="dash-stat dash-green"><span class="dash-stat-icon">♟</span><div><span>آموزگاران فعال</span><strong><?= number_format($dashboardStats['teachers']) ?></strong><small>ثبت‌شده در سامانه</small></div></article><?php endif; ?>
+                <?php if ($dashboardWidgets['stat_classes']): ?><article class="dash-stat dash-violet"><span class="dash-stat-icon">▦</span><div><span>صنف‌های فعال</span><strong><?= number_format($dashboardStats['classes']) ?></strong><small>در سال تحصیلی فعلی</small></div></article><?php endif; ?>
+                <?php if ($dashboardWidgets['stat_users']): ?><article class="dash-stat dash-orange"><span class="dash-stat-icon">⚙</span><div><span>حساب‌های فعال</span><strong><?= number_format($dashboardStats['users']) ?></strong><small>کاربران سامانه</small></div></article><?php endif; ?>
             </section>
             <section class="dash-middle-grid">
-                <article class="dash-panel dash-gender-panel"><div class="dash-panel-title"><h2>ترکیب جنسیتی دانش‌آموزان</h2><span>فعال</span></div>
+                <?php if ($dashboardWidgets['chart_gender']): ?><article class="dash-panel dash-gender-panel"><div class="dash-panel-title"><h2>ترکیب جنسیتی دانش‌آموزان</h2><span>فعال</span></div>
                     <div class="dash-gender-content"><div class="dash-donut" style="--male-share:<?= $malePercent ?>%"><div><strong><?= number_format($genderTotal) ?></strong><small>دانش‌آموز</small></div></div>
                         <div class="dash-legend"><p><i class="dash-dot dash-dot-blue"></i><span>پسر</span><strong><?= number_format($dashboardStats['male']) ?></strong><small><?= $malePercent ?>٪</small></p><p><i class="dash-dot dash-dot-green"></i><span>دختر</span><strong><?= number_format($dashboardStats['female']) ?></strong><small><?= $femalePercent ?>٪</small></p></div></div>
-                </article>
-                <article class="dash-panel"><div class="dash-panel-title"><h2>تعداد دانش‌آموزان هر صنف</h2><span>تا ۶ صنف</span></div>
+                </article><?php endif; ?>
+                <?php if ($dashboardWidgets['chart_class_counts']): ?><article class="dash-panel"><div class="dash-panel-title"><h2>تعداد دانش‌آموزان هر صنف</h2><span>تا ۶ صنف</span></div>
                     <?php if ($classSummary): ?><div class="dash-bars"><?php $maxClassCount = max(1, ...array_map(static fn(array $item): int => (int) $item['student_count'], $classSummary)); foreach ($classSummary as $item): ?><div class="dash-bar-row"><span><?= htmlspecialchars((string) $item['class_label'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></span><div class="dash-bar-track"><i style="width:<?= (int) round((int) $item['student_count'] * 100 / $maxClassCount) ?>%"></i></div><strong><?= number_format((int) $item['student_count']) ?></strong></div><?php endforeach; ?></div><?php else: ?><div class="dash-empty-note">پس از ایجاد صنف و ثبت‌نام دانش‌آموزان، آمار این بخش نمایش داده می‌شود.</div><?php endif; ?>
-                </article>
+                </article><?php endif; ?>
             </section>
-            <section class="dash-panel dash-recent-panel"><div class="dash-panel-title"><h2>آخرین دانش‌آموزان ثبت‌شده</h2><a href="students.php">مشاهده فهرست <span aria-hidden="true">←</span></a></div>
+            <?php if ($dashboardWidgets['recent_students']): ?><section class="dash-panel dash-recent-panel"><div class="dash-panel-title"><h2>آخرین دانش‌آموزان ثبت‌شده</h2><a href="students.php">مشاهده فهرست <span aria-hidden="true">←</span></a></div>
                 <?php if ($recentStudents): ?><div class="dash-table-wrap"><table class="dash-table"><thead><tr><th>شماره مسلسل</th><th>نام دانش‌آموز</th><th>صنف</th><th>جنسیت</th><th>تاریخ ثبت</th></tr></thead><tbody><?php foreach ($recentStudents as $student): ?><tr><td dir="ltr"><?= htmlspecialchars((string) $student['student_number'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></td><td><?= htmlspecialchars(trim((string) $student['first_name'] . ' ' . (string) $student['last_name']), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></td><td><?= htmlspecialchars((string) ($student['class_name'] ?: 'تعیین نشده'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></td><td><?= $student['gender'] === 'male' ? 'پسر' : ($student['gender'] === 'female' ? 'دختر' : 'تعیین نشده') ?></td><td><?= !empty($student['created_at']) ? htmlspecialchars(date('Y-m-d', strtotime((string) $student['created_at'])), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : '—' ?></td></tr><?php endforeach; ?></tbody></table></div><?php else: ?><div class="dash-empty-note">هنوز دانش‌آموزی ثبت نشده است. پس از ثبت اولین دانش‌آموز، فهرست او در این بخش ظاهر می‌شود.</div><?php endif; ?>
-            </section>
+            </section><?php endif; ?>
             <footer class="dash-footer">سامانه مدیریت دانش‌آموزان</footer>
         </main>
         <style>
