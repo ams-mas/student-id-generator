@@ -467,11 +467,11 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <?php if ($error !== ''): ?><div class="students-flash students-error" role="alert"><?= student_escape($error) ?></div><?php endif; ?>
 <?php if (!$showForm): ?><div class="students-metrics"><div class="students-metric"><span>همه دانش‌آموزان</span><strong><?= $total ?></strong></div><div class="students-metric"><span>پرونده‌های فعال</span><strong><?= $active ?></strong></div></div><?php endif; ?>
 <?php $mode = (string)($_GET['mode'] ?? ''); ?>
-<?php if (!$showForm): ?><div class="student-toolbar"><?php if ($canEdit): ?><a class="button button-primary" href="students.php?new=1">＋ ثبت دانش‌آموز</a><?php endif; ?><a class="button button-secondary" href="students.php">فهرست دانش‌آموزان</a></div><?php endif; ?>
+<?php if ($showForm): ?><div class="student-toolbar"><a class="button button-secondary" href="students.php">بازگشت به فهرست دانش‌آموزان</a></div><?php else: ?><div class="student-toolbar"><?php if ($canEdit): ?><a class="button button-primary" href="students.php?new=1">＋ ثبت دانش‌آموز</a><?php endif; ?><a class="button button-secondary" href="students.php">فهرست دانش‌آموزان</a></div><?php endif; ?>
 <div class="students-grid">
 <?php if ($showForm): ?>
 <section class="panel student-form-panel"><div class="student-form-heading"><div><h2><?= $editing ? 'ویرایش دانش‌آموز فعلی' : 'ثبت دانش‌آموز جدید' ?></h2></div></div>
-<form class="students-form" method="post" action="students.php">
+<form class="students-form" method="post" action="students.php?new=1">
 <input type="hidden" name="csrf_token" value="<?= student_escape(csrf_token()) ?>"><input type="hidden" name="action" value="save"><input type="hidden" name="student_id" value="<?= student_escape($editing['id'] ?? '') ?>"><input type="hidden" name="student_number" value="<?= student_escape($editing['student_number'] ?? '') ?>">
 <div class="student-form-section"><h3>مشخصات دانش‌آموز</h3><div class="student-form-fields">
 <div class="student-field"><label>شماره دائمی شاگرد</label><input type="text" value="<?= student_escape($editing['student_number'] ?? ('ST-' . sprintf('%04d', (int)($nextStudentId ?: 1)))) ?>" readonly aria-readonly="true"><small>شماره اصلی شاگرد ثابت می‌ماند و در سال‌های تعلیمی بعدی نیز استفاده می‌شود.</small></div>
