@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if ($action === 'add') {
             $username = strtolower(trim((string) ($_POST['username'] ?? '')));
+            $fullName = trim((string) ($_POST['full_name'] ?? ''));
             $password = (string) ($_POST['password'] ?? '');
             $confirmation = (string) ($_POST['password_confirm'] ?? '');
             $requestedRole = (string) ($_POST['role'] ?? 'user');
@@ -42,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!preg_match('/^[a-z0-9_.-]{3,80}$/', $username)) {
                 throw new RuntimeException('نام کاربری باید ۳ تا ۸۰ حرف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.');
             }
+            if ($fullName === '' || mb_strlen($fullName) > 160) throw new RuntimeException('نام کامل الزامی است و نباید بیشتر از ۱۶۰ نویسه باشد.');
             if (!in_array($requestedRole, $allowedRoles, true)) {
                 throw new RuntimeException('شما اجازه ساخت این نوع حساب را ندارید.');
             }
@@ -53,10 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $statement = $pdo->prepare(
-                'INSERT INTO users (username, password_hash, role, is_active) VALUES (:username, :password_hash, :role, 1)'
+                'INSERT INTO users (username, full_name, password_hash, role, is_active) VALUES (:username, :full_name, :password_hash, :role, 1)'
             );
             $statement->execute([
                 'username' => $username,
+                'full_name' => $fullName,
                 'password_hash' => password_hash($password, PASSWORD_DEFAULT),
                 'role' => $requestedRole,
             ]);
@@ -156,11 +159,13 @@ $username = (string) $_SESSION['username'];
 
         <section class="panel user-create-panel" aria-labelledby="create-user-title">
             <h2 id="create-user-title">افزودن حساب جدید</h2>
-            <p class="muted">نام کاربری و رمز عبور را تعیین کنید و نوع حساب را انتخاب کنید.</p>
+            <p class="muted">نام کامل برای نمایش در سیستم، نام کاربری برای ورود و رمز عبور را تعیین کنید.</p>
             <form method="post" action="users.php" class="user-create-form">
                 <input type="hidden" name="csrf_token" value="<?= escape(csrf_token()) ?>">
                 <input type="hidden" name="action" value="add">
-                <label for="new-username">نام کاربری</label>
+                <label for="new-full-name">نام کامل</label>
+                <input id="new-full-name" name="full_name" required maxlength="160" autocomplete="name" placeholder="مثال: محمد عاصف بیات">
+                <label for="new-username">نام کاربری (برای ورود)</label>
                 <input id="new-username" name="username" required minlength="3" maxlength="80" pattern="[a-zA-Z0-9_.-]+" autocomplete="off" placeholder="مثال: school.user">
                 <label for="new-role">نوع حساب</label>
                 <select id="new-role" name="role" required>
