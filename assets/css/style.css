@@ -828,3 +828,264 @@ html body .admin-sidebar .sidebar-group-title:hover {
   transform: none !important;
   box-shadow: none !important;
 }
+
+
+/* Sidebar redesign v2: fixed, calm, and stable; preserve all existing menu links. */
+html body .admin-sidebar,
+html body .admin-sidebar:hover,
+html body .admin-sidebar:focus-within,
+html body .admin-sidebar.is-open,
+html body .admin-sidebar:not(.is-open) {
+  position: fixed !important;
+  inset: 0 0 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 286px !important;
+  min-width: 286px !important;
+  max-width: 286px !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: 22px 15px 16px !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  z-index: 1000 !important;
+  direction: rtl !important;
+  background: #101d35 !important;
+  color: #e8eef9 !important;
+  border: 0 !important;
+  border-left: 1px solid #263653 !important;
+  border-radius: 0 !important;
+  box-shadow: -10px 0 32px rgb(13 25 46 / 16%) !important;
+  scrollbar-width: thin;
+  scrollbar-color: #405372 #101d35;
+}
+html body .admin-sidebar .sidebar-brand {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  padding: 4px 4px 20px !important;
+  gap: 11px !important;
+  border-bottom: 1px solid #2b3a55 !important;
+  color: #f8fafc !important;
+}
+html body .admin-sidebar .sidebar-brand-mark {
+  background: linear-gradient(145deg, #5288f5, #315ed1) !important;
+  box-shadow: 0 5px 14px rgb(49 94 209 / 30%) !important;
+}
+html body .admin-sidebar .sidebar-school-logo {
+  flex: 0 0 43px !important;
+  width: 43px !important;
+  height: 43px !important;
+  min-width: 43px !important;
+  max-width: 43px !important;
+  object-fit: contain !important;
+  background: #fff !important;
+}
+html body .admin-sidebar .sidebar-brand strong {
+  color: #f8fafc !important;
+  font-size: .94rem !important;
+  line-height: 1.6 !important;
+}
+html body .admin-sidebar .sidebar-brand small {
+  color: #9eacc3 !important;
+  font-size: .72rem !important;
+  line-height: 1.7 !important;
+}
+html body .admin-sidebar .sidebar-system-clock {
+  flex: 0 0 auto !important;
+  margin: 16px 0 6px !important;
+  padding: 12px 13px !important;
+  border: 1px solid #2b3b59 !important;
+  border-radius: 12px !important;
+  background: #182844 !important;
+  color: #c9d7ed !important;
+}
+html body .admin-sidebar .sidebar-clock-date,
+html body .admin-sidebar .sidebar-clock-time {
+  display: block !important;
+}
+html body .admin-sidebar .sidebar-clock-date {
+  color: #a9bad3 !important;
+  font-size: .73rem !important;
+}
+html body .admin-sidebar .sidebar-clock-time {
+  margin-top: 4px !important;
+  color: #fff !important;
+  font-size: 1.1rem !important;
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+html body .admin-sidebar .sidebar-section-label {
+  flex: 0 0 auto !important;
+  margin: 20px 9px 9px !important;
+  color: #8396b4 !important;
+  font-size: .69rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .04em !important;
+}
+html body .admin-sidebar .sidebar-nav {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  min-width: 0 !important;
+}
+html body .admin-sidebar .sidebar-group {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  margin: 2px 0 0 !important;
+}
+html body .admin-sidebar .sidebar-link,
+html body .admin-sidebar .sidebar-group-title,
+html body .admin-sidebar .sidebar-link:hover,
+html body .admin-sidebar .sidebar-group-title:hover,
+html body .admin-sidebar .sidebar-link:focus,
+html body .admin-sidebar .sidebar-group-title:focus {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 43px !important;
+  margin: 0 !important;
+  padding: 10px 11px !important;
+  box-sizing: border-box !important;
+  border: 1px solid transparent !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+  color: #c1cde0 !important;
+  font: inherit !important;
+  font-size: .84rem !important;
+  line-height: 1.55 !important;
+  text-align: right !important;
+  text-decoration: none !important;
+  white-space: normal !important;
+  cursor: pointer !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+html body .admin-sidebar .sidebar-link:hover,
+html body .admin-sidebar .sidebar-group-title:hover,
+html body .admin-sidebar .sidebar-link:focus-visible,
+html body .admin-sidebar .sidebar-group-title:focus-visible {
+  background: #1c2d4a !important;
+  color: #fff !important;
+  border-color: #2a3d5e !important;
+  outline: none !important;
+}
+html body .admin-sidebar .sidebar-link.is-current,
+html body .admin-sidebar .sidebar-group-title.is-current {
+  background: #244b91 !important;
+  border-color: #3769bd !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+}
+html body .admin-sidebar .sidebar-icon {
+  flex: 0 0 25px !important;
+  width: 25px !important;
+  color: #8eafff !important;
+  font-size: 1.08rem !important;
+}
+html body .admin-sidebar .submenu-chevron {
+  margin-right: auto !important;
+  color: #8396b4 !important;
+}
+html body .admin-sidebar .sidebar-submenu {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  margin: 4px 12px 9px 0 !important;
+  padding: 3px 10px 3px 0 !important;
+  border: 0 !important;
+  border-right: 1px solid #344764 !important;
+  min-width: 0 !important;
+}
+html body .admin-sidebar .sidebar-submenu .sidebar-link {
+  min-height: 36px !important;
+  padding: 7px 9px !important;
+  border-radius: 7px !important;
+  color: #aebdd3 !important;
+  font-size: .78rem !important;
+  font-weight: 500 !important;
+}
+html body .admin-sidebar .sidebar-submenu .sidebar-link:hover,
+html body .admin-sidebar .sidebar-submenu .sidebar-link:focus-visible {
+  background: #1c2d4a !important;
+  color: #fff !important;
+}
+html body .admin-sidebar .sidebar-link-disabled,
+html body .admin-sidebar .sidebar-link-disabled:hover {
+  justify-content: space-between !important;
+  color: #7789a5 !important;
+  cursor: not-allowed !important;
+  background: transparent !important;
+}
+html body .admin-sidebar .sidebar-link-disabled small {
+  background: #253653 !important;
+  color: #9eacc3 !important;
+}
+html body .admin-sidebar .sidebar-bottom {
+  flex: 0 0 auto !important;
+  margin-top: auto !important;
+  padding: 15px 4px 0 !important;
+  border-top: 1px solid #2b3a55 !important;
+}
+html body .admin-sidebar .sidebar-user-avatar {
+  background: #244b91 !important;
+  color: #fff !important;
+}
+html body .admin-sidebar .sidebar-user-copy strong {
+  color: #f3f6fc !important;
+}
+html body .admin-sidebar .sidebar-user-copy small {
+  color: #9eacc3 !important;
+}
+html body .admin-sidebar .sidebar-logout {
+  background: #1c2d4a !important;
+  color: #dbe6f7 !important;
+  cursor: pointer !important;
+}
+html body .admin-sidebar .sidebar-logout:hover {
+  background: #2a3d5e !important;
+}
+html body .admin-sidebar .sidebar-toggle,
+html body .admin-sidebar::before,
+html body .admin-sidebar::after {
+  display: none !important;
+  content: none !important;
+}
+html body .admin-main {
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 286px 0 0 !important;
+  box-sizing: border-box !important;
+}
+html body .admin-sidebar *,
+html body .admin-sidebar *::before,
+html body .admin-sidebar *::after {
+  animation: none !important;
+  transform: none !important;
+}
+@media (max-width: 850px) {
+  html body .admin-sidebar,
+  html body .admin-sidebar:hover,
+  html body .admin-sidebar:focus-within,
+  html body .admin-sidebar.is-open,
+  html body .admin-sidebar:not(.is-open) {
+    width: 286px !important;
+    min-width: 286px !important;
+    max-width: 286px !important;
+  }
+  html body .admin-main {
+    margin-right: 286px !important;
+    padding: 24px 16px !important;
+  }
+}
