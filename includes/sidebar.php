@@ -91,6 +91,24 @@ $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT
         <form action="logout.php" method="post"><input type="hidden" name="csrf_token" value="<?= $sidebarEsc(csrf_token()) ?>"><button class="sidebar-logout" type="submit" aria-label="خروج از حساب" title="خروج از حساب">↪</button></form>
     </div>
 </aside>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const sidebar = document.getElementById('admin-sidebar');
+    if (!sidebar) return;
+    sidebar.querySelectorAll('[data-submenu-toggle]').forEach(function (button) {
+        const group = button.closest('.sidebar-group');
+        if (!group) return;
+        if (button.classList.contains('is-current') || group.querySelector('.sidebar-submenu .is-current')) {
+            group.classList.add('is-open');
+            button.setAttribute('aria-expanded', 'true');
+        }
+        button.addEventListener('click', function () {
+            const open = group.classList.toggle('is-open');
+            button.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+    });
+});
+</script>
 <style>
 /* Keep the shared school logo and sidebar layout consistent on every page. */
 .admin-sidebar .sidebar-brand{display:flex;align-items:center;min-width:0;gap:12px}
