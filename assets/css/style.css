@@ -782,15 +782,3 @@ html[lang="fa"] .muted{
     padding: 24px 16px !important;
   }
 }
-@media (max-width: 420px) {
-  .admin-sidebar,
-  .admin-sidebar:not(.is-open),
-  .admin-sidebar.is-open,
-  .admin-sidebar:hover,
-  .admin-sidebar:focus-within {
-    width: 240px !important;
-    min-width: 240px !important;
-    max-width: 240px !important;
-  }
-  .admin-main { margin-right: 240px !important; }
-}
