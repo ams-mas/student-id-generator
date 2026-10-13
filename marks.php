@@ -65,8 +65,9 @@ if ($year && in_array($selectedSectionId,$allowedSectionIds,true)) {
     if ($subject!=='' && $assessment!=='') {
         $saved=$pdo->prepare('SELECT student_id,score,max_score FROM student_marks WHERE class_section_id=? AND subject_name=? AND assessment_name=? AND school_year_id=?');
         $saved->execute([$selectedSectionId,$subject,$assessment,(int)$year['id']]);
-        foreach($saved->fetchAll() as $row) $scoreMap[(int)$row['student_id']]=(string)$row['score'];
-        if ($saved->rowCount() > 0) $maxScore = (float)($row['max_score'] ?? $maxScore);
+        $savedRows = $saved->fetchAll();
+        foreach($savedRows as $row) $scoreMap[(int)$row['student_id']]=(string)$row['score'];
+        if ($savedRows) $maxScore = (float)$savedRows[0]['max_score'];
     }
 }
 ?>
