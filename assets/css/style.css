@@ -587,3 +587,36 @@ html body .admin-main,html body .dashboard-main{
  .admin-sidebar .sidebar-brand strong{font-size:.95rem}
  .admin-sidebar .sidebar-link,.admin-sidebar .sidebar-group-title{font-size:.82rem!important}
 }
+
+/* Sortable data tables: shared across the school management system. */
+table.table-sortable thead th.table-sort-header {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-inline-end: 25px;
+    transition: background-color .15s ease;
+}
+table.table-sortable thead th.table-sort-header:hover,
+table.table-sortable thead th.table-sort-header:focus-visible {
+    background-color: #e8eefb;
+    outline: none;
+}
+table.table-sortable thead th.table-sort-header::after {
+    content: "↕";
+    position: absolute;
+    inset-inline-end: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8a96aa;
+    font-size: 13px;
+}
+table.table-sortable thead th.table-sort-header[data-sort-direction="asc"]::after {
+    content: "↑";
+    color: #2449a5;
+    font-weight: 800;
+}
+table.table-sortable thead th.table-sort-header[data-sort-direction="desc"]::after {
+    content: "↓";
+    color: #2449a5;
+    font-weight: 800;
+}
