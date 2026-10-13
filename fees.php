@@ -83,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new RuntimeException('عملیات نامعتبر است.');
         }
     } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
         if ($e instanceof RuntimeException) $error = $e->getMessage();
         elseif ($e instanceof PDOException && $e->getCode() === '23000') $error = 'این فیس قبلاً برای همین سال، دوره و بازه صنفی ثبت شده است.';
         else { error_log('Tuition fee settings error: '.$e->getMessage()); $error = 'ذخیره فیس انجام نشد. مطمئن شوید به‌روزرسانی پایگاه داده اجرا شده است.'; }
