@@ -100,26 +100,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($initialPayment === false || !is_finite((float)$initialPayment) || $initialPayment < 0) {
                 throw new RuntimeException('مبلغ پرداخت اولیه معتبر نیست.');
             }
-            $feeRulesStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id AND grade_from <= :grade AND grade_to >= :grade ORDER BY id');
-            $feeRulesStmt->execute(['year_id' => $activeSchoolYearId, 'grade' => $selectedGrade]);
-            $matchingFeeRules = $feeRulesStmt->fetchAll();
-            if (!$matchingFeeRules) {
-                throw new RuntimeException('برای صنف انتخاب‌شده هنوز فیس دوره‌ای تعیین نشده است. ابتدا از بخش «تعیین فیس دوره‌ها» فیس را ثبت کنید.');
-            }
+            $matchingFeeRules = [];
             $selectedFeeRule = null;
-            foreach ($matchingFeeRules as $feeRule) {
-                if ((int)$feeRule['id'] === $feeRuleId) { $selectedFeeRule = $feeRule; break; }
-            }
-            if (!$selectedFeeRule) {
-                throw new RuntimeException('لطفاً یکی از دوره‌های فیس مربوط به صنف انتخاب‌شده را انتخاب کنید.');
-            }
-            $selectedFeeBase = (float)$selectedFeeRule['amount'];
-            $selectedDiscountAmount = $discountType === 'percent'
-                ? round($selectedFeeBase * (float)$discountValue / 100, 2)
-                : ($discountType === 'amount' ? min($selectedFeeBase, (float)$discountValue) : 0.0);
-            $selectedFeeNet = max(0, round($selectedFeeBase - $selectedDiscountAmount, 2));
-            if (!$id && (float)$initialPayment > $selectedFeeNet) {
-                throw new RuntimeException('پرداخت اولیه نمی‌تواند بیشتر از فیس دوره پس از تخفیف باشد.');
+            $selectedFeeNet = 0.0;
+            if (!$id) {
+                $feeRulesStmt = $pdo->prepare('SELECT id, period_name, grade_from, grade_to, amount FROM tuition_fee_rules WHERE school_year_id = :year_id AND grade_from <= :grade AND grade_to >= :grade ORDER BY id');
+                $feeRulesStmt->execute(['year_id' => $activeSchoolYearId, 'grade' => $selectedGrade]);
+                $matchingFeeRules = $feeRulesStmt->fetchAll();
+                if (!$matchingFeeRules) {
+                    throw new RuntimeException('برای صنف انتخاب‌شده هنوز فیس دوره‌ای تعیین نشده است. ابتدا از بخش «تعیین فیس دوره‌ها» فیس را ثبت کنید.');
+                }
+                foreach ($matchingFeeRules as $feeRule) {
+                    if ((int)$feeRule['id'] === $feeRuleId) { $selectedFeeRule = $feeRule; break; }
+                }
+                if (!$selectedFeeRule) {
+                    throw new RuntimeException('لطفاً یکی از دوره‌های فیس مربوط به صنف انتخاب‌شده را انتخاب کنید.');
+                }
+                $selectedFeeBase = (float)$selectedFeeRule['amount'];
+                $selectedDiscountAmount = $discountType === 'percent'
+                    ? round($selectedFeeBase * (float)$discountValue / 100, 2)
+                    : ($discountType === 'amount' ? min($selectedFeeBase, (float)$discountValue) : 0.0);
+                $selectedFeeNet = max(0, round($selectedFeeBase - $selectedDiscountAmount, 2));
+                if ((float)$initialPayment > $selectedFeeNet) {
+                    throw new RuntimeException('پرداخت اولیه نمی‌تواند بیشتر از فیس دوره پس از تخفیف باشد.');
+                }
+            } else {
+                $initialPayment = 0.0;
             }
             if (!in_array($gender, ['female','male','unspecified'], true)) {
                 throw new RuntimeException('جنسیت انتخاب‌شده معتبر نیست.');
@@ -444,12 +450,12 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <div class="student-field"><label for="discount_value">مقدار تخفیف</label><input id="discount_value" name="discount_value" type="number" min="0" step="0.01" value="<?= student_escape($currentDiscount['discount_value'] ?? '') ?>" placeholder="مثلاً ۱۰ یا ۵۰۰"><small>برای تخفیف درصدی از ۱ تا ۱۰۰ وارد کنید؛ برای مبلغ ثابت، مبلغ تخفیف را وارد کنید.</small></div>
 </div></div>
 
-<div class="student-form-section"><h3>فیس و پرداخت دوره</h3><div class="student-form-fields">
+<?php if (!$editing): ?><div class="student-form-section"><h3>فیس و پرداخت دوره</h3><div class="student-form-fields">
 <div class="student-field"><label for="fee_rule_id">دورهٔ فیس *</label><select id="fee_rule_id" name="fee_rule_id" required><option value="">انتخاب دوره</option><?php foreach ($feeRulesForForm as $feeRule): ?><option value="<?= (int)$feeRule['id'] ?>" data-grade-from="<?= (int)$feeRule['grade_from'] ?>" data-grade-to="<?= (int)$feeRule['grade_to'] ?>" data-amount="<?= student_escape($feeRule['amount']) ?>"><?= student_escape($feeRule['period_name'].' — صنف '.$feeRule['grade_from'].' تا '.$feeRule['grade_to'].' — '.number_format((float)$feeRule['amount'],2)) ?></option><?php endforeach; ?></select><small>فیس هر دوره از تنظیمات مالی گرفته می‌شود.</small></div>
 <div class="student-field"><label for="initial_payment">پرداخت فعلی (اختیاری)</label><input id="initial_payment" name="initial_payment" type="number" min="0" step="0.01" value="0" <?= $editing ? 'disabled' : '' ?>><small>۰ یعنی فعلاً پرداخت نشده؛ مبلغ باقی‌مانده بعداً از بخش دریافت فیس قابل پرداخت است.</small></div>
 <div class="student-field"><label for="initial_payment_method">روش پرداخت</label><select id="initial_payment_method" name="initial_payment_method" <?= $editing ? 'disabled' : '' ?>><option value="cash">نقدی</option><option value="bank">بانکی</option><option value="other">دیگر</option></select></div>
 <div class="student-field"><label>مبلغ پس از تخفیف</label><div class="student-number-note"><span id="fee-net-preview">—</span><small id="fee-preview-note">ابتدا صنف و دوره را انتخاب کنید.</small></div></div>
-</div></div>
+</div></div><?php endif; ?>
 <div class="student-form-section"><h3>اطلاعات تماس و سرپرست</h3><div class="student-form-fields">
 <div class="student-field"><label for="phone">شماره تماس دانش‌آموز</label><input id="phone" name="phone" maxlength="40" value="<?= student_escape($editing['phone'] ?? '') ?>"></div>
 <div class="student-field"><label for="guardian_name">نام والد / سرپرست</label><input id="guardian_name" name="guardian_name" maxlength="200" value="<?= student_escape($editing['guardian_name'] ?? '') ?>"></div>
