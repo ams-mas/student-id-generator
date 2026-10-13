@@ -327,7 +327,8 @@ $genderLabels = ['female'=>'دختر','male'=>'پسر','unspecified'=>'ثبت ن
 <body class="profile-page">
 <div class="admin-layout">
 
-<main class="admin-main">
+<?php require __DIR__ . '/includes/sidebar.php'; ?>
+        <main class="admin-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
 <header class="page-header dashboard-header"><div><p class="eyebrow">پرونده‌ها</p><h1>مدیریت دانش‌آموزان</h1><p class="muted">ثبت، جست‌وجو و به‌روزرسانی پرونده‌های دانش‌آموزان.</p></div><div class="account-actions"><span class="signed-in-as">نقش شما: <strong><?= student_escape($roleLabels[$role] ?? $role) ?></strong></span></div></header>
 <?php if ($success !== ''): ?><div class="students-flash" role="status"><?= student_escape($success) ?></div><?php endif; ?>
