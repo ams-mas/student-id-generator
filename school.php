@@ -146,7 +146,8 @@ foreach ($years as $year) {
 <div class="admin-layout">
     
 
-    <main class="admin-main">
+    <?php require __DIR__ . '/includes/sidebar.php'; ?>
+        <main class="admin-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
         <div class="year-settings-wrap">
             <header class="page-header">
