@@ -709,3 +709,88 @@ html[lang="fa"] .muted{
   .admin-sidebar::before, .admin-sidebar::after { display: none !important; content: none !important; }
   .admin-main { width: auto !important; max-width: none !important; margin: 0 !important; padding: 24px 16px !important; }
 }
+
+
+/* Permanent sidebar: fixed size and position on every screen, without a toggle or hover movement. */
+.admin-sidebar,
+.admin-sidebar:not(.is-open),
+.admin-sidebar.is-open,
+.admin-sidebar:hover,
+.admin-sidebar:focus-within {
+  position: fixed !important;
+  display: flex !important;
+  flex-direction: column !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: auto !important;
+  width: 286px !important;
+  min-width: 286px !important;
+  max-width: 286px !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  transform: none !important;
+  transition: none !important;
+  z-index: 1000 !important;
+}
+.admin-sidebar .sidebar-toggle { display: none !important; }
+.admin-sidebar::before,
+.admin-sidebar::after { display: none !important; content: none !important; }
+.admin-main {
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 286px 0 0 !important;
+  box-sizing: border-box !important;
+}
+.admin-sidebar .sidebar-link,
+.admin-sidebar .sidebar-group-title,
+.admin-sidebar .sidebar-link:hover,
+.admin-sidebar .sidebar-group-title:hover {
+  cursor: default !important;
+  transform: none !important;
+  transition: none !important;
+}
+.admin-sidebar .sidebar-link:hover,
+.admin-sidebar .sidebar-group-title:hover {
+  background: inherit !important;
+  color: inherit !important;
+}
+.admin-sidebar .sidebar-link.is-current,
+.admin-sidebar .sidebar-group-title.is-current {
+  background: var(--blue-soft) !important;
+  color: var(--blue) !important;
+}
+@media (max-width: 850px) {
+  .admin-sidebar,
+  .admin-sidebar:not(.is-open),
+  .admin-sidebar.is-open,
+  .admin-sidebar:hover,
+  .admin-sidebar:focus-within {
+    width: 286px !important;
+    min-width: 286px !important;
+    max-width: 286px !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .admin-main {
+    width: auto !important;
+    margin: 0 286px 0 0 !important;
+    padding: 24px 16px !important;
+  }
+}
+@media (max-width: 420px) {
+  .admin-sidebar,
+  .admin-sidebar:not(.is-open),
+  .admin-sidebar.is-open,
+  .admin-sidebar:hover,
+  .admin-sidebar:focus-within {
+    width: 240px !important;
+    min-width: 240px !important;
+    max-width: 240px !important;
+  }
+  .admin-main { margin-right: 240px !important; }
+}
