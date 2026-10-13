@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/auth.php';
-require_roles(['super_admin', 'admin']);
+require_roles(['super_admin']);
 require_once __DIR__ . '/config/database.php';
 
 $pdo = database_connection();
@@ -11,9 +11,11 @@ $actorRole = current_role();
 $isSuperAdmin = $actorRole === 'super_admin';
 
 $roleLabels = [
-    'super_admin' => 'سوپر ادمین',
-    'admin' => 'ادمین',
-    'user' => 'کاربر',
+    'super_admin' => 'مدیر کل',
+    'head_teacher' => 'سرمعلم',
+    'finance_manager' => 'مدیر مالی',
+    'administrative_staff' => 'کارمند اداری',
+    'teacher' => 'معلم',
 ];
 $error = '';
 $success = '';
@@ -37,8 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fullName = trim((string) ($_POST['full_name'] ?? ''));
             $password = (string) ($_POST['password'] ?? '');
             $confirmation = (string) ($_POST['password_confirm'] ?? '');
-            $requestedRole = (string) ($_POST['role'] ?? 'user');
-            $allowedRoles = $isSuperAdmin ? ['super_admin', 'admin', 'user'] : ['admin', 'user'];
+            $requestedRole = (string) ($_POST['role'] ?? 'administrative_staff');
+            $allowedRoles = array_keys($roleLabels);
 
             if (!preg_match('/^[a-z0-9_.-]{3,80}$/', $username)) {
                 throw new RuntimeException('نام کاربری باید ۳ تا ۸۰ حرف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.');
@@ -68,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $targetId = filter_var($_POST['user_id'] ?? null, FILTER_VALIDATE_INT);
             $newUsername = strtolower(trim((string)($_POST['username'] ?? '')));
             $newFullName = trim((string)($_POST['full_name'] ?? ''));
-            $newRole = (string)($_POST['role'] ?? 'user');
+            $newRole = (string)($_POST['role'] ?? 'administrative_staff');
             $newPassword = (string)($_POST['password'] ?? '');
             $confirmPassword = (string)($_POST['password_confirm'] ?? '');
             if (!$targetId) throw new RuntimeException('شناسه حساب معتبر نیست.');
@@ -83,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$isSuperAdmin && $target['role'] === 'super_admin') {
                 throw new RuntimeException('فقط سوپر ادمین می‌تواند حساب سوپر ادمین را ویرایش کند.');
             }
-            $allowedRoles = $isSuperAdmin ? ['super_admin', 'admin', 'user'] : ['admin', 'user'];
+            $allowedRoles = array_keys($roleLabels);
             if (!in_array($newRole, $allowedRoles, true)) {
                 throw new RuntimeException('شما اجازه تعیین این نوع حساب را ندارید.');
             }
@@ -246,7 +248,7 @@ $username = (string) $_SESSION['username'];
         <main class="admin-main">
             <?php require __DIR__ . '/includes/topbar.php'; ?>
         <header class="page-header dashboard-header">
-            <div><p class="eyebrow">پنل مدیریت</p><h1>لیست کاربران</h1><p class="muted">تمام حساب‌های کاربری، ادمین‌ها و سوپر ادمین‌ها به ترتیب شناسه نمایش داده می‌شوند.</p></div>
+            <div><p class="eyebrow">پنل مدیریت</p><h1>لیست کاربران</h1><p class="muted">حساب‌های کاربری و نقش‌های تعیین‌شده برای هر کارمند.</p></div>
             <div class="account-actions"><span class="signed-in-as">نقش شما: <strong><?= escape($roleLabels[$actorRole] ?? $actorRole) ?></strong></span><a class="button button-secondary" href="dashboard.php">بازگشت به پروفایل</a></div>
         </header>
 
@@ -267,9 +269,9 @@ $username = (string) $_SESSION['username'];
                 <input id="edit-username" name="username" required minlength="3" maxlength="80" pattern="[a-zA-Z0-9_.-]+" autocomplete="off" value="<?= escape($editUser['username']) ?>">
                 <label for="edit-role">نوع حساب</label>
                 <select id="edit-role" name="role" required>
-                    <option value="user" <?= $editUser['role'] === 'user' ? 'selected' : '' ?>>کاربر</option>
-                    <option value="admin" <?= $editUser['role'] === 'admin' ? 'selected' : '' ?>>ادمین</option>
-                    <?php if ($isSuperAdmin): ?><option value="super_admin" <?= $editUser['role'] === 'super_admin' ? 'selected' : '' ?>>سوپر ادمین</option><?php endif; ?>
+                    <?php foreach ($roleLabels as $roleValue => $roleLabel): ?>
+                    <option value="<?= escape($roleValue) ?>" <?= $editUser['role'] === $roleValue ? 'selected' : '' ?>><?= escape($roleLabel) ?></option>
+                    <?php endforeach; ?>
                 </select>
                 <label for="edit-password">رمز عبور جدید (اختیاری، حداقل ۸ کاراکتر)</label>
                 <input id="edit-password" name="password" type="password" minlength="8" maxlength="4096" autocomplete="new-password">
