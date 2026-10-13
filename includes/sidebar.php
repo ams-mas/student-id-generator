@@ -4,7 +4,7 @@ declare(strict_types=1);
 $sidebarUsername = (string) ($_SESSION['username'] ?? '');
 $sidebarFullName = (string) ($_SESSION['full_name'] ?? $sidebarUsername);
 $sidebarRole = current_role();
-$sidebarRoleLabels = ['super_admin' => 'سوپر ادمین', 'admin' => 'ادمین', 'user' => 'کاربر'];
+$sidebarRoleLabels = ['super_admin' => 'مدیر کل', 'head_teacher' => 'سرمعلم', 'finance_manager' => 'مدیر مالی', 'administrative_staff' => 'کارمند اداری', 'teacher' => 'معلم'];
 $sidebarCurrentPage = basename((string) ($_SERVER['PHP_SELF'] ?? ''));
 $sidebarSchoolLogo = '';
 $sidebarSchoolName = '';
