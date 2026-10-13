@@ -4,7 +4,7 @@ declare(strict_types=1);
 $topbarUsername = (string) ($_SESSION['username'] ?? '');
 $topbarFullName = (string) ($_SESSION['full_name'] ?? $topbarUsername);
 $topbarRole = current_role();
-$topbarRoleLabels = ['super_admin' => 'سوپر ادمین', 'admin' => 'ادمین', 'user' => 'کاربر'];
+$topbarRoleLabels = ['super_admin' => 'مدیر کل', 'head_teacher' => 'سرمعلم', 'finance_manager' => 'مدیر مالی', 'administrative_staff' => 'کارمند اداری', 'teacher' => 'معلم'];
 $topbarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 ?>
 <header class="admin-topbar">
