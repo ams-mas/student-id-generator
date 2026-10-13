@@ -39,7 +39,7 @@ function require_login(): void
     require_once __DIR__ . '/config/database.php';
     try {
         $statement = database_connection()->prepare(
-            'SELECT username, role, is_active FROM users WHERE id = :id LIMIT 1'
+            'SELECT username, full_name, role, is_active FROM users WHERE id = :id LIMIT 1'
         );
         $statement->execute(['id' => (int) $_SESSION['user_id']]);
         $account = $statement->fetch();
@@ -61,6 +61,7 @@ function require_login(): void
     }
 
     $_SESSION['username'] = (string) $account['username'];
+    $_SESSION['full_name'] = trim((string) ($account['full_name'] ?? '')) !== '' ? (string) $account['full_name'] : (string) $account['username'];
     $_SESSION['role'] = (string) $account['role'];
 }
 
