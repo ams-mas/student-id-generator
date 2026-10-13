@@ -19,7 +19,7 @@ try {
 }
 $sidebarEsc = static fn($value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 ?>
-<aside class="admin-sidebar <?= $sidebarCurrentPage === 'teachers.php' ? 'is-open' : '' ?>" id="admin-sidebar" aria-label="منوی اصلی">
+<aside class="admin-sidebar" id="admin-sidebar" aria-label="منوی اصلی">
     <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-controls="admin-sidebar" aria-expanded="false" aria-label="باز کردن منو"><span class="sidebar-toggle-icon" aria-hidden="true">☰</span><span class="sidebar-toggle-label">منو</span></button>
     <a class="sidebar-brand" href="dashboard.php">
         <?php if ($sidebarSchoolLogo !== ''): ?>
