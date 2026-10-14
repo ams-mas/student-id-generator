@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$alreadyInstalled) {
         $password = (string) ($_POST['password'] ?? '');
         $confirmation = (string) ($_POST['password_confirmation'] ?? '');
 
-        if ($fullName === '' || mb_strlen($fullName) > 160) {
+        if ($fullName === '' || strlen($fullName) > 640) {
             $message = 'نام کامل مدیر را وارد کنید.';
         } elseif (!preg_match('/^[a-z0-9_.-]{3,80}$/', $username)) {
             $message = 'نام کاربری باید ۳ تا ۸۰ حرف و شامل حروف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.';
