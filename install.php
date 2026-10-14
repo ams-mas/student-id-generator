@@ -109,99 +109,95 @@ $message = '';
 $messageType = 'error';
 $completedMigrations = [];
 $installed = false;
-$alreadyInstalled = false;
 $databaseExists = false;
+$existingTableCounts = [];
+$existingTables = [];
 
 try {
     $server = install_pdo($settings, false);
-    $dbName = str_replace('`', '``', $settings['name']);
-    $server->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    $dbName = str_replace('\`', '\`\`', $settings['name']);
+    $server->exec("CREATE DATABASE IF NOT EXISTS \`{$dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
     $pdo = install_pdo($settings, true);
     $databaseExists = true;
 
-    $tables = $pdo->query("SHOW TABLES LIKE 'users'")->fetchColumn();
-    if ($tables) {
-        $columns = $pdo->query("SHOW COLUMNS FROM users LIKE 'role'")->fetch();
-        if ($columns) {
-            $superAdmins = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'super_admin' AND is_active = 1")->fetchColumn();
-            $alreadyInstalled = $superAdmins > 0;
+    $tableRows = $pdo->query("SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'")->fetchAll(PDO::FETCH_NUM);
+    foreach ($tableRows as $row) {
+        $tableName = (string) $row[0];
+        $existingTables[] = $tableName;
+        if ($tableName === 'schema_migrations') {
+            continue;
+        }
+        $quotedTable = '\`' . str_replace('\`', '\`\`', $tableName) . '\`';
+        try {
+            $existingTableCounts[$tableName] = (int) $pdo->query("SELECT COUNT(*) FROM {$quotedTable}")->fetchColumn();
+        } catch (Throwable $countException) {
+            $existingTableCounts[$tableName] = null;
         }
     }
 } catch (Throwable $exception) {
     $message = 'اتصال به MySQL برقرار نشد. مطمئن شوید MySQL فعال است و تنظیمات DB_HOST، DB_NAME، DB_USER و DB_PASS درست هستند. جزئیات: ' . $exception->getMessage();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$alreadyInstalled) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $token = $_POST['csrf_token'] ?? '';
     if (!is_string($token) || !isset($_SESSION['install_csrf']) || !hash_equals($_SESSION['install_csrf'], $token)) {
         http_response_code(400);
         $message = 'درخواست معتبر نیست. صفحه را تازه‌سازی کنید.';
+    } elseif (($_POST['confirm_reset'] ?? '') !== 'yes') {
+        $message = 'برای ادامه، تأیید حذف اطلاعات موجود را علامت بزنید.';
     } else {
-        $fullName = trim((string) ($_POST['full_name'] ?? ''));
-        $username = strtolower(trim((string) ($_POST['username'] ?? '')));
-        $password = (string) ($_POST['password'] ?? '');
-        $confirmation = (string) ($_POST['password_confirmation'] ?? '');
+        try {
+            $server = install_pdo($settings, false);
+            $dbName = str_replace('\`', '\`\`', $settings['name']);
+            $server->exec("CREATE DATABASE IF NOT EXISTS \`{$dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+            $pdo = install_pdo($settings, true);
 
-        if ($fullName === '' || strlen($fullName) > 640) {
-            $message = 'نام کامل مدیر را وارد کنید.';
-        } elseif (!preg_match('/^[a-z0-9_.-]{3,80}$/', $username)) {
-            $message = 'نام کاربری باید ۳ تا ۸۰ حرف و شامل حروف انگلیسی کوچک، عدد، نقطه، خط تیره یا زیرخط باشد.';
-        } elseif (strlen($password) < 12) {
-            $message = 'رمز عبور باید حداقل ۱۲ کاراکتر باشد.';
-        } elseif (!hash_equals($password, $confirmation)) {
-            $message = 'رمز عبور و تأیید آن یکسان نیستند.';
-        } else {
-            try {
-                // Create/upgrade the database without deleting existing records.
-                $server = install_pdo($settings, false);
-                $dbName = str_replace('`', '``', $settings['name']);
-                $server->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-                $pdo = install_pdo($settings, true);
-
-                $schemaPath = __DIR__ . '/database/schema.sql';
-                $schema = file_get_contents($schemaPath);
-                if ($schema === false) {
-                    throw new RuntimeException('database/schema.sql is missing or unreadable.');
-                }
-                install_run_sql($pdo, $schema);
-                $completedMigrations = install_migrations($pdo);
-
-                // Never silently take over an existing installation or change an existing account.
-                $hasSuperAdmin = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'super_admin' AND is_active = 1")->fetchColumn();
-                if ($hasSuperAdmin > 0) {
-                    $alreadyInstalled = true;
-                    throw new RuntimeException('An active super administrator already exists. Installer stopped without changing accounts.');
-                }
-
-                $checkUser = $pdo->prepare('SELECT id FROM users WHERE username = :username LIMIT 1');
-                $checkUser->execute(['username' => $username]);
-                if ($checkUser->fetch()) {
-                    throw new RuntimeException('این نام کاربری قبلاً استفاده شده است. نام دیگری انتخاب کنید.');
-                }
-
-                $createUser = $pdo->prepare(
-                    'INSERT INTO users (username, full_name, password_hash, role, is_active)
-                     VALUES (:username, :full_name, :password_hash, :role, 1)'
-                );
-                $createUser->execute([
-                    'username' => $username,
-                    'full_name' => $fullName,
-                    'password_hash' => password_hash($password, PASSWORD_DEFAULT),
-                    'role' => 'super_admin',
-                ]);
-
-                $installed = true;
-                $messageType = 'success';
-                $message = 'نصب موفق شد. جدول‌ها و به‌روزرسانی‌های پایگاه داده اجرا شدند و حساب مدیر کل ساخته شد.';
-                unset($_SESSION['install_csrf']);
-            } catch (Throwable $exception) {
-                error_log('Student ID Generator installer error: ' . $exception->getMessage());
-                if (!$alreadyInstalled) {
-                    $message = 'نصب کامل نشد: ' . $exception->getMessage() . ' — خطای دقیق در گزارش PHP/Apache نیز ثبت شده است.';
-                } else {
-                    $message = 'این سیستم قبلاً مدیر کل فعال دارد. برای امنیت، ساخت مدیر کل جدید متوقف شد.';
-                }
+            // Ensure the latest schema and any unapplied migrations are present before clearing data.
+            $schemaPath = __DIR__ . '/database/schema.sql';
+            $schema = file_get_contents($schemaPath);
+            if ($schema === false) {
+                throw new RuntimeException('database/schema.sql is missing or unreadable.');
             }
+            install_run_sql($pdo, $schema);
+            $completedMigrations = install_migrations($pdo);
+
+            // Clear all application-table data. Keep migration history so migrations are not rerun.
+            $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+            try {
+                $tableRows = $pdo->query("SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'")->fetchAll(PDO::FETCH_NUM);
+                foreach ($tableRows as $row) {
+                    $tableName = (string) $row[0];
+                    if ($tableName === 'schema_migrations') {
+                        continue;
+                    }
+                    $quotedTable = '\`' . str_replace('\`', '\`\`', $tableName) . '\`';
+                    $pdo->exec("TRUNCATE TABLE {$quotedTable}");
+                }
+            } finally {
+                $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
+            }
+
+            // Store only a secure hash for the default super administrator password.
+            $createUser = $pdo->prepare(
+                'INSERT INTO users (username, full_name, password_hash, role, is_active)
+                 VALUES (:username, :full_name, :password_hash, :role, 1)'
+            );
+            $createUser->execute([
+                'username' => 'admin',
+                'full_name' => 'System Administrator',
+                'password_hash' => password_hash('admin@12345', PASSWORD_DEFAULT),
+                'role' => 'super_admin',
+            ]);
+
+            $installed = true;
+            $messageType = 'success';
+            $message = 'راه‌اندازی موفق شد. اطلاعات جدول‌های سیستم پاک شد و حساب مدیر کل admin ایجاد گردید.';
+            unset($_SESSION['install_csrf']);
+            $existingTableCounts = [];
+            $existingTables = [];
+        } catch (Throwable $exception) {
+            error_log('Student ID Generator installer error: ' . $exception->getMessage());
+            $message = 'راه‌اندازی کامل نشد: ' . $exception->getMessage() . ' — جزئیات در گزارش PHP/Apache ثبت شده است.';
         }
     }
 }
@@ -241,41 +237,46 @@ if (!isset($_SESSION['install_csrf'])) {
     <section class="setup-card">
         <p class="eyebrow">راه‌اندازی سیستم</p>
         <h1>راه‌اندازی اولیه سیستم مدیریت مکتب</h1>
-        <p class="setup-subtitle">این صفحه پایگاه داده را ایجاد می‌کند، ساختار اصلی و فایل‌های SQL به‌روزرسانی را اجرا می‌کند و حساب نخست «مدیر کل» را می‌سازد. اطلاعات موجود حذف نمی‌شوند.</p>
-        <?php if ($alreadyInstalled): ?>
-            <div class="setup-alert warning">این سیستم از قبل یک مدیر کل فعال دارد. برای جلوگیری از سوءاستفاده، نصب مجدد از این صفحه غیرفعال است.</div>
-            <p><a href="index.php">رفتن به صفحه ورود</a></p>
-        <?php elseif ($message !== ''): ?>
+        <p class="setup-subtitle">این صفحه ساختار پایگاه داده و به‌روزرسانی‌ها را بررسی می‌کند. با تأیید شما، تمام اطلاعات موجود در جدول‌های سیستم پاک می‌شود و حساب مدیر کل دوباره ساخته می‌شود.</p>
+        <?php if ($message !== ''): ?>
             <div class="setup-alert <?= install_escape($messageType) ?>" role="status"><?= install_escape($message) ?></div>
         <?php endif; ?>
 
         <?php if ($installed): ?>
-            <p><strong>اکنون می‌توانید وارد سیستم شوید.</strong></p>
+            <p><strong>اطلاعات قبلی حذف شد و حساب مدیر کل آماده ورود است.</strong></p>
+            <p>نام کاربری: <code class="setup-ltr">admin</code></p>
+            <p>رمز عبور: <code class="setup-ltr">admin@12345</code></p>
             <p><a class="setup-button" href="index.php">رفتن به صفحه ورود</a></p>
-            <p class="setup-note">برای امنیت بیشتر، پس از تأیید ورود موفق، فایل install.php را از سرور حذف کنید.</p>
-        <?php elseif (!$alreadyInstalled): ?>
+            <p class="setup-note">این رمز پیش‌فرض است. پس از ورود، آن را تغییر دهید و بعد از اطمینان از کارکرد سیستم، فایل install.php را حذف کنید.</p>
+        <?php else: ?>
+            <?php if ($existingTables): ?>
+                <h2>جدول‌های موجود</h2>
+                <p class="setup-note">تعداد رکوردهای فعلی (به‌جز جدول پیگیری به‌روزرسانی‌ها):</p>
+                <ul>
+                    <?php foreach ($existingTableCounts as $tableName => $rowCount): ?>
+                        <li><code><?= install_escape($tableName) ?></code>: <?= $rowCount === null ? 'قابل شمارش نیست' : number_format($rowCount) . ' رکورد' ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php else: ?>
+                <p class="setup-note">در پایگاه داده جدول موجودی پیدا نشد؛ جدول‌های سیستم هنگام اجرا ساخته خواهند شد.</p>
+            <?php endif; ?>
+
+            <div class="setup-alert warning">
+                <strong>هشدار مهم:</strong> با اجرای این عملیات، تمام رکوردهای جدول‌های سیستم، از جمله کاربران و شاگردان، حذف می‌شوند. جدول‌های ساختاری حذف نمی‌شوند؛ فقط اطلاعات پاک می‌شود. این کار قابل برگشت نیست.
+            </div>
             <form method="post" autocomplete="off">
                 <input type="hidden" name="csrf_token" value="<?= install_escape($_SESSION['install_csrf']) ?>">
                 <div class="setup-field">
-                    <label for="full_name">نام کامل مدیر کل</label>
-                    <input id="full_name" name="full_name" maxlength="160" required value="<?= install_escape((string) ($_POST['full_name'] ?? '')) ?>">
+                    <label>
+                        <input type="checkbox" name="confirm_reset" value="yes" required style="width:auto">
+                        تأیید می‌کنم که می‌خواهم تمام اطلاعات موجود پاک شود.
+                    </label>
                 </div>
-                <div class="setup-field">
-                    <label for="username">نام کاربری (انگلیسی)</label>
-                    <input class="setup-ltr" id="username" name="username" minlength="3" maxlength="80" pattern="[a-zA-Z0-9_.-]+" autocomplete="username" required value="<?= install_escape((string) ($_POST['username'] ?? '')) ?>">
-                </div>
-                <div class="setup-field">
-                    <label for="password">رمز عبور مدیر کل (حداقل ۱۲ کاراکتر)</label>
-                    <input class="setup-ltr" type="password" id="password" name="password" minlength="12" maxlength="4096" autocomplete="new-password" required>
-                </div>
-                <div class="setup-field">
-                    <label for="password_confirmation">تکرار رمز عبور</label>
-                    <input class="setup-ltr" type="password" id="password_confirmation" name="password_confirmation" minlength="12" maxlength="4096" autocomplete="new-password" required>
-                </div>
-                <button class="setup-button" type="submit">ایجاد پایگاه داده و مدیر کل</button>
+                <button class="setup-button" type="submit">پاک‌کردن اطلاعات و ساخت حساب مدیر</button>
             </form>
-            <p class="setup-note">تنظیمات پیش‌فرض برای نصب محلی XAMPP هستند: پایگاه داده student_id_generator، کاربر MySQL برابر root و رمز خالی. در صورت نیاز، متغیرهای محیطی DB_HOST، DB_NAME، DB_USER و DB_PASS را تنظیم کنید. این ابزار را روی سرور عمومی باز نگذارید.</p>
+            <p class="setup-note">حساب مدیر کل: نام کاربری <code class="setup-ltr">admin</code>، رمز عبور <code class="setup-ltr">admin@12345</code>. تنظیمات پیش‌فرض XAMPP: پایگاه داده student_id_generator، کاربر MySQL برابر root و رمز خالی.</p>
         <?php endif; ?>
+
     </section>
 </main>
 </body>
