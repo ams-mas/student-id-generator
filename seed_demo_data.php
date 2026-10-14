@@ -240,7 +240,7 @@ try {
                             $unpaidCount++;
                         }
                         if ($paidAmount > 0) {
-                            $receipt = 'رسید-آزمایشی-' . $studentId . '-' . strtoupper(bin2hex(random_bytes(3)));
+                            $receipt = 'رسید-آزمایشی-' . demo_persian_digits((string)$studentId) . '-' . demo_persian_digits((string)random_int(100000, 999999));
                             $methods = ['cash', 'bank', 'other'];
                             $daysAgo = random_int(0, 120);
                             $receivedAt = date('Y-m-d H:i:s', strtotime('-' . $daysAgo . ' days'));
