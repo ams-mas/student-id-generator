@@ -115,8 +115,8 @@ $existingTables = [];
 
 try {
     $server = install_pdo($settings, false);
-    $dbName = str_replace('\`', '\`\`', $settings['name']);
-    $server->exec("CREATE DATABASE IF NOT EXISTS \`{$dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    $dbName = str_replace('`', '``', $settings['name']);
+    $server->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
     $pdo = install_pdo($settings, true);
     $databaseExists = true;
 
@@ -127,7 +127,7 @@ try {
         if ($tableName === 'schema_migrations') {
             continue;
         }
-        $quotedTable = '\`' . str_replace('\`', '\`\`', $tableName) . '\`';
+        $quotedTable = '`' . str_replace('`', '``', $tableName) . '`';
         try {
             $existingTableCounts[$tableName] = (int) $pdo->query("SELECT COUNT(*) FROM {$quotedTable}")->fetchColumn();
         } catch (Throwable $countException) {
@@ -148,8 +148,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             $server = install_pdo($settings, false);
-            $dbName = str_replace('\`', '\`\`', $settings['name']);
-            $server->exec("CREATE DATABASE IF NOT EXISTS \`{$dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+            $dbName = str_replace('`', '``', $settings['name']);
+            $server->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
             $pdo = install_pdo($settings, true);
 
             // Ensure the latest schema and any unapplied migrations are present before clearing data.
@@ -170,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($tableName === 'schema_migrations') {
                         continue;
                     }
-                    $quotedTable = '\`' . str_replace('\`', '\`\`', $tableName) . '\`';
+                    $quotedTable = '`' . str_replace('`', '``', $tableName) . '`';
                     $pdo->exec("TRUNCATE TABLE {$quotedTable}");
                 }
             } finally {
