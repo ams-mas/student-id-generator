@@ -37,8 +37,15 @@ function demo_h(mixed $value): string {
 function demo_pick(array $items): string {
     return $items[random_int(0, count($items) - 1)];
 }
+function demo_persian_digits(string $value): string {
+    return strtr($value, ['0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹']);
+}
+function demo_grade_name(int $grade): string {
+    $names = [1=>'اول',2=>'دوم',3=>'سوم',4=>'چهارم',5=>'پنجم',6=>'ششم',7=>'هفتم',8=>'هشتم',9=>'نهم',10=>'دهم',11=>'یازدهم',12=>'دوازدهم'];
+    return $names[$grade] ?? demo_persian_digits((string)$grade);
+}
 function demo_phone(): string {
-    return '07' . random_int(100000000, 999999999);
+    return demo_persian_digits('07' . random_int(100000000, 999999999));
 }
 function demo_birth_date(int $grade): string {
     $year = (int)date('Y') - ($grade + 5) - random_int(0, 1);
@@ -104,13 +111,13 @@ try {
             // Isolate the demo records in their own year so real classes and enrollments are not mixed.
             // The previous school year remains in the database and can be reactivated later in school.php.
             $baseYear = (int)date('Y');
-            $yearName = 'DEMO-' . $baseYear . '-' . ($baseYear + 1);
+            $yearName = 'سال آزمایشی ' . demo_persian_digits((string)($baseYear + 621)) . '-' . demo_persian_digits((string)($baseYear + 622));
             $suffix = 2;
             $checkYear = $pdo->prepare('SELECT id FROM school_years WHERE name = ? LIMIT 1');
             while (true) {
                 $checkYear->execute([$yearName]);
                 if (!$checkYear->fetchColumn()) break;
-                $yearName = 'DEMO-' . $baseYear . '-' . ($baseYear + 1) . '-' . $suffix++;
+                $yearName = 'سال آزمایشی ' . demo_persian_digits((string)($baseYear + 621)) . '-' . demo_persian_digits((string)($baseYear + 622)) . ' (' . demo_persian_digits((string)$suffix++) . ')';
             }
             $pdo->exec('UPDATE school_years SET is_active = 0 WHERE is_active = 1');
             $insertYear = $pdo->prepare('INSERT INTO school_years (name, starts_on, ends_on, is_active, is_closed) VALUES (?, ?, ?, 1, 0)');
@@ -123,12 +130,12 @@ try {
                 $teacherName = $teacherNames[$i % count($teacherNames)];
                 if ($i >= count($teacherNames)) $teacherName .= ' ' . ($i + 1);
                 $insertTeacher = $pdo->prepare('INSERT INTO teachers (full_name, phone, email, user_id, is_active) VALUES (?, ?, ?, NULL, 1)');
-                $insertTeacher->execute([$teacherName, demo_phone(), 'demo.teacher' . ($i + 1) . '@example.test']);
+                $insertTeacher->execute([$teacherName, demo_phone(), '']);
                 $teacherIds[] = (int)$pdo->lastInsertId();
             }
 
             $sections = [];
-            $sectionNames = ['A', 'B', 'C'];
+            $sectionNames = ['الف', 'ب', 'ج'];
             $findSection = $pdo->prepare('SELECT id, teacher_id FROM class_sections WHERE school_year_id = ? AND grade = ? AND section_name = ? LIMIT 1');
             $insertSection = $pdo->prepare('INSERT INTO class_sections (school_year_id, grade, section_name, teacher_id, is_active) VALUES (?, ?, ?, ?, 1)');
             $assignTeacher = $pdo->prepare('UPDATE class_sections SET teacher_id = ? WHERE id = ? AND teacher_id IS NULL');
@@ -150,7 +157,7 @@ try {
             }
 
             // Create clearly labelled sample annual fee rules. They do not overwrite existing rules.
-            $periodName = 'نمونه فیس سالانه ' . date('Y');
+            $periodName = 'فیس سالانه آزمایشی ' . demo_persian_digits((string)((int)date('Y') + 621));
             $feeRules = [];
             $feeRanges = [[1, 3, 5000], [4, 6, 6000], [7, 12, 7000]];
             $findFeeRule = $pdo->prepare('SELECT id, amount FROM tuition_fee_rules WHERE school_year_id = ? AND period_name = ? AND grade_from = ? AND grade_to = ? LIMIT 1');
@@ -199,14 +206,14 @@ try {
                         $fatherName = demo_pick($boys);
                         $grandfatherName = demo_pick($boys);
                         $fullName = $firstName . ' ' . $lastName;
-                        $className = $grade . $sectionName;
+                        $className = demo_grade_name($grade) . ' ' . $sectionName;
                         $phone = demo_phone();
                         $temporaryNumber = 'TMP-DEMO-' . strtoupper(bin2hex(random_bytes(8)));
                         $insertStudent->execute([
                             $temporaryNumber, $firstName, $lastName, $fatherName, $grandfatherName,
                             $isFemale ? 'female' : 'male', demo_birth_date($grade), $className,
                             $phone, $fatherName . ' ' . $lastName, $phone,
-                            'نشانی نمونه - صنف ' . $className
+                            'نشانی آزمایشی - صنف ' . $className
                         ]);
                         $studentId = (int)$pdo->lastInsertId();
                         $studentNumber = 'ST-' . str_pad((string)$studentId, 4, '0', STR_PAD_LEFT);
@@ -233,7 +240,7 @@ try {
                             $unpaidCount++;
                         }
                         if ($paidAmount > 0) {
-                            $receipt = 'DEMO-RC-' . $studentId . '-' . strtoupper(bin2hex(random_bytes(3)));
+                            $receipt = 'رسید-آزمایشی-' . $studentId . '-' . strtoupper(bin2hex(random_bytes(3)));
                             $methods = ['cash', 'bank', 'other'];
                             $daysAgo = random_int(0, 120);
                             $receivedAt = date('Y-m-d H:i:s', strtotime('-' . $daysAgo . ' days'));
@@ -318,7 +325,7 @@ try {
 <section class="demo-card">
 <h2>اطلاعاتی که ساخته می‌شود</h2>
 <div class="demo-grid">
-<div class="demo-stat">صنف‌ها<strong>۳۶ صنف</strong><small>پایه ۱ تا ۱۲، هر پایه A، B و C</small></div>
+<div class="demo-stat">صنف‌ها<strong>۳۶ صنف</strong><small>پایه اول تا دوازدهم، هر پایه الف، ب و ج</small></div>
 <div class="demo-stat">شاگردان<strong>۹۰۰ شاگرد</strong><small>۲۵ شاگرد در هر صنف</small></div>
 <div class="demo-stat">آموزگاران<strong>۱۲ آموزگار</strong><small>هر آموزگار چند صنف را پوشش می‌دهد</small></div>
 <div class="demo-stat">فیس سالانه<strong>۵۰۰۰ / ۶۰۰۰ / ۷۰۰۰</strong><small>بر اساس پایه تحصیلی</small></div>
@@ -327,7 +334,7 @@ try {
 <li>نام‌های تصادفی فارسی/دری برای شاگردان دختر و پسر، همراه با نام پدر، نام پدرکلان و شماره تماس نمونه.</li>
 <li>فیس پایه‌های ۱ تا ۳: ۵۰۰۰؛ پایه‌های ۴ تا ۶: ۶۰۰۰؛ پایه‌های ۷ تا ۱۲: ۷۰۰۰.</li>
 <li>پرداخت‌ها به‌صورت تصادفی: تعدادی کامل، تعدادی قسمی و تعدادی بدون پرداخت. رسیدهای نمونه نیز ساخته می‌شود.</li>
-<li>اطلاعات در یک سال تحصیلی جداگانه با نام DEMO ذخیره می‌شود؛ سال فعلی قبلی حفظ می‌شود ولی برای نمایش داده‌های نمونه، سال DEMO فعال خواهد شد. بعداً می‌توانید سال قبلی را از صفحه تنظیم سال تحصیلی دوباره فعال کنید.</li>
+<li>اطلاعات در یک سال تحصیلی جداگانه با نام فارسی «سال آزمایشی» ذخیره می‌شود؛ سال فعلی قبلی حفظ می‌شود ولی برای نمایش داده‌های نمونه، سال آزمایشی فعال خواهد شد. بعداً می‌توانید سال قبلی را از صفحه تنظیم سال تحصیلی دوباره فعال کنید.</li>
 </ul>
 <?php if ($runAlreadyExists): ?>
 <div class="demo-alert warn"><strong>اطلاعات آزمایشی قبلاً وارد شده است.</strong> برای جلوگیری از رکوردهای تکراری، اجرای دوباره قفل شده است.</div>
@@ -344,7 +351,7 @@ try {
 </div>
 <?php endif; ?>
 <?php else: ?>
-<div class="demo-alert warn"><strong>توجه:</strong> این عملیات ۹۰۰ شاگرد، ۳۶ صنف، ۱۲ آموزگار و سوابق فیس/پرداخت نمونه ایجاد می‌کند. اطلاعات فعلی حذف نمی‌شود؛ اما سال تحصیلی DEMO فعال می‌شود تا صفحات سیستم داده‌های نمونه را نمایش دهند. سال قبلی در سوابق باقی می‌ماند و بعداً می‌توانید آن را دوباره فعال کنید. برای جلوگیری از داده‌های تکراری، این صفحه فقط یک بار قابل اجرا است.</div>
+<div class="demo-alert warn"><strong>توجه:</strong> این عملیات ۹۰۰ شاگرد، ۳۶ صنف، ۱۲ آموزگار و سوابق فیس/پرداخت نمونه ایجاد می‌کند. اطلاعات فعلی حذف نمی‌شود؛ اما سال تحصیلی آزمایشی فعال می‌شود تا صفحات سیستم داده‌های نمونه را نمایش دهند. سال قبلی در سوابق باقی می‌ماند و بعداً می‌توانید آن را دوباره فعال کنید. برای جلوگیری از داده‌های تکراری، این صفحه فقط یک بار قابل اجرا است.</div>
 <form method="post">
 <input type="hidden" name="csrf_token" value="<?=demo_h(csrf_token())?>">
 <label class="demo-check"><input type="checkbox" name="confirm_demo" value="yes" required><span>تأیید می‌کنم که می‌خواهم اطلاعات آزمایشی در پایگاه داده فعلی وارد شود.</span></label>
