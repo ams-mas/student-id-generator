@@ -7,7 +7,7 @@ $pdo = database_connection();
 $error = ''; $success = '';
 $mode = in_array((string)($_GET['mode'] ?? 'add'), ['add','edit','delete'], true) ? (string)($_GET['mode'] ?? 'add') : 'add';
 $gradeNames = [1=>'اول',2=>'دوم',3=>'سوم',4=>'چهارم',5=>'پنجم',6=>'ششم',7=>'هفتم',8=>'هشتم',9=>'نهم',10=>'دهم',11=>'یازدهم',12=>'دوازدهم'];
-$letters = ['الف','ب','ج','د','هـ','و','ز','ح','ط','ی','ک','ل','م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ','ذ','ض','ظ','غ'];
+$letters = ['A','B','C','الف','ب','ج','د','هـ','و','ز','ح','ط','ی','ک','ل','م','ن','س','ع','ف','ص','ق','ر','ش','ت','ث','خ','ذ','ض','ظ','غ'];
 function classes_h(mixed $v): string { return htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 $year = $pdo->query('SELECT id,name,is_closed FROM school_years WHERE is_active=1 ORDER BY id DESC LIMIT 1')->fetch() ?: null;
 try {
