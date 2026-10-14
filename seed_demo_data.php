@@ -101,24 +101,21 @@ try {
                 throw new RuntimeException('اطلاعات آزمایشی قبلاً وارد شده است.');
             }
 
-            $year = $pdo->query('SELECT id, name FROM school_years WHERE is_active = 1 AND is_closed = 0 ORDER BY id DESC LIMIT 1')->fetch();
-            if (!$year) {
-                $baseYear = (int)date('Y');
-                $yearName = 'نمونه ' . $baseYear . '-' . ($baseYear + 1);
-                $suffix = 2;
-                $checkYear = $pdo->prepare('SELECT id FROM school_years WHERE name = ? LIMIT 1');
-                while (true) {
-                    $checkYear->execute([$yearName]);
-                    if (!$checkYear->fetchColumn()) break;
-                    $yearName = 'نمونه ' . $baseYear . '-' . ($baseYear + 1) . ' (' . $suffix++ . ')';
-                }
-                $pdo->exec('UPDATE school_years SET is_active = 0 WHERE is_active = 1');
-                $insertYear = $pdo->prepare('INSERT INTO school_years (name, starts_on, ends_on, is_active, is_closed) VALUES (?, ?, ?, 1, 0)');
-                $insertYear->execute([$yearName, date('Y') . '-08-01', ((int)date('Y') + 1) . '-06-30']);
-                $yearId = (int)$pdo->lastInsertId();
-            } else {
-                $yearId = (int)$year['id'];
+            // Isolate the demo records in their own year so real classes and enrollments are not mixed.
+            // The previous school year remains in the database and can be reactivated later in school.php.
+            $baseYear = (int)date('Y');
+            $yearName = 'DEMO-' . $baseYear . '-' . ($baseYear + 1);
+            $suffix = 2;
+            $checkYear = $pdo->prepare('SELECT id FROM school_years WHERE name = ? LIMIT 1');
+            while (true) {
+                $checkYear->execute([$yearName]);
+                if (!$checkYear->fetchColumn()) break;
+                $yearName = 'DEMO-' . $baseYear . '-' . ($baseYear + 1) . '-' . $suffix++;
             }
+            $pdo->exec('UPDATE school_years SET is_active = 0 WHERE is_active = 1');
+            $insertYear = $pdo->prepare('INSERT INTO school_years (name, starts_on, ends_on, is_active, is_closed) VALUES (?, ?, ?, 1, 0)');
+            $insertYear->execute([$yearName, date('Y') . '-08-01', ((int)date('Y') + 1) . '-06-30']);
+            $yearId = (int)$pdo->lastInsertId();
 
             // Create 12 teachers. They are shared across the three sections per grade.
             $teacherIds = [];
@@ -330,7 +327,7 @@ try {
 <li>نام‌های تصادفی فارسی/دری برای شاگردان دختر و پسر، همراه با نام پدر، نام پدرکلان و شماره تماس نمونه.</li>
 <li>فیس پایه‌های ۱ تا ۳: ۵۰۰۰؛ پایه‌های ۴ تا ۶: ۶۰۰۰؛ پایه‌های ۷ تا ۱۲: ۷۰۰۰.</li>
 <li>پرداخت‌ها به‌صورت تصادفی: تعدادی کامل، تعدادی قسمی و تعدادی بدون پرداخت. رسیدهای نمونه نیز ساخته می‌شود.</li>
-<li>قوانین فیس با عنوان «نمونه» ثبت می‌شوند و اطلاعات موجود حذف نمی‌شود.</li>
+<li>اطلاعات در یک سال تحصیلی جداگانه با نام DEMO ذخیره می‌شود؛ سال فعلی قبلی حفظ می‌شود ولی برای نمایش داده‌های نمونه، سال DEMO فعال خواهد شد. بعداً می‌توانید سال قبلی را از صفحه تنظیم سال تحصیلی دوباره فعال کنید.</li>
 </ul>
 <?php if ($runAlreadyExists): ?>
 <div class="demo-alert warn"><strong>اطلاعات آزمایشی قبلاً وارد شده است.</strong> برای جلوگیری از رکوردهای تکراری، اجرای دوباره قفل شده است.</div>
@@ -347,7 +344,7 @@ try {
 </div>
 <?php endif; ?>
 <?php else: ?>
-<div class="demo-alert warn"><strong>توجه:</strong> این عملیات ۹۰۰ شاگرد، ۳۶ صنف، ۱۲ آموزگار و سوابق فیس/پرداخت نمونه ایجاد می‌کند. اطلاعات فعلی حذف نمی‌شود. برای جلوگیری از داده‌های تکراری، این صفحه فقط یک بار قابل اجرا است.</div>
+<div class="demo-alert warn"><strong>توجه:</strong> این عملیات ۹۰۰ شاگرد، ۳۶ صنف، ۱۲ آموزگار و سوابق فیس/پرداخت نمونه ایجاد می‌کند. اطلاعات فعلی حذف نمی‌شود؛ اما سال تحصیلی DEMO فعال می‌شود تا صفحات سیستم داده‌های نمونه را نمایش دهند. سال قبلی در سوابق باقی می‌ماند و بعداً می‌توانید آن را دوباره فعال کنید. برای جلوگیری از داده‌های تکراری، این صفحه فقط یک بار قابل اجرا است.</div>
 <form method="post">
 <input type="hidden" name="csrf_token" value="<?=demo_h(csrf_token())?>">
 <label class="demo-check"><input type="checkbox" name="confirm_demo" value="yes" required><span>تأیید می‌کنم که می‌خواهم اطلاعات آزمایشی در پایگاه داده فعلی وارد شود.</span></label>
